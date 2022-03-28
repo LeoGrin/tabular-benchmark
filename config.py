@@ -1,17 +1,14 @@
 from target_function_classif import *
 from data_transforms import *
 from generate_data import *
-from sklearn.experimental import enable_hist_gradient_boosting
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier, ExtraTreesClassifier, AdaBoostClassifier, RandomForestRegressor
-from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, ExtraTreesClassifier, \
+    RandomForestRegressor
 #from pyearth import Earth
 from rotation_forest import RotationForestClassifier
 from utils.skorch_utils import create_mlp_skorch, create_mlp_ensemble_skorch, create_sparse_model_skorch, create_sparse_model_new_skorch, create_mlp_skorch_regressor
 #from autosklearn.classification import AutoSklearnClassifier
-from sklearn.linear_model import LogisticRegression, SGDClassifier, Perceptron
-from MLRNN import MLRNNClassifier
-from NAM import create_nam_skorch
-from sklearn.svm import SVC
+from models.MLRNN import MLRNNClassifier
+from models.NAM import create_nam_skorch
 from xp_regression import start_from_pretrained_model
 
 
@@ -1210,9 +1207,9 @@ def config(keyword):
         #                                 "noise": [False]}]
         data_generation_functions = [{"method": generate_periodic_triangles_uniform,
                                       "method_name": "triangle_uniform",
-                                      "num_samples": [7000, 10000],
+                                      "num_samples": [500],#[7000, 10000],
                                       "period": [8],
-                                      "period_size": [0.1, 0.15, 0.2, 0.3, 0.4],
+                                      "period_size": [0.2],#[0.1, 0.15, 0.2, 0.3, 0.4],
                                       "noise": [False],
                                       "regression": True}]
         target_generation_functions = [{"method": None,
@@ -1229,7 +1226,7 @@ def config(keyword):
         model_generation_functions = [#{"method": RandomForestRegressor, "method_name": "rf"},
                                       {"method": start_from_pretrained_model,
                                        "method_name": "pretrained",
-                                       "pretrained_model_filename": "models/regression_synthetic/mlp/-6905694080875447095",
+                                       "pretrained_model_filename": "saved_models/regression_synthetic/mlp/-6905694080875447095",
                                        "noise_std": [0, 0.01, 0.05],#[0, 0.001,  0.005, 0.01, 0.05, 0.1],
                                        "optimizer": ["adam"],
                                        "optimizer__weight_decay": [0],

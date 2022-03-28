@@ -1,9 +1,9 @@
 import skorch
-from skorch.callbacks import Checkpoint, LoadInitState, EarlyStopping, LRScheduler
+from skorch.callbacks import Checkpoint, EarlyStopping, LRScheduler
 from skorch import NeuralNetClassifier, NeuralNetRegressor
 from skorch.callbacks import EpochScoring
-from torch_models import MLP_npt, MLP_ensemble, InputShapeSetter, SparseModel, SparseModelNew
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts, CyclicLR
+from models.torch_models import MLP_npt, MLP_ensemble, InputShapeSetter, SparseModel, SparseModelNew
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
 from torch.optim import AdamW, Adam, SGD
 from skorch.callbacks import WandbLogger
 from skorch.scoring import loss_scoring

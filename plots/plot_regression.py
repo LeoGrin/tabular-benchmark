@@ -3,13 +3,13 @@ from target_function_classif import periodic_triangle
 import pickle
 import matplotlib.pyplot as plt
 
-# x_train, x_test, y_train, y_test = pickle.load(open('models/regression/california/data', 'rb'))
+# x_train, x_test, y_train, y_test = pickle.load(open('saved_models/regression/california/data', 'rb'))
 #
 # print(x_train.shape)
 # print(y_train.shape)
 #
-# rf = pickle.load(open('models/regression/california/rf', 'rb'))
-# mlp = pickle.load(open('models/regression/california/mlp', 'rb'))
+# rf = pickle.load(open('saved_models/regression/california/rf', 'rb'))
+# mlp = pickle.load(open('saved_models/regression/california/mlp', 'rb'))
 #
 #
 # plt.scatter(x_train, y_train, color='blue', s=0.5, label="data", alpha=0.4)
@@ -44,30 +44,30 @@ import matplotlib.pyplot as plt
 #     for period in periods:
 #         for iter in range(2):
 
-filename_rf = "models/regression_synthetic_pretrained/pretrained/-1328826748526267170.pkl"
-#filename_mlp = "models/regression_synthetic/mlp/-6905694080875447095"
-filename_mlp = "models/regression_synthetic_pretrained/pretrained/-661633476578852768"
+filename_rf = "../saved_models/regression_synthetic_pretrained/pretrained/-1328826748526267170.pkl"
+#filename_mlp = "saved_models/regression_synthetic/mlp/-6905694080875447095"
+filename_mlp = "saved_models/regression_synthetic_pretrained/pretrained/-661633476578852768"
 
-filename_mlp_2 = "models/regression_synthetic_pretrained/pretrained/7702155688162513620"
+filename_mlp_2 = "saved_models/regression_synthetic_pretrained/pretrained/7702155688162513620"
 
 x_train, x_test, y_train, y_test = pickle.load(open(filename_mlp + ".data", 'rb'))
 plt.scatter(x_train, y_train, color='blue', s=2, label="data", alpha=1)
 print(x_train.shape)
 print(y_train.shape)
 
-#rf = pickle.load(open('models/regression_synthetic_{}_{}_{}_{}_rf'.format(num_samples, offset, period, iter), 'rb'))
+#rf = pickle.load(open('saved_models/regression_synthetic_{}_{}_{}_{}_rf'.format(num_samples, offset, period, iter), 'rb'))
 with open(filename_rf, 'rb') as f:
     rf = pickle.load(f)
 print(rf)
-#mlp = pickle.load(open('models/regression_synthetic/{}/mlp'.format(period), 'rb'))
+#mlp = pickle.load(open('saved_models/regression_synthetic/{}/mlp'.format(period), 'rb'))
 with open(filename_mlp + ".pkl", 'rb') as f:
     mlp = pickle.load(f)
-#mlp = pickle.load(open('models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(num_samples, offset, period, iter), 'rb'))
+#mlp = pickle.load(open('saved_models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(num_samples, offset, period, iter), 'rb'))
 print(mlp)
 
 with open(filename_mlp_2 + ".pkl", 'rb') as f:
     mlp_2 = pickle.load(f)
-#mlp = pickle.load(open('models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(num_samples, offset, period, iter), 'rb'))
+#mlp = pickle.load(open('saved_models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(num_samples, offset, period, iter), 'rb'))
 
 
 x_grid = np.linspace(np.min(x_train), np.max(x_train), 100).astype(np.float32)

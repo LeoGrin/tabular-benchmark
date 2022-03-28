@@ -76,7 +76,7 @@ def create_string_from_dic(dic):
 
 def store_model_function(model, model_name, params_model, params_data, params_target, params_transform_list, config_keyword,
                          x_train, x_test, y_train, y_test):
-    prefix = "models/{}/{}/".format(config_keyword, model_name)
+    prefix = "saved_models/{}/{}/".format(config_keyword, model_name)
 
     file_name = ".".join("{}:{}".format(k, v) for k, v in list(params_model.items()) if k not in ["method", "method_name", "device"])
     file_name += "--" + ".".join("{}:{}".format(k, v) for k, v in list(params_data.items()) if k not in ["method"])
@@ -101,41 +101,41 @@ def store_model_function(model, model_name, params_model, params_data, params_ta
 
 
         # if params_data["method_name"] == "real_data":
-        #     model.save_params(f_params="models/{}/{}/{}.pkl".format(config_keyword, params_data["keyword"], model_name))
+        #     model.save_params(f_params="saved_models/{}/{}/{}.pkl".format(config_keyword, params_data["keyword"], model_name))
         #     torch.save(model.module_.state_dict(),
-        #                "models/{}/{}/{}.pt".format(config_keyword, params_data["keyword"], model_name))
+        #                "saved_models/{}/{}/{}.pt".format(config_keyword, params_data["keyword"], model_name))
         #     # saving
-        #     with open("models/{}/{}/{}_pickle.pkl".format(config_keyword, params_data["keyword"], model_name),
+        #     with open("saved_models/{}/{}/{}_pickle.pkl".format(config_keyword, params_data["keyword"], model_name),
         #               'wb') as f:
         #         pickle.dump(model, f)
-        #     with open("models/{}/{}/{}".format(config_keyword, params_data["keyword"], "data"), 'wb') as f:
+        #     with open("saved_models/{}/{}/{}".format(config_keyword, params_data["keyword"], "data"), 'wb') as f:
         #         pickle.dump((x_train, x_test, y_train, y_test), f)
-        #     with open("models/{}/{}/{}_{}".format(config_keyword, params_data["keyword"], model_name, "params"),
+        #     with open("saved_models/{}/{}/{}_{}".format(config_keyword, params_data["keyword"], model_name, "params"),
         #               'wb') as f:
         #         pickle.dump(params_model, f)
         # else:
         #     if model_name == "rf":
         #         print("saving rf")
-        #         with open("models/{}_{}_{}_{}_{}_{}".format(config_keyword, params_data["num_samples"],
+        #         with open("saved_models/{}_{}_{}_{}_{}_{}".format(config_keyword, params_data["num_samples"],
         #                                                     params_target["offset"], params_target["period"], iter,
         #                                                     model_name), 'wb') as f:
         #             pickle.dump(model, f)
         #     if model_name == "mlp":
         #         print("saving mlp")
         #         model.save_params(
-        #             f_params="models/{}_{}_{}_{}_{}_{}.pkl".format(config_keyword, params_data["num_samples"],
+        #             f_params="saved_models/{}_{}_{}_{}_{}_{}.pkl".format(config_keyword, params_data["num_samples"],
         #                                                            params_target["offset"], params_target["period"],
         #                                                            iter, model_name))
-        #         # torch.save(model.module_.state_dict(), "models/{}/{}/{}/{}.pt".format(config_keyword, params_target["offset"], params_target["period"], iter, model_name))
-        #         with open("models/{}_{}_{}_{}_{}_{}_pickle.pkl".format(config_keyword, params_data["num_samples"],
+        #         # torch.save(model.module_.state_dict(), "saved_models/{}/{}/{}/{}.pt".format(config_keyword, params_target["offset"], params_target["period"], iter, model_name))
+        #         with open("saved_models/{}_{}_{}_{}_{}_{}_pickle.pkl".format(config_keyword, params_data["num_samples"],
         #                                                                params_target["offset"], params_target["period"],
         #                                                                iter, model_name), 'wb') as f:
         #             pickle.dump(model, f)
-        #         with open("models/{}_{}_{}_{}_{}_{}".format(config_keyword, params_data["num_samples"],
+        #         with open("saved_models/{}_{}_{}_{}_{}_{}".format(config_keyword, params_data["num_samples"],
         #                                                     params_target["offset"], params_target["period"], iter,
         #                                                     "data"), 'wb') as g:
         #             pickle.dump((x_train, x_test, y_train, y_test), g)
-        #         with open("models/{}_{}_{}_{}_{}_{}".format(config_keyword, params_data["num_samples"],
+        #         with open("saved_models/{}_{}_{}_{}_{}_{}".format(config_keyword, params_data["num_samples"],
         #                                                     params_target["offset"], params_target["period"],
         #                                                     model_name, "params"), 'wb') as f:
         #             pickle.dump(params_model, f)
@@ -223,11 +223,11 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
                     model = model_function(model_id, wandb_run,
                                            **params_model_clean)  # create a different checkpointing file for each run to avoid conflict (I'm not 100% sure it's necessary)
                     #model = pickle.load(open(
-                    #    'models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(5000, 0, 16,
+                    #    'saved_models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(5000, 0, 16,
                     #                                                                   iter), 'rb'))
                     #model.initialize()
                     #model.load_params(
-                    #    f_params="models/{}_{}_{}_{}_{}_{}.pkl".format(config_keyword, 5000,
+                    #    f_params="saved_models/{}_{}_{}_{}_{}_{}.pkl".format(config_keyword, 5000,
                      #                                                  params_target["offset"], params_target["period"],
                     #                                                   iter, model_name))
 #                    model.module_.no_reinitialize = True
@@ -410,7 +410,7 @@ def grid_search_parallel(path, model_generation_functions, data_generation_funct
     df.to_csv(path)
 
 
-# def grid_search(models, model_names, n_iter=3, init_id=0):
+# def grid_search(saved_models, model_names, n_iter=3, init_id=0):
 #     res_dics = []
 #     id = init_id
 #     for a, data_generation_dic in tqdm.tqdm(enumerate(data_generation_functions)):
@@ -422,18 +422,18 @@ def grid_search_parallel(path, model_generation_functions, data_generation_funct
 #                     for c, data_transforms_dic in enumerate(data_transforms_functions):
 #                         # print(len(iterate_params_from_possible_params(data_transforms_dic)))
 #                         for params_transform in iterate_params_from_possible_params(data_transforms_dic):
-#                             train_scores = np.zeros((len(models), n_iter))
-#                             test_scores = np.zeros((len(models), n_iter))
+#                             train_scores = np.zeros((len(saved_models), n_iter))
+#                             test_scores = np.zeros((len(saved_models), n_iter))
 #                             for iter in range(n_iter):
 #                                 x, y = generate_dataset([params_data, params_target, [params_transform]])
 #                                 x = x.astype(np.float32)  # for skorch
 #                                 y = y.astype(np.int64)
 #                                 x_train, x_test, y_train, y_test = train_test_split(x, y)
-#                                 for i, model in enumerate(models):
+#                                 for i, model in enumerate(saved_models):
 #                                     model.fit(x_train, y_train)
 #                                     train_scores[i, iter] = model.score(x_train, y_train)
 #                                     test_scores[i, iter] = model.score(x_test, y_test)
-#                             for i, model in enumerate(models):
+#                             for i, model in enumerate(saved_models):
 #                                 model_name = model_names[i]
 #                                 res_dic = {"id": id, "model": model_name,
 #                                            "test_scores_mean": np.mean(test_scores, axis=1)[i],
@@ -563,7 +563,7 @@ if __name__ == '__main__':
 
     if args.store_model:
         try:
-            os.mkdir("models/{}".format(args.config_keyword))
+            os.mkdir("saved_models/{}".format(args.config_keyword))
         except FileExistsError:
             pass
 

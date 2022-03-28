@@ -5,7 +5,7 @@ def start_from_pretrained_model(model_id, wandb_run, pretrained_model_filename, 
     model = create_mlp_skorch_regressor(model_id, wandb_run,
                            **kwargs)  # create a different checkpointing file for each run to avoid conflict (I'm not 100% sure it's necessary)
     # model = pickle.load(open(
-    #    'models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(5000, 0, 16,
+    #    'saved_models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(5000, 0, 16,
     #                                                                   iter), 'rb'))
     model.initialize()
     model.load_params(

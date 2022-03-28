@@ -15,7 +15,7 @@ model_names = st.text_input("Model name")
 dataset = st.radio("Dataset", ('electricity', "wine", "california", "covtype"))
 
 
-with open('models/{}/{}/{}'.format(config_keyword, dataset, "data"), "rb") as f:
+with open('saved_models/{}/{}/{}'.format(config_keyword, dataset, "data"), "rb") as f:
     x_train, x_test, y_train, y_test = pickle.load(f)
 
 x_train, x_test = x_train.astype(np.float32), x_test.astype(np.float32)
@@ -40,7 +40,7 @@ y_min, y_max = st.slider("y boudaries", float(y_min_init), float(y_max_init), va
 
 
 for model_name in model_names.split(","):
-    with open("models/{}/{}/{}_{}".format(config_keyword, dataset, model_names, "params"), "rb") as f:
+    with open("saved_models/{}/{}/{}_{}".format(config_keyword, dataset, model_names, "params"), "rb") as f:
         params = pickle.load(f)
     params.pop("method")
     params.pop("method_name")
@@ -50,8 +50,8 @@ for model_name in model_names.split(","):
                               module__output_size=2,
                               **params)
     model.initialize()
-    #model.module_.load_state_dict(torch.load("models/{}/{}/{}.pt".format(config_keyword, dataset, model_name), map_location=torch.device('cpu')))
-    model.load_params(f_params="models/{}/{}/{}.pkl".format(config_keyword, dataset, model_name))
+    #model.module_.load_state_dict(torch.load("saved_models/{}/{}/{}.pt".format(config_keyword, dataset, model_name), map_location=torch.device('cpu')))
+    model.load_params(f_params="saved_models/{}/{}/{}.pkl".format(config_keyword, dataset, model_name))
     st.pyplot(plot_decision_boudaries(x_train_sample, y_train_sample, x_test_sample, y_test_sample, model, model_name, x_min, x_max, y_min, y_max))
 
 
