@@ -1,6 +1,7 @@
 from utils.utils import numpy_to_dataset, remove_keys_from_dict
 import numpy as np
 from utils.keyword_to_function_conversion import convert_keyword_to_function
+from sklearn.model_selection import train_test_split
 
 #There are three steps to generate a dataset:
 # 1) Generate x
@@ -25,6 +26,16 @@ def transform_data(x, y, methods, parameters, rng):
             x, y = methods[i](x, y, **parameters[i], rng=rng)
     return x, y
 
+def data_to_train_test(x, y, train_set_prop=0.75, max_train_samples=None, rng=None):
+    #TODO: add the possibility for Cross Validation
+    n_rows = x.shape[0]
+    if not max_train_samples is None:
+        train_set_prop = min(max_train_samples / n_rows, train_set_prop)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_set_prop, random_state=rng)
+    else:
+        x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=rng)
+    return x_train, x_test, y_train, y_test
+
 def generate_dataset(settings, rng):
     #TODO no duplicate with streamlit function
     #right now the seed is only for streamlit
@@ -42,6 +53,9 @@ def generate_dataset(settings, rng):
         x = data
         x = x.astype(np.float64)
         y = generate_target(x, target_method, target_parameters, rng)
+
+    x_train, x_test, y_train, y_test = data_to_train_test(x, y, **settings[3], rng=rng)
+
     #x, y = transform_data(x, y, transform_methods, transform_parameters_list, rng)
     return x, y
 

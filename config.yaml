@@ -1,0 +1,10 @@
+program: run_experiment.py
+method: random
+metric:
+  goal: maximize
+  name: test_accuracy
+parameters:
+  n_estimators:
+    values: [1, 10, 100, 200, 300]
+  n_samples:
+    values: [100, 200, 300, 400, 500]

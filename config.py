@@ -1186,17 +1186,17 @@ def config(keyword):
                                        "module__dropout_prob": [0],
                                        "module__activations": ["relu"],
                                        "module__resnet": [True],
-                                       "max_epochs": [10],
+                                       "max_epochs": [1200],
                                        "n_layers": [1, 3],
-                                       "hidden_size":[256],
+                                       "hidden_size":[1024],
                                        "lr": [0.0001],
-                                       "batch_size": [0.1, 0.2, 0.5, 0.95],
+                                       "batch_size": [256, 1024],#[0.1, 0.2, 0.5, 0.95],
                                        "es_patience": [50],
                                        "lr_patience": [10],
                                        "device": "cpu"}
                                       ]
         data_generation_functions = [{"method_name": "uniform_data",
-                                      "num_samples": [500, 600, 750, 1000, 1600, 2500, 5000, 7500, 10000],
+                                      "num_samples": [500, 600, 750, 1000, 1600, 2500, 5000, 7500],
                                       "num_features": 1,
                                       "regression": True}] #TODO
         target_generation_functions = [{"method_name": "periodic_triangle",
