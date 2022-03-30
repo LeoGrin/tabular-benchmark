@@ -1,6 +1,7 @@
 from target_function_classif import *
 from data_transforms import *
 from generate_data import *
+from sklearn.experimental import enable_hist_gradient_boosting
 from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, ExtraTreesClassifier, \
     RandomForestRegressor
 #from pyearth import Earth
@@ -1178,42 +1179,82 @@ def config(keyword):
         model_generation_functions = [#{"method": RandomForestRegressor, "method_name": "rf"},
                                       {"method": create_mlp_skorch_regressor,
                                        "optimizer": ["adam"],
+                                       "use_checkpoints": [False],
                                        "optimizer__weight_decay": [0],
                                        "module__use_exu": [False],
                                        "module__batchnorm": [True],
                                        "module__dropout_prob": [0],
                                        "module__activations": ["relu"],
                                        "module__resnet": [True],
-                                       "max_epochs": [100],
-                                       "n_layers": [1, 3],#, 9],
-                                       "hidden_size":[248],#, 1024],
+                                       "max_epochs": [1200],
+                                       "n_layers": [1, 3],
+                                       "hidden_size":[256],
                                        "lr": [0.0001],
-                                       "batch_size": [256, 1024],#[0.1, 0.2, 0.5, 0.95, 256, 1024],
+                                       "batch_size": [0.1, 0.2, 0.5, 0.95],
+                                       "es_patience": [50],
+                                       "lr_patience": [10],
+                                       "method_name":"mlp",
+                                       "device": "cpu"}
+                                      ]
+        data_generation_functions = [{"method": "uniform_data",
+                                      "method_name": "uniform",
+                                      "num_samples": [500, 600, 750, 1000, 1600, 2500, 5000, 7500, 10000],
+                                      "num_features": 1,
+                                      "regression": True}] #TODO
+        target_generation_functions = [{"method": "periodic_triangle",
+                                        "method_name": "periodic",
+                                        "period": [8],
+                                        "period_size": [0.1, 0.15, 0.2, 0.3, 0.4],#[0.1, 0.15],#, 0.2, 0.3, 0.4],#, 0.2, 0.3],
+                                        #"offset": [0, 0.3, 0.5, 0.7, 1, 1.5],
+                                        "noise": [False]}]
+        # data_generation_functions = [{"method": generate_periodic_triangles_uniform,
+        #                               "method_name": "triangle_uniform",
+        #                               "num_samples": [500],#[7000, 10000],
+        #                               "period": [8],
+        #                               "period_size": [0.1, 0.15, 0.2, 0.3, 0.4],
+        #                               "noise": [False],
+        #                               "regression": True}]
+        # target_generation_functions = [{"method": None,
+        #                                 "method_name": "no_method"}]
+        data_transforms_functions = [#[{"method": tree_quantile_transformer,
+                                     # "method_name": "tree_quantile_transformer",
+                                     #  "regression":True}],
+                                     [{"method": None,
+                                        "method_name": "no_method",
+                                        "regression":True}]
+                                     ]
+
+    elif keyword == "test_cuda":
+        model_generation_functions = [#{"method": RandomForestRegressor, "method_name": "rf"},
+                                      {"method": create_mlp_skorch_regressor,
+                                       "optimizer": ["adam"],
+                                       "optimizer__weight_decay": [0],
+                                       "module__use_exu": [False],
+                                       "module__batchnorm": [True],
+                                       "module__dropout_prob": [0],
+                                       "module__activations": ["relu"],
+                                       "module__resnet": [True],
+                                       "max_epochs": [10],
+                                       "n_layers": [3],
+                                       "hidden_size":[248],
+                                       "lr": [0.0001],
+                                       "batch_size": [256],#[0.1, 0.2, 0.5, 0.95, 256, 1024],
                                        "es_patience": [50],
                                        "lr_patience": [10],
                                        "method_name":"mlp",
                                        "device": "cuda"}
                                       ]
-        # data_generation_functions = [{"method": generate_uniform_data,
-        #                               "method_name": "uniform",
-        #                               "num_samples": [500, 600, 750, 1000, 1600, 2500, 5000],
-        #                               "num_features": 1,
-        #                               "regression": True}] #TODO
-        # target_generation_functions = [{"method": periodic_triangle,
-        #                                 "method_name": "periodic",
-        #                                 "period": [8],
-        #                                 "period_size": [0.1, 0.15, 0.2, 0.3, 0.4],#[0.1, 0.15],#, 0.2, 0.3, 0.4],#, 0.2, 0.3],
-        #                                 #"offset": [0, 0.3, 0.5, 0.7, 1, 1.5],
-        #                                 "noise": [False]}]
-        data_generation_functions = [{"method": generate_periodic_triangles_uniform,
-                                      "method_name": "triangle_uniform",
-                                      "num_samples": [500],#[7000, 10000],
-                                      "period": [8],
-                                      "period_size": [0.2],#[0.1, 0.15, 0.2, 0.3, 0.4],
-                                      "noise": [False],
-                                      "regression": True}]
-        target_generation_functions = [{"method": None,
-                                        "method_name": "no_method"}]
+        data_generation_functions = [{"method": generate_uniform_data,
+                                      "method_name": "uniform",
+                                      "num_samples": [500, 600],
+                                      "num_features": 1,
+                                      "regression": True}] #TODO
+        target_generation_functions = [{"method": periodic_triangle,
+                                        "method_name": "periodic",
+                                        "period": [8],
+                                        "period_size": [0.3, 0.4],#[0.1, 0.15, 0.2, 0.3, 0.4],#[0.1, 0.15],#, 0.2, 0.3, 0.4],#, 0.2, 0.3],
+                                        #"offset": [0, 0.3, 0.5, 0.7, 1, 1.5],
+                                        "noise": [False]}]
         data_transforms_functions = [#[{"method": tree_quantile_transformer,
                                      # "method_name": "tree_quantile_transformer",
                                      #  "regression":True}],

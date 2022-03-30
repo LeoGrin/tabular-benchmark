@@ -204,10 +204,10 @@ def create_mlp_skorch(id, wandb_run, **kwargs):
     callbacks = [EpochScoring(scoring='accuracy', name='train_acc', on_train=True), InputShapeSetter(),
                  ('lr_scheduler',
                   LRScheduler(policy=ReduceLROnPlateau, patience=lr_patience, min_lr=2e-5, factor=0.2)),
-                 EarlyStopping(monitor="train_loss", patience=es_patience),
-                 Checkpoint(dirname="skorch_cp", f_params=r"params_{}.pt".format(id), f_optimizer=None,
-                            f_criterion=None),
-                 SaveModelHistory(f=r"history/history_{}.json".format(id))]
+                 EarlyStopping(monitor="train_loss", patience=es_patience)]
+                 #Checkpoint(dirname="skorch_cp", f_params=r"params_{}.pt".format(id), f_optimizer=None,
+                 #           f_criterion=None),
+                 #SaveModelHistory(f=r"history/history_{}.json".format(id))]
     if not wandb_run is None:
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
@@ -232,7 +232,7 @@ def create_mlp_skorch(id, wandb_run, **kwargs):
     return mlp_skorch
 
 
-def create_mlp_skorch_regressor(id, wandb_run, **kwargs):
+def create_mlp_skorch_regressor(id, wandb_run, use_checkpoints=True, **kwargs):
     hidden_size = kwargs.pop('hidden_size')
     n_layers = kwargs.pop('n_layers')
     if "es_patience" not in kwargs.keys():
@@ -250,52 +250,45 @@ def create_mlp_skorch_regressor(id, wandb_run, **kwargs):
         optimizer = AdamW
     elif optimizer == "sgd":
         optimizer = SGD
-    if not wandb_run is None:
-        mlp_skorch = NeuralNetRegressor(
-            MLP_npt,
-            # Shuffle training data on each epoch
-            optimizer=optimizer,
-            iterator_train__shuffle=True,
-            module__hidden_layer_sizes=[hidden_size for i in range(n_layers)],
-            module__input_size=1,  # will be change when fitted
-            module__output_size=1,  # idem
-            module__softmax=False,
-            module__no_reinitialize=False,
-            verbose=0,
-            callbacks=[EpochScoring(scoring='rmse', name='train_acc', on_train=True), LearningRateLogger(),
-                       WandbLogger(wandb_run, save_model=False), InputShapeSetter(regression=True),
+    batch_size = kwargs.pop('batch_size')
+    callbacks = [InputShapeSetter(regression=True, batch_size=batch_size),
                       # ('lr_scheduler',
-                       # LRScheduler(policy=ReduceLROnPlateau, patience=lr_patience, min_lr=2e-5, factor=0.2)),
-                       LRScheduler(policy=CosineAnnealingWarmRestarts, T_0=50),
-                       EarlyStopping(monitor="train_loss", patience=es_patience),
-                       Checkpoint(dirname="skorch_cp", f_params=r"params_{}.pt".format(id), f_optimizer=None,
-                                  f_criterion=None),
-                       SaveModelHistory(f=r"history/history_{}.json".format(id))],
-            **kwargs
-        )
-    else:
-        mlp_skorch = NeuralNetRegressor(
-            MLP_npt,
-            # Shuffle training data on each epoch
-            optimizer=optimizer,
-            iterator_train__shuffle=True,
-            module__hidden_layer_sizes=[hidden_size for i in range(n_layers)],
-            module__input_size=1,  # will be change when fitted
-            module__output_size=1,  # idem
-            module__softmax=False,
-            module__no_reinitialize=False,
-            verbose=0,
-            callbacks=[EpochScoring(scoring='neg_root_mean_squared_error', name='train_rmse', on_train=True),
-                       InputShapeSetter(regression=True),
-                       ('lr_scheduler',
-                        LRScheduler(policy=ReduceLROnPlateau, patience=lr_patience, min_lr=2e-5, factor=0.2)),
+                       LRScheduler(policy=ReduceLROnPlateau, patience=lr_patience, min_lr=2e-5, factor=0.2),
                        #LRScheduler(policy=CosineAnnealingWarmRestarts, T_0=50),
-                       EarlyStopping(monitor="train_loss", patience=es_patience),
-                       Checkpoint(dirname="skorch_cp", f_params=r"params_{}.pt".format(id), f_optimizer=None,
-                                  f_criterion=None),
-                       SaveModelHistory(f=r"history/history_{}.json".format(id))],
-            **kwargs
-        )
+                       EarlyStopping(monitor="train_loss", patience=es_patience)]
+    if use_checkpoints:
+        callbacks.append(EpochScoring(scoring='rmse', name='train_rmse', on_train=True))
+        callbacks.append(Checkpoint(dirname="skorch_cp", f_params=r"params_{}.pt".format(id), f_optimizer=None,
+                                  f_criterion=None))
+    if not wandb_run is None:
+        callbacks.append(WandbLogger(wandb_run, save_model=False))
+        callbacks.append(LearningRateLogger())
+
+    mlp_skorch = NeuralNetRegressor(
+        MLP_npt,
+        # Shuffle training data on each epoch
+        optimizer=optimizer,
+        batch_size=max(batch_size, 1), # if batch size is float, it will be reset during fit
+        iterator_train__shuffle=True,
+        module__hidden_layer_sizes=[hidden_size for i in range(n_layers)],
+        module__input_size=1,  # will be change when fitted
+        module__output_size=1,  # idem
+        module__softmax=False,
+        module__no_reinitialize=False,
+        verbose=0,
+        callbacks=callbacks,
+        # callbacks=[EpochScoring(scoring='rmse', name='train_acc', on_train=True), LearningRateLogger(),
+        #            WandbLogger(wandb_run, save_model=False), InputShapeSetter(regression=True),
+        #           # ('lr_scheduler',
+        #            LRScheduler(policy=ReduceLROnPlateau, patience=lr_patience, min_lr=2e-5, factor=0.2),
+        #            #LRScheduler(policy=CosineAnnealingWarmRestarts, T_0=50),
+        #            EarlyStopping(monitor="train_loss", patience=es_patience),
+        #            Checkpoint(dirname="skorch_cp", f_params=r"params_{}.pt".format(id), f_optimizer=None,
+        #                       f_criterion=None)],
+        #            #SaveModelHistory(f=r"history/history_{}.json".format(id))],
+        **kwargs
+    )
+
     return mlp_skorch
 
 

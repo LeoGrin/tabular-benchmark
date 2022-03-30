@@ -141,16 +141,22 @@ def store_model_function(model, model_name, params_model, params_data, params_ta
         #             pickle.dump(params_model, f)
 
 def evaluate_model(iter, params_model, params_data, params_target, params_transform_list, identifier, use_wandb, run_id,
-                   tags, dest, store_model, config_keyword):
+                   tags, dest, store_model, config_keyword, no_fit):
+    print("##########")
+    print(sys.getsizeof(params_model))
+    print(sys.getsizeof(params_data))
+    print(sys.getsizeof(params_target))
+    print(sys.getsizeof(params_transform_list))
+    print(sys.getsizeof(identifier))
     print(iter)
     print(params_model["method_name"])
     n_seconds = 0
     print("SLEEPING FOR {} SECONDS".format(n_seconds))
     time.sleep(n_seconds)
-    print(torch.cuda.is_available())
+    #print(torch.cuda.is_available())
     #print(torch.cuda.current_device())
     #print(torch.cuda.device(torch.cuda.current_device()))
-    print(torch.cuda.device_count())
+    #print(torch.cuda.device_count())
     #print(torch.cuda.get_device_name(torch.cuda.current_device()))
 #    print(params_data["keyword"])
     try:
@@ -255,7 +261,10 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
             #print("fitting")
             #print(model.module_.no_reinitialize)
             #model.partial_fit(x_train, y_train)
-            model.fit(x_train, y_train)
+            if not no_fit:
+                model.fit(x_train, y_train)
+            else:
+                time.sleep(10)
             #else:
             #    print("f")
                 #model.warm_start = True
@@ -298,23 +307,28 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
             #                     precision=2, filled=True)
             # except:
             #     pass
-            y_hat_train = model.predict(x_train).reshape(-1)
-            y_hat_test = model.predict(x_test).reshape(-1)
+            if not no_fit:
+                y_hat_train = model.predict(x_train).reshape(-1)
+                y_hat_test = model.predict(x_test).reshape(-1)
 
-            time_elapsed = time.time() - t
-            #
-            if "regression" in params_data.keys() and params_data["regression"]:
-                train_score = np.sqrt(np.mean((y_hat_train - y_train.reshape(-1))**2))
-            else:
-                train_score = np.sum((y_hat_train == y_train)) / len(y_train)
-            #if model_name[:3] == "mlp" or model_name[:3] == "nam" or model_name[:3] == "spa":
-            #    model.load_params(r"skorch_cp/params_{}.pt".format(model_id)) #TODO
+                time_elapsed = time.time() - t
+                #
+                if "regression" in params_data.keys() and params_data["regression"]:
+                    train_score = np.sqrt(np.mean((y_hat_train - y_train.reshape(-1))**2))
+                else:
+                    train_score = np.sum((y_hat_train == y_train)) / len(y_train)
+                if "use_checkpoints" in params_model.keys() and params_model["use_checkpoints"]:
+                    model.load_params(r"skorch_cp/params_{}.pt".format(model_id)) #TODO
 
-            #test_score = np.sum((y_hat_test == y_test)) / len(y_test)
-            if "regression" in params_data.keys() and params_data["regression"]:
-                test_score = np.sqrt(np.mean((y_hat_test - y_test.reshape(-1))**2))
+                #test_score = np.sum((y_hat_test == y_test)) / len(y_test)
+                if "regression" in params_data.keys() and params_data["regression"]:
+                    test_score = np.sqrt(np.mean((y_hat_test - y_test.reshape(-1))**2))
+                else:
+                    test_score = np.sum((y_hat_test == y_test)) / len(y_test)
             else:
-                test_score = np.sum((y_hat_test == y_test)) / len(y_test)
+                train_score = np.nan
+                test_score = np.nan
+                time_elapsed = np.nan
             print("#########")
             print(time.time() - t)
             print(params_model)
@@ -346,12 +360,13 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
         res_dic.update({"data_generation_str": create_string_from_dic(all_params)})
         res_dic.update({"model_params_str": create_string_from_dic(remove_keys_from_dict(params_model, ["method"]))})
         res_dic.update(all_params)
-        if model_name[:3] == "mlp" or model_name[:3] == "nam" or model_name[:3] == "spa":
+        if "use_checkpoints" in params_model.keys() and params_model["use_checkpoints"]:
             try:
                 os.remove(r"skorch_cp/params_{}.pt".format(model_id))
             except:
                 print("could not remove params file")
                 pass
+        #del model
         # dic_plot_train = {"y_pred": y_hat_train, "y_true": y_train}
         # dic_plot_test = {"y_pred": y_hat_test, "y_true": y_test}
         # for i in range(x.shape[1]):
@@ -375,7 +390,7 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
 def grid_search_parallel(path, model_generation_functions, data_generation_functions,
                          target_generation_functions, data_transforms_functions, n_iter=3, search_type="grid",
                          n_config=10, parallel=True, n_jobs=-1, use_wandb=False, run_id=0,
-                         tags=["no"], dask=False, dest=None, store_model=False, config_keyword=None):  # TODO use parser
+                         tags=["no"], dask=False, dest=None, store_model=False, config_keyword=None, no_fit=False):  # TODO use parser
     settings_list = []
     for g, model_generation_dic in enumerate(model_generation_functions):
         for h, params_model in enumerate(
@@ -394,7 +409,7 @@ def grid_search_parallel(path, model_generation_functions, data_generation_funct
                                     for iter in range(n_iter):
                                         settings_list.append(
                                             [iter, params_model, params_data, params_target, params_transform_list,
-                                             identifier, use_wandb, run_id, tags, dest, store_model, config_keyword])
+                                             identifier, use_wandb, run_id, tags, dest, store_model, config_keyword, no_fit])
     if parallel:
         print("n_jobs = {}".format(n_jobs))
         if not dask:
@@ -509,6 +524,9 @@ if __name__ == '__main__':
         parser.add_argument('-wandb', dest='use_wandb', action='store_true')
         parser.set_defaults(use_wandb=False)
 
+        parser.add_argument('-gpu', dest='use_gpu', action='store_true')
+        parser.set_defaults(use_gpu=False)
+
         parser.add_argument("--n-jobs",
                             dest="n_jobs",
                             help="Number of jobs for joblib",
@@ -517,6 +535,9 @@ if __name__ == '__main__':
 
         parser.add_argument('-dask', dest='dask', action='store_true')
         parser.set_defaults(dask=False)
+
+        parser.add_argument('--no-fit', dest='no_fit', action='store_true') #intended for debugging
+        parser.set_defaults(no_fit=False)
 
         parser.add_argument('--store-model', dest='store_model', action='store_true')
         parser.set_defaults(store_model=False)
@@ -536,14 +557,27 @@ if __name__ == '__main__':
         from dask_jobqueue import SLURMCluster
 
 
-
-        cluster = SLURMCluster(cores=1,
-                              #processes=1,
-                               memory='4G',
-                               walltime='10:00:00',
-                               queue = "electronic,funky,jazzy",
-                               #queue="normal,parietal")
-                              extra = ['--resources GPU=1'])
+        if not args.use_gpu:
+            cluster = SLURMCluster(cores=40,
+                                  #processes=1,
+                                   memory='100GB',
+                                   walltime='10:00:00',
+                                   job_name = args.dest,
+                                   queue='normal')
+                                  # queue = "electronic,funky,jazzy",
+                                  # job_extra=[
+                                  #     f'--gres=gpu:1'])
+                                   #queue="normal,parietal")
+                                  #extra = ['--resources GPU=1'])
+        else:
+            cluster = SLURMCluster(cores=1,
+                                   #processes=1,
+                                   memory='100GB',
+                                   walltime='10:00:00',
+                                   job_name=args.dest,
+                                   queue="electronic,funky,jazzy",
+                                   job_extra=[f'--gres=gpu:1'])
+                                   #extra = ['--resources GPU=1'])
         cluster.scale(jobs=args.n_jobs)
         #cluster.adapt(maximum_jobs=args.n_jobs)
         #cluster.adapt(maximum_jobs=args.n_jobs)
@@ -556,6 +590,9 @@ if __name__ == '__main__':
         print(client.submit(lambda x: x + 1, 10).result())
         print("LINK")
         print(client.dashboard_link)
+        print("SCRIPT")
+        print(cluster.job_script())
+        client.wait_for_workers(20)
 
 
     else:
@@ -573,4 +610,5 @@ if __name__ == '__main__':
                          n_iter=args.n_iter, search_type=args.search_type, n_config=args.n_config,
                          parallel=args.parallel, n_jobs=args.n_jobs, use_wandb=args.use_wandb,
                          run_id=int(time.time()), tags=args.tags, dask=args.dask, dest=args.dest, store_model=args.store_model,
-                         config_keyword=args.config_keyword)
+                         config_keyword=args.config_keyword, no_fit=args.no_fit)
+
