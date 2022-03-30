@@ -1,5 +1,6 @@
 from utils.utils import numpy_to_dataset, remove_keys_from_dict
 import numpy as np
+from utils.keyword_to_function_conversion import convert_keyword_to_function
 
 #There are three steps to generate a dataset:
 # 1) Generate x
@@ -27,10 +28,10 @@ def transform_data(x, y, methods, parameters, rng):
 def generate_dataset(settings, rng):
     #TODO no duplicate with streamlit function
     #right now the seed is only for streamlit
-    generate_method, target_method = [settings[i]["method"] for i in range(2)]
+    generate_method, target_method = [convert_keyword_to_function(settings[i]["method_name"]) for i in range(2)]
     #transform_methods = [transform_params["method"] for transform_params in settings[2]]
     #transform_parameters_list = [remove_keys_from_dict(transform_params, ["method", "method_name"]) for transform_params in settings[2]]
-    generate_parameters, target_parameters = [remove_keys_from_dict(settings[i], ["method", "method_name"]) for i in range(2)]
+    generate_parameters, target_parameters = [remove_keys_from_dict(settings[i], ["method", "method_name"]) for i in range(2)] #FIXME
     data = generate_data(generate_method, generate_parameters, rng)
     if data is None:
         return None
@@ -45,7 +46,7 @@ def generate_dataset(settings, rng):
     return x, y
 
 def apply_transform(x_train, x_test, y_train, y_test, params_transform, rng):
-    transform_methods = [transform_params["method"] for transform_params in params_transform]
+    transform_methods = [convert_keyword_to_function(transform_params["method_name"]) for transform_params in params_transform]
     transform_parameters_list = [remove_keys_from_dict(transform_params, ["method", "method_name"]) for transform_params in params_transform]
     print("transform_methods")
     print(transform_methods)

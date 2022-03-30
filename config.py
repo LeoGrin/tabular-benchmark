@@ -1177,7 +1177,7 @@ def config(keyword):
 
     elif keyword == "regression_synthetic":
         model_generation_functions = [#{"method": RandomForestRegressor, "method_name": "rf"},
-                                      {"method": create_mlp_skorch_regressor,
+                                      {"method_name": "mlp_skorch_regressor",
                                        "optimizer": ["adam"],
                                        "use_checkpoints": [False],
                                        "optimizer__weight_decay": [0],
@@ -1186,23 +1186,20 @@ def config(keyword):
                                        "module__dropout_prob": [0],
                                        "module__activations": ["relu"],
                                        "module__resnet": [True],
-                                       "max_epochs": [1200],
+                                       "max_epochs": [10],
                                        "n_layers": [1, 3],
                                        "hidden_size":[256],
                                        "lr": [0.0001],
                                        "batch_size": [0.1, 0.2, 0.5, 0.95],
                                        "es_patience": [50],
                                        "lr_patience": [10],
-                                       "method_name":"mlp",
                                        "device": "cpu"}
                                       ]
-        data_generation_functions = [{"method": "uniform_data",
-                                      "method_name": "uniform",
+        data_generation_functions = [{"method_name": "uniform_data",
                                       "num_samples": [500, 600, 750, 1000, 1600, 2500, 5000, 7500, 10000],
                                       "num_features": 1,
                                       "regression": True}] #TODO
-        target_generation_functions = [{"method": "periodic_triangle",
-                                        "method_name": "periodic",
+        target_generation_functions = [{"method_name": "periodic_triangle",
                                         "period": [8],
                                         "period_size": [0.1, 0.15, 0.2, 0.3, 0.4],#[0.1, 0.15],#, 0.2, 0.3, 0.4],#, 0.2, 0.3],
                                         #"offset": [0, 0.3, 0.5, 0.7, 1, 1.5],
@@ -1216,11 +1213,10 @@ def config(keyword):
         #                               "regression": True}]
         # target_generation_functions = [{"method": None,
         #                                 "method_name": "no_method"}]
-        data_transforms_functions = [#[{"method": tree_quantile_transformer,
-                                     # "method_name": "tree_quantile_transformer",
-                                     #  "regression":True}],
-                                     [{"method": None,
-                                        "method_name": "no_method",
+        data_transforms_functions = [[{"method": tree_quantile_transformer,
+                                      "method_name": "tree_quantile_transformer",
+                                       "regression":True}],
+                                     [{"method_name": "no_method",
                                         "regression":True}]
                                      ]
 

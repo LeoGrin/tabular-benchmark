@@ -17,6 +17,7 @@ import joblib
 from data_transforms import select_features_rf
 import pickle
 import torch
+from utils.keyword_to_function_conversion import convert_keyword_to_function
 
 os.environ["WANDB_START_METHOD"] = "thread"
 
@@ -29,7 +30,7 @@ def iterate_params_from_possible_params(dic, search_type="grid", n_config=None):
             if key not in ["method_name", "method"]:
                 for value in dic[key]:
                     l.append({"method_name": dic["method_name"],
-                              "method": dic["method"],
+                              "method": dic["method"], #FIXME remove method
                               key: value})
         return l
 
@@ -53,7 +54,7 @@ def merge_all_dics(data_generation_dic, target_generation_dic, data_transforms_l
     for i, param_dic in enumerate([data_generation_dic, target_generation_dic]):
         new_param_dic = {prefixes[i] + "__" + "method_name": param_dic["method_name"]}
         for key in param_dic.keys():
-            if key not in ["method", "method_name"]:
+            if key not in ["method", "method_name"]: #FIXME: remove method
                 new_param_dic[prefixes[i] + "__" + key] = param_dic[key]
         total_dic.update(new_param_dic)
     for i, param_dic in enumerate(data_transforms_list):
@@ -142,12 +143,6 @@ def store_model_function(model, model_name, params_model, params_data, params_ta
 
 def evaluate_model(iter, params_model, params_data, params_target, params_transform_list, identifier, use_wandb, run_id,
                    tags, dest, store_model, config_keyword, no_fit):
-    print("##########")
-    print(sys.getsizeof(params_model))
-    print(sys.getsizeof(params_data))
-    print(sys.getsizeof(params_target))
-    print(sys.getsizeof(params_transform_list))
-    print(sys.getsizeof(identifier))
     print(iter)
     print(params_model["method_name"])
     n_seconds = 0
@@ -174,15 +169,15 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
         x = x.astype(np.float32)  # for skorch
         all_params = merge_all_dics(params_data, params_target, params_transform_list)
         res_dic = {"iter": iter, "id": hash}
-        model_function = params_model["method"]
+        #model_function = params_model["method"]
         model_name = params_model["method_name"]
-        params_model_clean = remove_keys_from_dict(params_model, ["method", "method_name"])
-        model_name = model_name
+        model_function = convert_keyword_to_function(model_name)
+        params_model_clean = remove_keys_from_dict(params_model, ["method_name"])
         #if model_name[:3] == "nam":
         #
 
 
-
+        #TODO: split should be done in the data generation
         n_rows = x.shape[0]
         if "max_num_samples" in params_data.keys():
             train_set_size = min(params_data["max_num_samples"] / n_rows, 0.75)
