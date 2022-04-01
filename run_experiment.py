@@ -18,129 +18,20 @@ from data_transforms import select_features_rf
 import pickle
 import torch
 from utils.keyword_to_function_conversion import convert_keyword_to_function
+from train import *
 
 def evaluate_model(config):
     try:
         #rng = np.random.RandomState(iter)  #FIXME
-        x, y = generate_dataset([params_data, params_target, params_transform_list], rng)
-        #print(y.dtype)
-        #x, y, features = select_features_rf(x, y, rng, 2, return_features=True)
-        #with open("data/numerical_only/names_{}".format(params_data["keyword"]), 'rb') as f:
-        #  names = pickle.load(f)
-        #names = np.array(names)[features]
-       # print(names)
+        x_train, x_test, y_train, y_test = generate_dataset(config)#, rng) #FIXME
 
-        #x = x[:, [0, 2]]
-        x = x.astype(np.float32)  # for skorch
-        all_params = merge_all_dics(params_data, params_target, params_transform_list)
-        res_dic = {"iter": iter, "id": hash}
-        #model_function = params_model["method"]
-        model_name = params_model["method_name"]
-        model_function = convert_keyword_to_function(model_name)
-        params_model_clean = remove_keys_from_dict(params_model, ["method_name"])
-        #if model_name[:3] == "nam":
-        #
+        model = create_model(config)
 
+        model = train_model(model, x_train, y_train, x_test, y_test, config)
 
-        #TODO: split should be done in the data generation
-        n_rows = x.shape[0]
-        if "max_num_samples" in params_data.keys():
-            train_set_size = min(params_data["max_num_samples"] / n_rows, 0.75)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_set_size, random_state=rng)
-        else:
-            x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=rng)
+        train_score, test_score = evaluate_model(model, x_train, y_train, x_test, y_test, config)
 
-
-        x_train, x_test, y_train, y_test = apply_transform(x_train, x_test, y_train, y_test, params_transform_list, rng)
-        x_train, x_test = x_train.astype(np.float32), x_test.astype(np.float32) #for skorch
-
-        if "regression" in params_data.keys() and params_data["regression"]:
-            y_train, y_test = y_train.reshape(-1, 1), y_test.reshape(-1, 1)
-            y_train, y_test = y_train.astype(np.float32), y_test.astype(np.float32)
-        else:
-            y_train, y_test = y_train.astype(np.compat.long), y_test.astype(np.compat.long)
-
-
-
-        try:
-            if model_name[:3] == "mlp" or model_name[:3] == "nam" or model_name[:3] == "spa" or model_name == "pretrained":
-                if use_wandb:
-                    config = all_params
-                    config["run_id"] = run_id
-                    config["model_name"] = model_name
-                    config["iter"] = iter
-                    config["dim"] = x_train.shape[1]
-                    config["n_train"] = x_train.shape[0]
-                    config.update(params_model_clean)
-                    wandb_run = wandb.init(project="ToyTabular",
-                                           entity="leogrin",
-                                           # notes="tweak baseline",
-                                           # tags=["baseline", "paper1"),
-                                           config=config,
-                                           tags=tags)
-
-                else:
-                    wandb_run = None
-                # y_train, y_test = y_train.astype(np.float32), y_test.astype(np.float32)
-                if model_name[:3] == "mlp" or model_name == "pretrained":
-                    model_id = dest + "_" +  hash + str(params_model["hidden_size"]) + str(iter)
-                    print("kwargs")
-                    print(params_model_clean)
-                    model = model_function(model_id, wandb_run,
-                                           **params_model_clean)  # create a different checkpointing file for each run to avoid conflict (I'm not 100% sure it's necessary)
-                    #model = pickle.load(open(
-                    #    'saved_models/regression_synthetic_{}_{}_{}_{}_mlp_pickle.pkl'.format(5000, 0, 16,
-                    #                                                                   iter), 'rb'))
-                    #model.initialize()
-                    #model.load_params(
-                    #    f_params="saved_models/{}_{}_{}_{}_{}_{}.pkl".format(config_keyword, 5000,
-                     #                                                  params_target["offset"], params_target["period"],
-                    #                                                   iter, model_name))
-#                    model.module_.no_reinitialize = True
-                    #state_dict = model.module_.state_dict()
-                    # Add noise
-                    #for param in state_dict.keys():
-                    #    print("#########")
-                    #    if param.startswith("fc_layers") or param.startswith("input_layer") or param.startswith("output_layer"):
-                    #        state_dict[param] = model.module_.state_dict()[param] + 0 * torch.randn(model.module_.state_dict()[param].shape)
-                    #        model.module_.load_state_dict(state_dict)
-                elif model_name[:3] == "nam" or model_name[:3] == "spa":
-                    model_id = dest + "_" + hash + str(iter)  # TODO
-                    model = model_function(model_id, wandb_run,
-                                           **params_model_clean)  # create a different checkpointing file for each run to avoid conflict (I'm not 100% sure it's necessary)
-            else:
-                model = model_function(**params_model_clean)
-
-            t = time.time()
-            print("fitting....")
-            print(x_train.shape)
-            print(y_train.shape)
-            #y_hat_train_0 = model.predict(x_train).reshape(-1)
-
-            #if model_name[:3] != "mlp":
-            #print("fitting")
-            #print(model.module_.no_reinitialize)
-            #model.partial_fit(x_train, y_train)
-            if not no_fit:
-                model.fit(x_train, y_train)
-            else:
-                time.sleep(10)
-            #else:
-            #    print("f")
-                #model.warm_start = True
-                #model.fit(x_train, y_train, epochs=0)
-            #    print(model.initialized_)
-            #    model.partial_fit(x_train, y_train, epochs=0)
-            #model.fit(x_train, y_train)
-
-            if store_model:
-                stored_model_file_name = store_model_function(model, model_name, params_model, params_data, params_target, params_transform_list,
-                            config_keyword, x_train, x_test, y_train, y_test)
-                print("model name")
-                print(stored_model_file_name)
-
-            #plot_decision_boudaries(x_train, y_train, x_test, y_test, model, title=model_name)
-            if use_wandb:
+        if config["use_wandb"]:
                 wandb_run.finish()
             if model_name == "rf" and "store_features" in tags:
                 print(params_data["keyword"])
