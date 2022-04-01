@@ -208,14 +208,14 @@ def periodic_sinus(x, period=None, offset=None, period_size=None, noise=True, rn
         res += rng.normal(0, 0.1, x.shape[0])
     return res
 
-def periodic_triangle(x, period=None, offset=None, period_size=None, noise=True, rng=None):
+def periodic_triangle(x, n_periods=None, offset=None, period_size=None, noise=True, rng=None):
     # TAKE INTO INPUT A UNIFORM(-2, 2) (I think)
     assert (x <= 2).all()
     assert (x >= -2).all()
     #offset = offset * 2
     if not period_size is None:
-        if not period is None:
-            offset = (4 - period_size * period) / 2
+        if not n_periods is None:
+            offset = (4 - period_size * n_periods) / 2
         elif not offset is None:
             period = (4 - offset * 2) / period_size
     res = np.zeros(x.shape[0])

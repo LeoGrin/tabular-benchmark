@@ -135,8 +135,8 @@ def generate_gaussian_data(num_samples,
                                        size=num_samples)
 
 
-def generate_uniform_data(num_samples,
-                          num_features,
+def generate_uniform_data(n_samples,
+                          n_features,
                           regression=None,
                           rng=None) -> np.array:
     """
@@ -144,7 +144,7 @@ def generate_uniform_data(num_samples,
     :param num_features:
     :return:
     """
-    return rng.uniform(low=-2, high=2, size=(num_samples, num_features))
+    return rng.uniform(low=-2, high=2, size=(n_samples, n_features))
 
 
 def generate_student_data(num_samples,

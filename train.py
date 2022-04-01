@@ -54,7 +54,7 @@ def evaluate_model(fitted_model, x_train, y_train, x_test, y_test, config):
 
     return train_score, test_score
 
-def train_model(model, x_train, x_test, y_train, y_test, config):
+def train_model(model, x_train, y_train, config):
     """
     Train the model
     """
