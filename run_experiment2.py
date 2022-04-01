@@ -522,6 +522,12 @@ if __name__ == '__main__':
         parser.add_argument('-gpu', dest='use_gpu', action='store_true')
         parser.set_defaults(use_gpu=False)
 
+        parser.add_argument("-queue",
+                            dest="slurm_queue",
+                            help="queue for slurm",
+                            type=str,
+                            default="normal")
+
         parser.add_argument("--n-jobs",
                             dest="n_jobs",
                             help="Number of jobs for joblib",
@@ -558,7 +564,7 @@ if __name__ == '__main__':
                                    memory='100GB',
                                    walltime='10:00:00',
                                    job_name = args.dest,
-                                   queue='normal')
+                                   queue=args.slurm_queue)
                                   # queue = "electronic,funky,jazzy",
                                   # job_extra=[
                                   #     f'--gres=gpu:1'])
@@ -566,11 +572,12 @@ if __name__ == '__main__':
                                   #extra = ['--resources GPU=1'])
         else:
             cluster = SLURMCluster(cores=1,
+                                   job_cpu=0,
                                    #processes=1,
                                    memory='100GB',
                                    walltime='10:00:00',
                                    job_name=args.dest,
-                                   queue="electronic,funky,jazzy",
+                                   queue=args.slurm_queue,
                                    job_extra=[f'--gres=gpu:1'])
                                    #extra = ['--resources GPU=1'])
         cluster.scale(jobs=args.n_jobs)
