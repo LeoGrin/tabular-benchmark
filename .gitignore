@@ -8,7 +8,7 @@
 !/data/clean_data_regression.py
 !/data/data_utils.py
 !data/dirty_data_fetcher.py
-!data/re_temp.py
+!trash/re_temp.py
 /features
 /history
 /predictions

@@ -1,9 +1,8 @@
-from data_transforms import tree_quantile_transformer, select_features_rf, gaussienize
-from generate_data import generate_gaussian_data, import_real_data
-from target_function_classif import periodic_triangle, periodic_sinus
+from src.data_transforms import tree_quantile_transformer
+from src.generate_data import generate_gaussian_data
+from src.target_function_classif import periodic_triangle
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.preprocessing import QuantileTransformer
 
 rng = np.random.RandomState(0)
 

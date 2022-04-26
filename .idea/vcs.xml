@@ -2,6 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lgrinszt/ToyTabular" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lgrinszt/ToyTabular/nam" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/nam" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tabular" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tabular-dl-revisiting-models" vcs="Git" />
   </component>
 </project>

@@ -1,10 +1,8 @@
 import streamlit as st
-from utils.plot_utils import plot_decision_boudaries
+from utils import plot_decision_boudaries
 import pickle
 import numpy as np
-import torch
-from config import config
-from utils.skorch_utils import create_mlp_skorch
+from utils import create_mlp_skorch
 
 st.title('Decision boundaries')
 

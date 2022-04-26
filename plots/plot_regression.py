@@ -1,5 +1,4 @@
 import numpy as np
-from target_function_classif import periodic_triangle
 import pickle
 import matplotlib.pyplot as plt
 

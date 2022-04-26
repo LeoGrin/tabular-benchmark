@@ -4,7 +4,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "resnet_benchmark_numeric",
+  "name" : "resnet_add_features",
   "project": "thesis",
   "method" : "random",
   "metric": {
@@ -86,12 +86,18 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "churn", "credit", "cpu", "wine"]
+      "values": ["heloc", "electricity", "california", "covtype", "churn", "cpu", "wine"]
     },
     "transform__0__method_name": {
+      "value": "add_uninformative_features"
+    },
+    "transform__0__multiplier": {
+      "values": [1., 1.5, 2],
+    },
+    "transform__1__method_name": {
       "value": "gaussienize"
     },
-    "transform__0__type": {
+    "transform__1__type": {
       "value": "quantile",
     },
     "n_iter": {
