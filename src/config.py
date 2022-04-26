@@ -556,6 +556,7 @@ def config(keyword):
                                         "method_name": "no_transform"}]
         data_transforms_functions = [[{"method": None,
                                         "method_name": "no_transform"}]]
+
     elif keyword == "useless_features":
         model_generation_functions = [{"method": RandomForestClassifier,
                                        "method_name": "rf"},
