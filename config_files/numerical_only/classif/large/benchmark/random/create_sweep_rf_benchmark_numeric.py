@@ -3,7 +3,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "rf_benchmark_numeric",
+  "name" : "rf_benchmark_numeric_large",
   "project": "thesis",
   "method" : "random",
   "metric": {
