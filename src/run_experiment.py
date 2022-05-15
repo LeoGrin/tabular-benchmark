@@ -28,16 +28,15 @@ def train_model_on_config(config=None):
     #    print(torch.cuda.get_device_name(torch.cuda.current_device()))
     print("#####")
     CONFIG_DEFAULT = {"train_prop": 0.70,
-                      "max_train_samples": 10000,
                       "val_test_prop": 0.3,
                       "max_val_samples": 50000,
-                     "max_test_samples": 50000,
-                      "regression": False}
+                     "max_test_samples": 50000}
     # "model__use_checkpoints": True} #TODO
     # Initialize a new wandb run
     with wandb.init(config=config) as run:
         run.config.update(CONFIG_DEFAULT)
         config = wandb.config
+        print(config)
         # Modify the config in certain cases
         if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
             config["model__module__d_token"] = (config["d_token"] // config["model__module__n_heads"]) * config[
@@ -69,12 +68,15 @@ def train_model_on_config(config=None):
                 rng = np.random.RandomState(i)
                 print(rng.randn(1))
                 # TODO: separate numeric and categorical features
+                t = time.time()
                 x_train, x_val, x_test, y_train, y_val, y_test = generate_dataset(config, rng)
+                data_generation_time = time.time() - t
+                print("Data generation time:", data_generation_time)
                 #print(y_train)
                 print(x_train.shape)
 
                 if config["model_type"] == "skorch" and config["regression"] == True:
-                    #y_train, y_val, y_test = y_train.reshape(-1, 1), y_val.reshape(-1, 1), y_test.reshape(-1, 1)
+                    y_train, y_val, y_test = y_train.reshape(-1, 1), y_val.reshape(-1, 1), y_test.reshape(-1, 1)
                     y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(np.float32)
                 else:
                     y_train, y_val, y_test = y_train.reshape(-1), y_val.reshape(-1), y_test.reshape(-1)
@@ -146,7 +148,8 @@ def train_model_on_config(config=None):
                            "processor": processor})
 
             wandb.log({"n_train": x_train.shape[0], "n_test": x_test.shape[0],
-                       "n_features": x_train.shape[1]})
+                       "n_features": x_train.shape[1],
+                       "data_generation_time": data_generation_time})
 
         except:
             # Print to the console
@@ -166,16 +169,17 @@ if __name__ == """__main__""":
     #           "n_iter": 1,
     #           "max_train_samples": 10000}
 
-    config = {
-        "model_type": "skorch",
-        "model_name": "npt",
-        "n_iter": 1,
-        "model__optimizer": "adamw",
-        "model__lr": 0.001,
-        "model__batch_size": 64,
-        "data__method_name": "real_data",
-        "data__keyword": "electricity"
-    }
+    # config = {
+    #     "model_type": "skorch",
+    #     "model_name": "npt",
+    #     "n_iter": 1,
+    #     "model__optimizer": "adamw",
+    #     "model__lr": 0.001,
+    #     "model__batch_size": 64,
+    #     "data__method_name": "real_data",
+    #     "data__keyword": "electricity",
+    #     "regression": False
+    # }
 
     # config = {"model_type": "skorch",
     #           "model_name": "rtdl_resnet",
@@ -201,4 +205,4 @@ if __name__ == """__main__""":
     #           #"max_test_samples": None,
     #           }
 
-    train_model_on_config(config)
+    train_model_on_config()

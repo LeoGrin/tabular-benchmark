@@ -3,7 +3,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "ft_transformer_benchmark_numeric",
+  "name" : "ft_transformer_benchmark_numeric_large",
   "project": "thesis",
   "method" : "random",
   "metric": {
@@ -22,6 +22,9 @@ sweep_config = {
     },
     "model_name": {
       "value": "ft_transformer"
+    },
+    "model__use_checkpoints": {
+      "value": True
     },
     "model__optimizer": {
       "value": "adamw"
@@ -100,7 +103,11 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "churn", "credit", "spam", "wine", "shopping", "nomao", "cpu"]
+      "values": ["covertype",
+                 "poker",
+                 "MiniBooNE",
+                 "Higgs",
+                 "jannis"]
     },
     "transform__0__method_name": {
       "value": "gaussienize"
@@ -109,8 +116,14 @@ sweep_config = {
       "value": "quantile",
     },
     "n_iter": {
-      "value": 1,
-    }
+      "value": "auto",
+    },
+    "regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 50000
+    },
   }
 }
 

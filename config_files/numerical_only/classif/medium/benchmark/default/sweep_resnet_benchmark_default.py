@@ -5,7 +5,7 @@ sweep_config = {
   "program": "run_experiment.py",
   "name" : "resnet_benchmark_numeric",
   "project": "thesis",
-  "method" : "random",
+  "method" : "grid",
   "metric": {
     "name": "mean_test_score",
     "goal": "maximize"
@@ -23,14 +23,17 @@ sweep_config = {
     "model_name": {
       "value": "rtdl_resnet"
     },
+    "model__use_checkpoints": {
+      "value": False
+    },
     "model__optimizer": {
       "value": "adamw"
     },
     "model__lr_scheduler": {
-      "values": [True, False]
+      "values": [True]
     },
     "model__batch_size": {
-      "values": [256, 512, 1024]
+      "values": [512]
     },
     "model__max_epochs": {
       "value": 300
@@ -39,53 +42,52 @@ sweep_config = {
       "value": "reglu"
     },
     "model__module__normalization": {
-      "values": ["batchnorm", "layernorm"]
+      "values": ["batchnorm"]
     },
     "model__module__n_layers": {
-      "distribution": "q_uniform",
-      "min": 1,
-      "max": 16
+      "value": 8,
     },
     "model__module__d": {
-      "distribution": "q_uniform",
-      "min": 64,
-      "max": 1024
+      "value": 256,
     },
     "model__module__d_hidden_factor": {
-      "distribution": "uniform",
-      "min": 1,
-      "max": 4
+      "value": 2,
     },
     "model__module__hidden_dropout": {
-      "distribution": "uniform",
-      "min": 0.0,
-      "max": 0.5
+      "value": 0.2,
     },
     "model__module__residual_dropout": {
-      "distribution": "uniform",
-      "min": 0.0,
-      "max": 0.5
+      "value": 0.2
     },
     "model__lr": {
-      "distribution": "log_uniform_values",
-      "min": 1e-5,
-      "max": 1e-2
+      "value": 1e-3,
     },
      "model__optimizer__weight_decay": {
-      "distribution": "log_uniform_values",
-      "min": 1e-8,
-      "max": 1e-3
+      "value": 1e-7,
     },
     "model__module__d_embedding": {
-      "distribution": "q_uniform",
-      "min": 64,
-      "max": 512
+      "value": 128
     },
     "data__method_name": {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "churn", "credit", "shopping", "nomao", "cpu", "spam", "wine"]
+      "values": ["electricity",
+                 "covertype",
+                 "poker",
+                 "pol",
+                 "house_16H",
+                 "kdd_ipums_la_97-small",
+                 "MagicTelescope",
+                 "bank-marketing",
+                 "phoneme",
+                 "MiniBooNE",
+                 "Higgs",
+                 "eye_movements",
+                 #"jannis",
+                 "credit",
+                 "california",
+                 "wine"]
     },
     "transform__0__method_name": {
       "value": "gaussienize"
@@ -94,7 +96,10 @@ sweep_config = {
       "value": "quantile",
     },
     "n_iter": {
-      "value": 1,
+      "value": "auto",
+    },
+    "regression": {
+      "value": False
     }
   }
 }

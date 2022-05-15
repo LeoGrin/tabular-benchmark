@@ -10,6 +10,7 @@ from rotation_forest import RotationForestClassifier
 
 
 def convert_keyword_to_function(keyword):
+    print(keyword)
     if keyword == "npt":
         return create_NPT_skorch
     if keyword == "rotation_forest":
@@ -30,7 +31,7 @@ def convert_keyword_to_function(keyword):
         return RandomForestRegressor
     if keyword == "gbt_c":
         return GradientBoostingClassifier
-    if keyword == "gpt_r":
+    if keyword == "gbt_r":
         return GradientBoostingRegressor
     if keyword == "xgb_c":
         return XGBClassifier
@@ -44,11 +45,19 @@ def convert_keyword_to_function(keyword):
         return import_real_data
     elif keyword == "gaussienize":
         return gaussienize
+    elif keyword == "select_features_rf":
+        return select_features_rf
+    elif keyword == "remove_features_rf":
+        return remove_features_rf
     elif keyword == "remove_useless_features":
         return remove_useless_features
     elif keyword == "add_uninformative_features":
         return add_uninformative_features
     elif keyword == "random_rotation":
         return apply_random_rotation
+    elif keyword == "remove_high_frequency_from_train":
+        return remove_high_frequency_from_train
+    elif keyword == "no_transform":
+        return None
     else:
         raise ValueError("Unknown keyword")

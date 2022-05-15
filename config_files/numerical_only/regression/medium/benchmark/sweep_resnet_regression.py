@@ -1,15 +1,14 @@
-
 import wandb
 import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "resnet_add_features",
+  "name" : "resnet_benchmark_numeric_regressor",
   "project": "thesis",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
-    "goal": "maximize"
+    "goal": "minimize"
   },
   "parameters" : {
     "log_training": {
@@ -22,7 +21,10 @@ sweep_config = {
       "value": "skorch"
     },
     "model_name": {
-      "value": "rtdl_resnet"
+      "value": "rtdl_resnet_regressor"
+    },
+    "model__use_checkpoints": {
+      "value": True
     },
     "model__optimizer": {
       "value": "adamw"
@@ -86,22 +88,43 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "churn", "cpu", "wine"]
+      "values": ["cpu_act",
+                 "pol",
+                 "elevators",
+                 "isolet",
+                 "wine_quality",
+                  "Ailerons",
+                  "yprop_4_1",
+                  "houses",
+                  "house_16H",
+                  #"delays_zurich_transport",
+                  #"diamonds",
+                  #"Allstate_Claims_Severity",
+                  "Bike_Sharing_Demand",
+                  "OnlineNewsPopularity",
+                  #"nyc-taxi-green-dec-2016",
+                  "house_sales",
+                  "sulfur",
+                  "Bike_Sharing_Demand",
+                  #"fps-in-video-games",
+                  #"medical_charges",
+                  "MiamiHousing2016",
+                  "superconduct"]
     },
     "transform__0__method_name": {
-      "value": "add_uninformative_features"
-    },
-    "transform__0__multiplier": {
-      "values": [1., 1.5, 2],
-    },
-    "transform__1__method_name": {
       "value": "gaussienize"
     },
-    "transform__1__type": {
+    "transform__0__type": {
       "value": "quantile",
     },
     "n_iter": {
-      "value": 1,
+      "value": "auto",
+    },
+    "regression": {
+          "value": True
+    },
+    "data__regression": {
+          "value": True
     }
   }
 }

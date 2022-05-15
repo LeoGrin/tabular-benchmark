@@ -1,26 +1,26 @@
 import itertools
 import os
 os.environ["PROJECT_DIR"] = "test"
-from generate_dataset_pipeline import generate_dataset
+from generate_dataset_pipeline_joblib import generate_dataset
 from utils.utils import numpy_to_dataset, remove_keys_from_dict
-from utils.plot_utils import plot_decision_boudaries
-from sklearn.tree import export_graphviz
 from generate_data import *
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_validate, KFold, ParameterGrid, ParameterSampler
-from config import config
+from config_new import config
 from joblib import Parallel, delayed
 import argparse
 import time
 import sys, traceback  # Needed for pulling out your full stackframe info
 import wandb
 import joblib
-from data_transforms import select_features_rf
 import pickle
 import torch
 from utils.keyword_to_function_conversion import convert_keyword_to_function
+import platform
 
 os.environ["WANDB_START_METHOD"] = "thread"
+
+
 
 
 def iterate_params_from_possible_params(dic, search_type="grid", n_config=None):
@@ -31,19 +31,21 @@ def iterate_params_from_possible_params(dic, search_type="grid", n_config=None):
             if key not in ["method_name", "method"]:
                 for value in dic[key]:
                     l.append({"method_name": dic["method_name"],
-                              "method": dic["method"], #FIXME remove method
                               key: value})
         return l
 
     new_dic = {}
     for key in dic.keys():
-        if type(dic[key]) != list:
-            new_dic[key] = [dic[key]]
+        if not hasattr(dic[key], "rvs") and type(dic[key]) != list:
+                new_dic[key] = [dic[key]]
         else:
             new_dic[key] = dic[key]
     if search_type == "grid":
         return list(ParameterGrid(new_dic))
     elif search_type == "random":
+        print("HERE")
+        print(new_dic)
+        print(list(ParameterSampler(new_dic, n_iter=n_config)))
         return list(ParameterSampler(new_dic, n_iter=n_config))
 
 
@@ -77,7 +79,7 @@ def create_string_from_dic(dic):
     return res
 
 def store_model_function(model, model_name, params_model, params_data, params_target, params_transform_list, config_keyword,
-                         x_train, x_test, y_train, y_test):
+                         x_train, x_test, y_train, y_test, deep_learning):
     prefix = "saved_models/{}/{}/".format(config_keyword, model_name)
 
     file_name = ".".join("{}:{}".format(k, v) for k, v in list(params_model.items()) if k not in ["method", "method_name", "device"])
@@ -88,7 +90,7 @@ def store_model_function(model, model_name, params_model, params_data, params_ta
 
     file_name = prefix + str(hash(prefix + file_name))
 
-    if model_name == "mlp" or model_name == "pretrained":
+    if deep_learning:
         model.save_params(f_params="{}.params".format(file_name))
         with open("{}.pkl".format(file_name), "wb") as f:
             pickle.dump(model, f)
@@ -142,7 +144,7 @@ def store_model_function(model, model_name, params_model, params_data, params_ta
         #                                                     model_name, "params"), 'wb') as f:
         #             pickle.dump(params_model, f)
 
-def evaluate_model(iter, params_model, params_data, params_target, params_transform_list, identifier, use_wandb, run_id,
+def evaluate_model(iter, general_parameters, params_model, params_data, params_target, params_transform_list, identifier, use_wandb, run_id,
                    tags, dest, store_model, config_keyword, no_fit):
     print(iter)
     print(params_model["method_name"])
@@ -158,7 +160,8 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
     try:
         hash = "".join(map(str, identifier))
         rng = np.random.RandomState(iter)  # can be called without a seed
-        x, y = generate_dataset([params_data, params_target, params_transform_list], rng)
+        x_train, x_val, x_test, y_train, y_val, y_test = generate_dataset([general_parameters, params_data, params_target, params_transform_list], rng)
+        #x, y = generate_dataset([params_data, params_target, params_transform_list], rng)
         #print(y.dtype)
         #x, y, features = select_features_rf(x, y, rng, 2, return_features=True)
         #with open("data/numerical_only/names_{}".format(params_data["keyword"]), 'rb') as f:
@@ -167,7 +170,8 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
        # print(names)
 
         #x = x[:, [0, 2]]
-        x = x.astype(np.float32)  # for skorch
+        #x = x.astype(np.float32)  # for skorch
+        x_train, x_val, x_test = x_train.astype(np.float32), x_val.astype(np.float32), x_test.astype(np.float32)
         all_params = merge_all_dics(params_data, params_target, params_transform_list)
         res_dic = {"iter": iter, "id": hash}
         #model_function = params_model["method"]
@@ -178,28 +182,19 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
         #
 
 
-        #TODO: split should be done in the data generation
-        n_rows = x.shape[0]
-        if "max_num_samples" in params_data.keys():
-            train_set_size = min(params_data["max_num_samples"] / n_rows, 0.75)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_set_size, random_state=rng)
-        else:
-            x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=rng)
-
-
-        #x_train, x_test, y_train, y_test = apply_transform(x_train, x_test, y_train, y_test, params_transform_list, rng)
-        x_train, x_test = x_train.astype(np.float32), x_test.astype(np.float32) #for skorch
-
         if "regression" in params_data.keys() and params_data["regression"]:
-            y_train, y_test = y_train.reshape(-1, 1), y_test.reshape(-1, 1)
-            y_train, y_test = y_train.astype(np.float32), y_test.astype(np.float32)
+            y_train, y_val, y_test = y_train.reshape(-1, 1), y_val.reshape(-1, 1), y_test.reshape(-1, 1)
+            y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(np.float32)
         else:
-            y_train, y_test = y_train.astype(np.compat.long), y_test.astype(np.compat.long)
+            y_train, y_val, y_test = y_train.astype(np.compat.long), y_val.astype(np.compat.long), y_test.astype(np.compat.long)
 
 
-
+        if model_name[:3] == "mlp" or model_name == "pretrained" or "rtdl" in model_name or "transformer" in model_name:
+            deep_learning = True
+        else:
+            deep_learning = False
         try:
-            if model_name[:3] == "mlp" or model_name[:3] == "nam" or model_name[:3] == "spa" or model_name == "pretrained":
+            if deep_learning:
                 if use_wandb:
                     config = all_params
                     config["run_id"] = run_id
@@ -218,8 +213,9 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
                 else:
                     wandb_run = None
                 # y_train, y_test = y_train.astype(np.float32), y_test.astype(np.float32)
-                if model_name[:3] == "mlp" or model_name == "pretrained":
-                    model_id = dest + "_" +  hash + str(params_model["hidden_size"]) + str(iter)
+                if deep_learning:
+                    #model_id = dest + "_" + hash + str(params_model["hidden_size"]) + str(iter)
+                    model_id = ".".join(list(all_params.keys())) + str(iter)
                     print("kwargs")
                     print(params_model_clean)
                     model = model_function(model_id, wandb_run,
@@ -271,7 +267,7 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
 
             if store_model:
                 stored_model_file_name = store_model_function(model, model_name, params_model, params_data, params_target, params_transform_list,
-                            config_keyword, x_train, x_test, y_train, y_test)
+                            config_keyword, x_train, x_test, y_train, y_test, deep_learning=deep_learning)
                 print("model name")
                 print(stored_model_file_name)
 
@@ -305,6 +301,7 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
             #     pass
             if not no_fit:
                 y_hat_train = model.predict(x_train).reshape(-1)
+                y_hat_val = model.predict(x_val).reshape(-1)
                 y_hat_test = model.predict(x_test).reshape(-1)
 
                 time_elapsed = time.time() - t
@@ -316,6 +313,11 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
                 if "use_checkpoints" in params_model.keys() and params_model["use_checkpoints"]:
                     model.load_params(r"skorch_cp/params_{}.pt".format(model_id)) #TODO
 
+                if "regression" in params_data.keys() and params_data["regression"]:
+                    val_score = np.sqrt(np.mean((y_hat_val - y_val.reshape(-1))**2))
+                else:
+                    val_score = np.sum((y_hat_val == y_val)) / len(y_val)
+
                 #test_score = np.sum((y_hat_test == y_test)) / len(y_test)
                 if "regression" in params_data.keys() and params_data["regression"]:
                     test_score = np.sqrt(np.mean((y_hat_test - y_test.reshape(-1))**2))
@@ -323,6 +325,7 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
                     test_score = np.sum((y_hat_test == y_test)) / len(y_test)
             else:
                 train_score = np.nan
+                val_score = np.nan
                 test_score = np.nan
                 time_elapsed = np.nan
             print("#########")
@@ -332,12 +335,21 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
             print(train_score)
             print(test_score)
             print("###########")
-            res_dic.update({"test_scores": test_score,
-                            "train_scores": train_score,
+            if "device" in params_model.keys():
+                if params_model["device"] == "cpu":
+                    processor = platform.processor()
+                elif params_model["device"] == "cuda":
+                    processor = torch.cuda.get_device_name(torch.cuda.current_device())
+            else:
+                processor = platform.processor()
+            res_dic.update({"test_score": test_score,
+                            "val_score": val_score,
+                            "train_score": train_score,
                             "time_elapsed": time_elapsed,
                             "n_train": len(y_train),
                             "n_test": len(y_test),
-                            "n_features": x_train.shape[1]})
+                            "n_features": x_train.shape[1],
+                            "processor": processor})
             if store_model:
                 res_dic["model_file_name"] = stored_model_file_name
             #pd.DataFrame(res_dic).to_csv("results")
@@ -345,8 +357,9 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
                 print("rf")
                 print(model.feature_importances_)
         except:
-            res_dic.update({"test_scores": np.nan,
-                            "train_scores": np.nan,
+            res_dic.update({"test_score": np.nan,
+                            "val_score": np.nan,
+                            "train_score": np.nan,
                             "time_elapsed": np.nan})
             print("ERROR DURING FIT")
             print(params_model)
@@ -383,7 +396,7 @@ def evaluate_model(iter, params_model, params_data, params_target, params_transf
     return res_dic
 
 
-def grid_search_parallel(path, model_generation_functions, data_generation_functions,
+def grid_search_parallel(path, general_parameters, model_generation_functions, data_generation_functions,
                          target_generation_functions, data_transforms_functions, n_iter=3, search_type="grid",
                          n_config=10, parallel=True, n_jobs=-1, use_wandb=False, run_id=0,
                          tags=["no"], dask=False, dest=None, store_model=False, config_keyword=None, no_fit=False):  # TODO use parser
@@ -402,9 +415,21 @@ def grid_search_parallel(path, model_generation_functions, data_generation_funct
                                 params_transform_list_list = itertools.product(*params_transform_list_list_raw)
                                 for f, params_transform_list in enumerate(params_transform_list_list):
                                     identifier = (a, b, c, d, e, f, g, h)
+                                    if general_parameters["n_iter"] == "auto":
+                                        rng = np.random.RandomState(0)  # can be called without a seed
+                                        x_train, x_val, x_test, y_train, y_val, y_test= generate_dataset([general_parameters, params_data, params_target, params_transform_list],
+                                                                rng)
+                                        if x_test.shape[0] > 6000:
+                                            n_iter = 1
+                                        elif x_test.shape[0] > 3000:
+                                            n_iter = 2
+                                        elif x_test.shape[0] > 1000:
+                                            n_iter = 3
+                                        else:
+                                            n_iter = 5
                                     for iter in range(n_iter):
                                         settings_list.append(
-                                            [iter, params_model, params_data, params_target, params_transform_list,
+                                            [iter, general_parameters, params_model, params_data, params_target, params_transform_list,
                                              identifier, use_wandb, run_id, tags, dest, store_model, config_keyword, no_fit])
     if parallel:
         print("n_jobs = {}".format(n_jobs))
@@ -552,7 +577,7 @@ if __name__ == '__main__':
     parser = create_parser_new()
     args = parser.parse_args()
 
-    model_generation_functions, data_generation_functions, target_generation_functions, transform_generation_functions = config(
+    general_parameters, model_generation_functions, data_generation_functions, target_generation_functions, transform_generation_functions = config(
         args.config_keyword)
 
     if args.dask:
@@ -576,10 +601,10 @@ if __name__ == '__main__':
                                    job_cpu=0,
                                    #processes=1,
                                    memory='100GB',
-                                   walltime='10:00:00',
+                                   walltime='2:00:00',
                                    job_name=args.dest,
-                                   queue=args.slurm_queue,
-                                   job_extra=[f'--gres=gpu:1'])
+                                   #queue=args.slurm_queue,
+                                   job_extra=[f'--gres=gpu:1', f'--account=rrg-eugenium'])
                                    #extra = ['--resources GPU=1'])
         cluster.scale(jobs=args.n_jobs)
         #cluster.adapt(maximum_jobs=args.n_jobs)
@@ -595,7 +620,7 @@ if __name__ == '__main__':
         print(client.dashboard_link)
         print("SCRIPT")
         print(cluster.job_script())
-        client.wait_for_workers(20)
+        #client.wait_for_workers(20)
 
 
     else:
@@ -608,7 +633,7 @@ if __name__ == '__main__':
             pass
 
 
-    grid_search_parallel("{}.csv".format(args.dest), model_generation_functions, data_generation_functions, #TODO results
+    grid_search_parallel("{}.csv".format(args.dest), general_parameters, model_generation_functions, data_generation_functions, #TODO results
                          target_generation_functions, transform_generation_functions,
                          n_iter=args.n_iter, search_type=args.search_type, n_config=args.n_config,
                          parallel=args.parallel, n_jobs=args.n_jobs, use_wandb=args.use_wandb,

@@ -3,7 +3,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "gpt_add_features",
+  "name" : "rf_add_features",
   "project": "thesis",
   "method" : "random",
   "metric": {
@@ -15,27 +15,20 @@ sweep_config = {
       "value": "sklearn"
     },
     "model_name": {
-      "value": "gbt_c"
+      "value": "rf_c"
     },
     # Parameter space taken from Hyperopt-sklearn except when mentioned
-    "model__loss": {
-      "values": ["deviance", "exponential"],
-    },
-    "model__learning_rate": {
-      'distribution': "log_normal",
-      'mu': float(np.log(0.01)),
-      'sigma': float(np.log(10.0)),
-    },
-    "model__subsample": { # Not exactly like Hyperopt-sklearn
-      'distribution': "uniform",
-      'min': 0.5,
-      'max': 1.0,
-    },
     "model__n_estimators": {
       "distribution": "q_log_uniform_values",
-      "min": 10.5,
-      "max": 1000.5,
+      "min": 9.5,
+      "max": 3000.5,
       "q": 1
+    },
+    "model__criterion": {
+      "values": ["gini", "entropy"],
+    },
+    "model__max_features": { # like Hyperopt ?
+      "values": ["sqrt", "sqrt", "log2", None, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     },
     "model__max_depth": { # Not exactly like Hyperopt
       "values": [None, 2, 3, 4],
@@ -49,21 +42,39 @@ sweep_config = {
       "max": 50.5,
       "q": 1
     },
+    "model__bootstrap": {
+      "values": [True, False]
+    },
     "data__method_name": {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "spam", "churn", "credit", "shopping", "nomao", "cpu", "wine"]
+      "values": ["electricity",
+                 "covertype",
+                 "poker",
+                 "pol",
+                 "house_16H",
+                 "kdd_ipums_la_97-small",
+                 "MagicTelescope",
+                 "bank-marketing",
+                 "phoneme",
+                 "MiniBooNE",
+                 "Higgs",
+                 "eye_movements",
+                 "jannis",
+                 "credit",
+                 "california",
+                 "wine"]
     },
     "n_iter": {
-      "value": 1,
+      "value": "auto",
     },
       "transform__0__method_name": {
           "value": "add_uninformative_features"
       },
       "transform__0__multiplier": {
           "values": [1., 1.5, 2],
-      },
+      }
   }
 }
 

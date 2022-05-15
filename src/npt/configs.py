@@ -195,7 +195,7 @@ def build_parser():
         help='The proportion of total steps over which we warmup.'
              'If this value is set to -1, we warmup for a fixed number of '
              'steps. Literature such as Evolved Transformer (So et al. 2019) '
-             'warms up for 10K fixed steps, and decays for the rest. Can '
+             'warms up for medium fixed steps, and decays for the rest. Can '
              'also be used in certain situations to determine tradeoff '
              'annealing, see exp_tradeoff_annealing_proportion below.')
     parser.add_argument(

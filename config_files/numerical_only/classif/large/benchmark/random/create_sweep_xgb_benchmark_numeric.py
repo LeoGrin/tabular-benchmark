@@ -75,23 +75,21 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "spam", "churn", "credit", "shopping", "nomao", "cpu", "wine"]
+      "values": ["covertype",
+                 "poker",
+                 "MiniBooNE",
+                 "Higgs",
+                 "jannis"]
     },
-    "max_train_samples": {
-      "value": 10000
-    },
-    "max_test_samples": {
-      "value": 30000
-    },
-    "train_set_prop": {
-      "value": 0.75
+    "n_iter": {
+      "value": "auto",
     },
     "regression": {
       "value": False
     },
-    "n_iter": {
-      "value": 1,
-    }
+    "max_train_samples": {
+      "value": 50000
+    },
   }
 }
 

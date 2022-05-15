@@ -1,6 +1,6 @@
 library(tidyverse)
 
-names <- c("electricity", "california", "covtype", "churn", "credit", "shopping", "nomao", "spam")
+names <- c("electricity", "california", "covtype", "churn", "credit", "shopping", "nomao", "spam", "cpu", "heloc")
 n_samples <- c(10000, 10000, 10000, 4074, 10000, 3816,8194,3624)
 n_features <- c(7, 8, 10, 6, 10, 10, 46, 57) #TODO
 

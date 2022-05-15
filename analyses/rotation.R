@@ -25,7 +25,7 @@ df_normalized <- df %>%
   mutate(model_name = case_when(
     model_name == "rf_c" ~ "RandomForest",
     model_name == "xgb_c" ~ "XGBoost",
-    model_name == "gbt_c" ~ "GradientBoostedTree",
+    model_name == "gbt_c" ~ "GradientBoostingTree",
     model_name == "ft_transformer" ~ "FT_Transformer",
     model_name == "rtdl_resnet" ~ "Resnet")) %>% 
   mutate(transform__1__method_name = if_else(transform__1__method_name == "no_rotation", "No rotation", "Random rotation")) %>% 
@@ -37,7 +37,7 @@ df_normalized <- df %>%
 
 # ITERS
 
-N_SHUFFLE <- 20
+N_SHUFFLE <- 10
 
 res <- tibble()
 
@@ -127,6 +127,18 @@ res_ <- res %>% #select(model_name, data__keyword, log_cum_time_factor,log_cum_t
             max_test_score = mean(mean_test_score, na.rm=T) + 2 * sd(mean_test_score, na.rm=T) / sqrt(count),
             min_test_score = mean(mean_test_score, na.rm=T) - 2 * sd(mean_test_score, na.rm=T) / sqrt(count),
             mean_test_score = mean(mean_test_score, na.rm=T))
+
+
+res %>% 
+  filter(random_rank == 5) %>%
+  mutate(model_name = fct_relevel(model_name, c("RandomForest", "GradientBoostingTree", "FT_Transformer"))) %>%
+  ggplot() +
+  geom_boxplot(aes(x = model_name, y =mean_test_score, fill=transform__1__method_name)) +
+  xlab("") +
+  ylab("Normalized test score of best model \n (on valid set) after 5 random search iterations") +
+  labs(fill = "") +
+  theme_minimal(base_size=22)
+
 
 ggplot() +
   #geom_hline(aes(yintercept=mean_test_score, color=model_name), data=res_ %>% filter(random_rank == 0), linetype="dotted", size=1.5) +

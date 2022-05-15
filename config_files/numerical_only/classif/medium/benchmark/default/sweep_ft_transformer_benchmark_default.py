@@ -3,68 +3,85 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "mlp_benchmark_numeric",
+  "name" : "ft_transformer_benchmark_numeric",
   "project": "thesis",
-  "method" : "random",
+  "method" : "grid",
   "metric": {
     "name": "mean_test_score",
     "goal": "maximize"
   },
-  "controller": {
-    "type": "local",
-  },
   "parameters" : {
-    "log_training": {
+     "log_training": {
       "value": True
     },
     "model__device": {
-      "value": "cpu"
+      "value": "cuda"
     },
     "model_type": {
       "value": "skorch"
     },
     "model_name": {
-      "value": "rtdl_mlp"
+      "value": "ft_transformer"
+    },
+    "model__use_checkpoints": {
+      "value": False
     },
     "model__optimizer": {
       "value": "adamw"
     },
     "model__lr_scheduler": {
-      "values": [True, False]
+      "value": False
     },
     "model__batch_size": {
-      "values": [256, 512, 1024]
+      "value": 512
     },
     "model__max_epochs": {
       "value": 300
     },
+    "model__module__activation": {
+      "value": "reglu"
+    },
+    "model__module__token_bias": {
+      "value": True
+    },
+    "model__module__prenormalization": {
+      "value": True
+    },
+    "model__module__kv_compression": {
+      "value": True
+    },
+    "model__module__kv_compression_sharing": {
+      "value": "headwise"
+    },
+    "model__module__initialization": {
+      "value": "kaiming"
+    },
     "model__module__n_layers": {
-      "distribution": "q_uniform",
-      "min": 1,
-      "max": 8
+      "value": 3
     },
-    "model__module__d_layers": {
-      "distribution": "q_uniform",
-      "min": 16,
-      "max": 1024
+    "model__module__n_heads": {
+      "value": 8,
     },
-    "model__module__dropout": {
-      "value": 0.0,
+    "model__module__d_ffn_factor": {
+      "value": 4./3
+    },
+    "model__module__ffn_dropout": {
+      "value": 0.1
+    },
+    "model__module__attention_dropout": {
+      "value": 0.2
+    },
+    "model__module__residual_dropout": {
+      "value": 0.0
     },
     "model__lr": {
-      "distribution": "log_uniform_values",
-      "min": 1e-5,
-      "max": 1e-2
+      "value": 1e-4,
     },
-    #  "model__optimizer__weight_decay": {
-    #   "distribution": "log_uniform_values",
-    #   "min": 1e-8,
-    #   "max": 1e-3
-    # },
-    "model__module__d_embedding": {
-      "distribution": "q_uniform",
-      "min": 64,
-      "max": 512
+     "model__optimizer__weight_decay": {
+      "value": 1e-5,
+    },
+    "d_token": {
+      "value": 192
     },
     "data__method_name": {
       "value": "real_data"
@@ -95,7 +112,13 @@ sweep_config = {
     },
     "n_iter": {
       "value": "auto",
-    }
+    },
+    "regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 

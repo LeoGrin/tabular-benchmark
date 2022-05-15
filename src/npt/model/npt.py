@@ -20,12 +20,18 @@ class InputShapeSetterNPT(skorch.callbacks.Callback):
         self.regression = regression
         self.batch_size = batch_size
     def on_train_begin(self, net, X, y):
+        print(X.shape)
         metadata = {
-            "num_features":list(range(X.shape[1])),
+            "input_feature_dims":[2 for _ in range(X.shape[1])], #TODO check
             "cat_features":[], #FIXME
-            "d_out":2 if self.regression == False else 1} #FIXME
+            "num_features":list(range(X.shape[1]))} #FIXME
         net.set_params(module__metadata=metadata,
                        criterion_metatdata=metadata)
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 
 class NPTModel(nn.Module):
@@ -64,10 +70,14 @@ class NPTModel(nn.Module):
     `self.out_embedding()`, which applies a learned linear embedding to
     each column `D` separately.
     """
-    def __init__(self, stacking_depth, dim_hidden, num_heads, image_n_patches,
-                 feature_type_embedding, feature_index_embedding, hidden_dropout_prob,
-                 embedding_layer_norm, layer_norm_eps, model_bert_augmentation, exp_gradient_clipping,
-                 metadata, device=None):
+    def __init__(self, metadata, stacking_depth=8, dim_hidden=64, image_n_patches=False,
+                 feature_type_embedding=True, feature_index_embedding=True, model_hidden_dropout_prob=0.1,
+                 embedding_layer_norm=True, model_layer_norm_eps=1e-12, model_bert_augmentation=True, exp_gradient_clipping=1.,
+                 model_hybrid_debug=False, model_att_score_dropout_prob=0.1,
+                 model_mix_heads=True, model_num_heads=8, model_sep_res_embed=True,
+                 model_att_block_layer_norm=True, model_rff_depth=1, model_att_score_norm="softmax",
+                 model_pre_layer_norm=True, viz_att_maps=False, model_ablate_rff=False, #check last one
+                 device=None):
         """Initialise NPTModel.
 
         Args:
@@ -92,29 +102,45 @@ class NPTModel(nn.Module):
         #     self.c = Args(c)
 
         # * Main model configuration *
-        self.device = device
+
+        self.c = AttrDict()
+        self.c["device"] = device
+        self.c["model_mix_heads"] = model_mix_heads
+        self.c["model_sep_res_embed"] = model_sep_res_embed
+        self.c["model_att_block_layer_norm"] = model_att_block_layer_norm
+        self.c["model_rff_depth"] = model_rff_depth
+        self.c["model_att_score_norm"] = model_att_score_norm
+        self.c["model_pre_layer_norm"] = model_pre_layer_norm
+        self.c["viz_att_maps"] = viz_att_maps
+        self.c["model_ablate_rff"] = model_ablate_rff
+        self.c["model_layer_norm_eps"] = model_layer_norm_eps
+        self.c["model_hidden_dropout_prob"] = model_hidden_dropout_prob
+        self.c["model_att_score_dropout_prob"] = model_att_score_dropout_prob
 
         # * Dataset Metadata *
+        print(metadata)
         input_feature_dims = metadata['input_feature_dims']
         cat_features = metadata['cat_features']
         num_features = metadata['num_features']
 
         # * Dimensionality Configs *
         # how many attention blocks are stacked after each other
-        self.stacking_depth = stacking_depth
+        self.c["stacking_depth"] = stacking_depth
 
         # the shared embedding dimension of each attribute is given by
-        self.dim_hidden = dim_hidden
+        self.c["dim_hidden"] = dim_hidden
 
         # we use num_heads attention heads
-        self.num_heads = num_heads
+        self.c["model_num_heads"] = model_num_heads
+
+        self.c["model_hybrid_debug"] = model_hybrid_debug
 
         # how many feature columns are in the input data
         # apply image patching if specified
         if image_n_patches:
             extra_args = {}
 
-            # num_input_features = n_patches per image
+            #num_input_features = n_patches per image
             self.image_patcher = IMAGE_PATCHER_SETTING_TO_CLASS[
                 image_n_patches](
                 input_feature_dims=input_feature_dims,
@@ -128,10 +154,10 @@ class NPTModel(nn.Module):
             self.num_input_features = len(input_feature_dims)
 
         # whether or not to add a feature type embedding
-        self.use_feature_type_embedding = feature_type_embedding
+        self.c["use_feature_type_embedding"] = feature_type_embedding
 
         # whether or not to add a feature index embedding
-        self.use_feature_index_embedding = feature_index_embedding
+        self.c["use_feature_index_embedding"] = feature_index_embedding
 
         # *** Build Model ***
 
@@ -147,8 +173,8 @@ class NPTModel(nn.Module):
 
         # Hidden dropout is applied for in- and out-embedding
         self.embedding_dropout = (
-            nn.Dropout(p=hidden_dropout_prob)
-            if hidden_dropout_prob else None)
+            nn.Dropout(p=model_hidden_dropout_prob)
+            if model_hidden_dropout_prob else None)
 
         # LayerNorm applied after embedding, before dropout
         if embedding_layer_norm and device is None:
@@ -158,9 +184,9 @@ class NPTModel(nn.Module):
         elif embedding_layer_norm:
             # we batch over rows and columns
             # (i.e. just normalize over E)
-            layer_norm_dims = [self.dim_hidden]
+            layer_norm_dims = [self.c.dim_hidden]
             self.embedding_layer_norm = nn.LayerNorm(
-                layer_norm_dims, eps=layer_norm_eps)
+                layer_norm_dims, eps=model_layer_norm_eps)
         else:
             self.embedding_layer_norm = None
 
@@ -180,14 +206,14 @@ class NPTModel(nn.Module):
 
         if self.image_patcher is None:
             self.in_embedding = nn.ModuleList([
-                nn.Linear(dim_feature_encoding, self.dim_hidden)
+                nn.Linear(dim_feature_encoding, self.c.dim_hidden)
                 for dim_feature_encoding in input_feature_dims])
 
         # Feature Type Embedding
         # Optionally, we construct "feature type" embeddings -- i.e. we learn a
         # representation based on whether the feature is either
         # (i) numerical or (ii) categorical.
-        if self.use_feature_type_embedding:
+        if self.c.use_feature_type_embedding:
             if cat_features is None or num_features is None:
                 raise Exception(
                     'Must provide cat_feature and num_feature indices at '
@@ -206,33 +232,33 @@ class NPTModel(nn.Module):
                 print(
                     'All features are either categorical or numerical. '
                     'Not going to bother doing feature type embeddings.')
-                self.feature_type_embedding = None
+                self.c.feature_type_embedding = None
             else:
-                self.feature_types = torch_cast_to_dtype(torch.empty(
+                self.c.feature_types = torch_cast_to_dtype(torch.empty(
                     self.num_input_features, device=device), 'long')
 
                 for feature_index in range(self.num_input_features):
                     if feature_index in num_features:
-                        self.feature_types[feature_index] = 0
+                        self.c.feature_types[feature_index] = 0
                     elif feature_index in cat_features:
-                        self.feature_types[feature_index] = 1
+                        self.c.feature_types[feature_index] = 1
                     else:
                         raise Exception
 
-                self.feature_type_embedding = nn.Embedding(
-                    2, self.dim_hidden)
+                self.c.feature_type_embedding = nn.Embedding(
+                    2, self.c.dim_hidden)
 
             print(
                 f'Using feature type embedding (unique embedding for '
                 f'categorical and numerical features).')
         else:
-            self.feature_type_embedding = None
+            self.c.feature_type_embedding = None
 
         # Feature Index Embedding
         # Optionally, learn a representation based on the index of the column.
         # Allows us to explicitly encode column identity, as opposed to
         # producing this indirectly through the per-column feature embeddings.
-        if self.use_feature_index_embedding:
+        if self.c.use_feature_index_embedding:
             if mp_distributed and device is None:
                 raise Exception(
                     'Must provide device to NPT initialization: in '
@@ -242,14 +268,14 @@ class NPTModel(nn.Module):
             self.feature_indices = torch_cast_to_dtype(
                 torch.arange(self.num_input_features, device=device), 'long')
 
-            self.feature_index_embedding = nn.Embedding(
-                self.num_input_features, self.dim_hidden)
+            self.c.feature_index_embedding = nn.Embedding(
+                self.num_input_features, self.c.dim_hidden)
 
             print(
                 f'Using feature index embedding (unique embedding for '
                 f'each column).')
         else:
-            self.feature_index_embedding = None
+            self.c.feature_index_embedding = None
 
         # Out embedding.
         # The outputs of the AttentionBlocks have shape (N, D, E)
@@ -268,7 +294,7 @@ class NPTModel(nn.Module):
 
             self.out_embedding = nn.ModuleList([
                 nn.Linear(
-                    self.dim_hidden,
+                    self.c.dim_hidden,
                     get_dim_feature_out(dim_feature_encoding))
                 for dim_feature_encoding in input_feature_dims])
 
@@ -293,11 +319,11 @@ class NPTModel(nn.Module):
         attention and inputting them to row attention. Therefore, it requires
         reshaping between each block, splitting, and concatenation.
         """
-        if self.stacking_depth < 2:
+        if self.c.stacking_depth < 2:
             raise ValueError(
                 f'Stacking depth {self.stacking_depth} invalid.'
                 f'Minimum stacking depth is 2.')
-        if self.stacking_depth % 2 != 0:
+        if self.c.stacking_depth % 2 != 0:
             raise ValueError('Please provide an even stacking depth.')
 
         print('Building NPT.')
@@ -337,11 +363,11 @@ class NPTModel(nn.Module):
 
         layer_index = 0
 
-        while layer_index < self.stacking_depth:
+        while layer_index < self.c.stacking_depth:
             if layer_index % 2 == 1:
                 # Input is already in nested shape (N, D, E)
                 stack.append(next(AttentionBlocks)(
-                    self.dim_hidden, self.dim_hidden, self.dim_hidden,
+                    self.c.dim_hidden, self.c.dim_hidden, self.c.dim_hidden,
                     **next(att_args)))
 
                 # Reshape to flattened representation
@@ -357,8 +383,8 @@ class NPTModel(nn.Module):
                 # whenever we attend over the instances,
                 # we consider dim_hidden = self.c.dim_hidden * D
                 stack.append(next(AttentionBlocks)(
-                    self.dim_hidden * D, self.dim_hidden * D,
-                    self.dim_hidden * D,
+                    self.c.dim_hidden * D, self.c.dim_hidden * D,
+                    self.c.dim_hidden * D,
                     **next(att_args)))
 
                 # Reshape to nested representation
@@ -382,6 +408,7 @@ class NPTModel(nn.Module):
         return enc
 
     def forward(self, X_ragged, X_labels=None, eval_model=None):
+        print("X_ragged.shape:", X_ragged.shape)
         if self.image_patcher is not None:
             X = self.image_patcher.encode(X_ragged)
             in_dims = [X.size(0), X.size(1), -1]
@@ -393,9 +420,9 @@ class NPTModel(nn.Module):
             X = torch.stack(X, 1)
 
         # Compute feature type (cat vs numerical) embeddings, and add them
-        if self.feature_type_embedding is not None:
+        if self.c.feature_type_embedding is not None:
             feature_type_embeddings = self.feature_type_embedding(
-                self.feature_types)
+                self.c.feature_types)
 
             # Add a batch dimension (the rows)
             feature_type_embeddings = torch.unsqueeze(
@@ -409,7 +436,7 @@ class NPTModel(nn.Module):
             X = X + feature_type_embeddings
 
         # Compute feature index embeddings, and add them
-        if self.feature_index_embedding is not None:
+        if self.c.feature_index_embedding is not None:
             feature_index_embeddings = self.feature_index_embedding(
                 self.feature_indices)
 

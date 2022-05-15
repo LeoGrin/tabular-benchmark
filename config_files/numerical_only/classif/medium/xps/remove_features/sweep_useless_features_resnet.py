@@ -3,7 +3,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "ft_transformer_add_features",
+  "name" : "resnet_benchmark_numeric",
   "project": "thesis",
   "method" : "random",
   "metric": {
@@ -21,7 +21,10 @@ sweep_config = {
       "value": "skorch"
     },
     "model_name": {
-      "value": "ft_transformer"
+      "value": "rtdl_resnet"
+    },
+    "model__use_checkpoints": {
+      "value": True
     },
     "model__optimizer": {
       "value": "adamw"
@@ -38,40 +41,25 @@ sweep_config = {
     "model__module__activation": {
       "value": "reglu"
     },
-    "model__module__token_bias": {
-      "value": True
-    },
-    "model__module__prenormalization": {
-      "value": True
-    },
-    "model__module__kv_compression": {
-      "values": [True, False]
-    },
-    "model__module__kv_compression_sharing": {
-      "values": ["headwise", 'key-value']
-    },
-    "model__module__initialization": {
-      "value": "kaiming"
+    "model__module__normalization": {
+      "values": ["batchnorm", "layernorm"]
     },
     "model__module__n_layers": {
       "distribution": "q_uniform",
       "min": 1,
-      "max": 6
+      "max": 16
     },
-    "model__module__n_heads": {
-      "value": 8,
+    "model__module__d": {
+      "distribution": "q_uniform",
+      "min": 64,
+      "max": 1024
     },
-    "model__module__d_ffn_factor": {
+    "model__module__d_hidden_factor": {
       "distribution": "uniform",
-      "min": 2./3,
-      "max": 8./3
+      "min": 1,
+      "max": 4
     },
-    "model__module__ffn_dropout": {
-      "distribution": "uniform",
-      "min": 0,
-      "max": 0.5
-    },
-    "model__module__attention_dropout": {
+    "model__module__hidden_dropout": {
       "distribution": "uniform",
       "min": 0.0,
       "max": 0.5
@@ -84,14 +72,14 @@ sweep_config = {
     "model__lr": {
       "distribution": "log_uniform_values",
       "min": 1e-5,
-      "max": 1e-3
+      "max": 1e-2
     },
      "model__optimizer__weight_decay": {
       "distribution": "log_uniform_values",
-      "min": 1e-6,
+      "min": 1e-8,
       "max": 1e-3
     },
-    "d_token": {
+    "model__module__d_embedding": {
       "distribution": "q_uniform",
       "min": 64,
       "max": 512
@@ -100,13 +88,31 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["heloc", "electricity", "california", "covtype", "churn", "wine", "cpu"]
+      "values": ["electricity",
+                 "covertype",
+                 "poker",
+                 "pol",
+                 "house_16H",
+                 "kdd_ipums_la_97-small",
+                 "MagicTelescope",
+                 "bank-marketing",
+                 "phoneme",
+                 "MiniBooNE",
+                 "Higgs",
+                 "eye_movements",
+                 "jannis",
+                 "credit",
+                 "california",
+                 "wine"]
     },
     "transform__0__method_name": {
-      "value": "add_uninformative_features"
+      "value": "remove_features_rf"
     },
-    "transform__0__multiplier": {
-      "values": [1., 1.5, 2],
+    "transform__0__num_features_to_remove": {
+      "values": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+    },
+    "transform__0__model_to_use": {
+      "values": ["rf_c"],
     },
     "transform__1__method_name": {
       "value": "gaussienize"
@@ -115,7 +121,10 @@ sweep_config = {
       "value": "quantile",
     },
     "n_iter": {
-      "value": 1,
+      "value": "auto",
+    },
+    "regression": {
+      "value": False
     }
   }
 }

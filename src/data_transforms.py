@@ -5,7 +5,8 @@ from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
-
+import utils.keyword_to_function_conversion
+from scipy.stats import multivariate_normal
 
 def marginal_transformations(x, y, function, vectorized=False, rng=None):
     """
@@ -122,26 +123,33 @@ def cluster_1d(x, y, type="kmeans", rng=None, **kwargs):
     return x, y
 
 
-def remove_useless_features(x_train, x_val, x_test, y_train, y_val, y_test, max_rel_decrease=0.01, rng=None):
+def remove_useless_features(x_train, x_val, x_test, y_train, y_val, y_test, max_rel_decrease=0.01, n_iter=3, rng=None):
     #TODO test
     print("Removing useless_features...")
     rf = RandomForestClassifier(random_state=rng) # used to compute features importance
     gbt = GradientBoostingClassifier(random_state=rng) # used to compute accuracy decrease
     rf.fit(x_train, y_train)
     sorted_features = np.argsort(rf.feature_importances_)
-    x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train, y_train, test_size=0.5, random_state=rng)
-    gbt.fit(x_train_bis, y_train_bis)
-    score_full = gbt.score(x_test_bis, y_test_bis)
+    score_full_list = []
+    for i in range(n_iter):
+        x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train, y_train, test_size=0.5, random_state=rng)
+        gbt.fit(x_train_bis, y_train_bis)
+        score_full = gbt.score(x_test_bis, y_test_bis)
+        score_full_list.append(score_full)
     i = 0
     features_to_remove = []
     for feature in sorted_features[:-1]: # in order of increasing importance
         features_to_remove.append(feature)
         i += 1
         x_train_new = np.delete(x_train, features_to_remove, axis=1)
-        x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train_new, y_train, test_size=0.5, random_state=rng)
-        gbt.fit(x_train_bis, y_train_bis)
-        score_new = gbt.score(x_test_bis, y_test_bis)
-        if (score_full - score_new) / score_full > max_rel_decrease:
+        score_new_list = []
+        for j in range(n_iter):
+            x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train_new, y_train, test_size=0.5, random_state=rng)
+            gbt.fit(x_train_bis, y_train_bis)
+            score_new = gbt.score(x_test_bis, y_test_bis)
+            score_new_list.append(score_new)
+
+        if (np.mean(score_full) - np.mean(score_new)) / np.mean(score_full) > max_rel_decrease:
             features_to_remove.pop()
             break
 
@@ -153,7 +161,7 @@ def remove_useless_features(x_train, x_val, x_test, y_train, y_val, y_test, max_
 
 
 
-def select_features_rf(x_train, x_test, y_train, y_test, rng, num_features=None, importance_cutoff=None,
+def select_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_features=None, importance_cutoff=None,
                        return_features=False):
     assert (num_features is None) + (importance_cutoff is None) == 1  # xor
     if isinstance(num_features, float):
@@ -164,30 +172,36 @@ def select_features_rf(x_train, x_test, y_train, y_test, rng, num_features=None,
         num_features = max(1, np.sum(rf.feature_importances_ > importance_cutoff)) # At least one feature
 
     x_train = x_train[:, np.argsort(rf.feature_importances_)[-num_features:]]
+    x_val = x_val[:, np.argsort(rf.feature_importances_)[-num_features:]]
     x_test = x_test[:, np.argsort(rf.feature_importances_)[-num_features:]]
     if not return_features:
-        return x_train, x_test, y_train, y_test
+        return x_train, x_val, x_test, y_train, y_val, y_test
     else:
-        return x_train, x_test, y_train, y_test, np.argsort(rf.feature_importances_)[-num_features:]
+        return x_train, x_val, x_test, y_train, y_val, y_test, np.argsort(rf.feature_importances_)[-num_features:]
 
-def remove_features_rf(x_train, x_test, y_train, y_test, rng, num_features_to_remove=None, importance_cutoff=None,
-                       return_features=False):
+
+def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_features_to_remove=None, importance_cutoff=None,
+                       keep_removed_features=False,
+                       return_features=False, model_to_use="rf_c"):
     assert (num_features_to_remove is None) + (importance_cutoff is None) == 1  # xor
     assert x_train.shape[1] == x_test.shape[1]
     if isinstance(num_features_to_remove, float):
         num_features_to_remove = int(num_features_to_remove * x_train.shape[1])
-    rf = RandomForestClassifier(random_state=rng)
-    rf.fit(x_train, y_train)
+    model = utils.keyword_to_function_conversion.convert_keyword_to_function(model_to_use)(random_state=rng)
+    model.fit(x_train, y_train)
     if importance_cutoff is not None:
-        num_features_to_remove = min(x_train.shape[1] - 1, np.sum(rf.feature_importances_ < importance_cutoff)) # At least one feature
-    features_to_keep = np.argsort(rf.feature_importances_)[- (x_train.shape[1] - num_features_to_remove):]
+        num_features_to_remove = min(x_train.shape[1] - 1, np.sum(model.feature_importances_ < importance_cutoff)) # At least one feature
+    features_to_keep = np.argsort(model.feature_importances_)[- (x_train.shape[1] - num_features_to_remove):]
+    if keep_removed_features: # for experiment purposes, keep the features we should have removed
+        features_to_keep = [i for i in range(x_train.shape[1]) if i not in features_to_keep]
     x_train = x_train[:, features_to_keep]
+    x_val = x_val[:, features_to_keep]
     x_test = x_test[:, features_to_keep]
     assert x_train.shape[1] == x_test.shape[1]
     if not return_features:
-        return x_train, x_test, y_train, y_test
+        return x_train, x_val, x_test, y_train, y_val, y_test
     else:
-        return x_train, x_test, y_train, y_test, np.argsort(rf.feature_importances_)[-(x_train.shape[1] - num_features_to_remove):]
+        return x_train, x_val, x_test, y_train, y_val, y_test, np.argsort(model.feature_importances_)[-(x_train.shape[1] - num_features_to_remove):]
 
 
 def tree_quantile_transformer(x_train, x_test, y_train, y_test, regression=False, normalize=True, rng=None):
@@ -273,6 +287,22 @@ def limit_size(x, y, n_samples, rng):
     indices = list(range(len(y)))
     chosen_indices = rng.choice(indices, n_samples, replace=False)
     return x[chosen_indices], y[chosen_indices]
+
+
+def remove_high_frequency_from_train(x_train, x_val, x_test, y_train, y_val, y_test, rng=None, cov_mult=0.001, classif=True):
+    if cov_mult == 0:
+        return x_train, x_val, x_test, y_train, y_val, y_test
+    y_train_new = np.zeros(y_train.shape)
+    empirical_cov = np.cov(x_train, rowvar=False)
+    empirical_cov = cov_mult * empirical_cov
+    for i in range(x_train.shape[0]):
+        gaussian_kernel = multivariate_normal(mean=x_train[i], cov= empirical_cov)
+        gaussian_densities = gaussian_kernel.pdf(x_train)
+        y_train_new[i] = np.dot(y_train, gaussian_densities) / np.sum(gaussian_densities)
+    if classif:
+        y_train_new = (y_train_new > 0.5).astype(int)
+        print(np.unique(y_train_new, return_counts=True))
+    return x_train, x_val, x_test, y_train_new, y_val, y_test
 
 
 if __name__ == """__main__""":

@@ -552,10 +552,8 @@ def config(keyword):
                                       "balanced": True,
                                       "keyword": ["heloc", "electricity", "california", "covtype", "spam", "churn", "credit", "shopping", "nomao", "cpu", "wine"],
                                       "max_num_samples": [10000]}]
-        target_generation_functions = [{"method": None,
-                                        "method_name": "no_transform"}]
-        data_transforms_functions = [[{"method": None,
-                                        "method_name": "no_transform"}]]
+        target_generation_functions = [{"method_name": "no_transform"}]
+        data_transforms_functions = [[{"method_name": "no_transform"}]]
 
     elif keyword == "useless_features":
         model_generation_functions = [{"method": RandomForestClassifier,
@@ -1103,7 +1101,7 @@ def config(keyword):
                                        "es_patience": [50],
                                        "lr_patience": [10],
                                        "method_name":"mlp",
-                                       "device": "cuda"}
+                                       "device": "cpu"}
                                       ]
         # data_generation_functions = [{"method": generate_uniform_data,
         #                               "method_name": "uniform",
@@ -1282,23 +1280,20 @@ def config(keyword):
         data_transforms_functions = [[{"method": balance, "method_name": "balance"}]]
 
     elif keyword == "resnet":
-        model_generation_functions = [{"method": create_mlp_skorch,
-                                       "n_layers": [1, 2, 3],
+        model_generation_functions = [{"n_layers": [1, 2, 3],
                                        "hidden_size":[256, 512],
                                        "lr": [0.01],
                                        "module__resnet": [True],
                                        "batch_size":[128],
                                        "method_name":"mlp",
-                                       "device": "cuda"}]
-        data_generation_functions = [{"method": import_real_data,
-                                      "method_name": "real_data",
+                                       "device": "cpu"}]
+        data_generation_functions = [{"method_name": "real_data",
                                       "balanced": True,
                                       "keyword": ["heloc", "electricity", "california", "covtype", "spam", "churn", "credit", "shopping", "nomao", "cpu", "wine"],
                                       "max_num_samples": [10000]}]
-        target_generation_functions = [{"method": None,
+        target_generation_functions = [{
                                         "method_name": "no_transform"}]
-        data_transforms_functions = [[{"method": gaussienize,
-                                      "method_name": "gaussienize",
+        data_transforms_functions = [[{"method_name": "gaussienize",
                                       "type": ["quantile"]},
                                       {"method":None, "method_name":"no_transform"}]]
 

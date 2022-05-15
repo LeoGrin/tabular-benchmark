@@ -1,17 +1,20 @@
 library(tidyverse)
 
 
-df <- read_csv("results/sweeps/remove_features/resnet_remove_features.csv") %>% 
-  bind_rows(read_csv("results/sweeps/remove_features/ft_transformer_remove_features.csv")) %>% 
-  bind_rows(read_csv("results/sweeps/sweep_resnet.csv") %>% 
-              mutate(transform__0__max_rel_decrease = 0) %>% 
-              slice_head(n=1000)) %>% 
-  bind_rows(read_csv("results/sweeps/sweep_ft_transformer.csv") %>% 
-              mutate(transform__0__max_rel_decrease = 0) %>% 
-              slice_head(n=1000)) %>% 
-  mutate(transform__0__max_rel_decrease = as_factor(transform__0__max_rel_decrease)) %>% 
-  filter(data__keyword %in% c("heloc", "electricity", "california", "covtype", "churn", "cpu", "wine"))
+#df <- read_csv("results/sweeps/remove_features/resnet_remove_features.csv") %>% 
+#  bind_rows(read_csv("results/sweeps/remove_features/ft_transformer_remove_features.csv")) %>% 
+##  bind_rows(read_csv("results/sweeps/sweep_resnet.csv") %>% 
+  #             mutate(transform__0__max_rel_decrease = 0) %>% 
+  #             slice_head(n=1000)) %>% 
+  # bind_rows(read_csv("results/sweeps/sweep_ft_transformer.csv") %>% 
+  #             mutate(transform__0__max_rel_decrease = 0) %>% 
+  #             slice_head(n=1000)) %>% 
+  # mutate(transform__0__max_rel_decrease = as_factor(transform__0__max_rel_decrease)) %>% 
+  # filter(data__keyword %in% c("heloc", "electricity", "california", "covtype", "churn", "cpu", "wine"))
 
+
+df <- read_csv("results/sweeps/sweeps_classif/remove_useless/rf_useless.csv") %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/remove_useless/gpt_useless.csv"))
 
 
 #################

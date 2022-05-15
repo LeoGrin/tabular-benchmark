@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import plot_decision_boudaries
+from src.plot_utils import plot_decision_boudaries
 import pickle
 import numpy as np
 from utils import create_mlp_skorch

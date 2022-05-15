@@ -3,7 +3,7 @@ import numpy as np
 import numpy.random
 import pandas as pd
 from sklearn.datasets import make_spd_matrix, make_sparse_spd_matrix
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, QuantileTransformer
 import openml
 import pickle
 
@@ -65,13 +65,9 @@ def import_open_ml_data(openml_task_id=None, path_to_dir="openML_data", max_num_
 def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num_samples=None, regression=False, dim=[],
                      rng=None):
     if regression:
-        with open("{}/numerical_only/regression/full/data_{}".format(path_to_dir, keyword), "rb") as f:
+        with open("{}/numerical_only/regression/data_{}".format(path_to_dir, keyword), "rb") as f:
             X, y = pickle.load(f)
-            if len(dim) > 0:
-                print("selecting dims")
-                with open("{}/numerical_only/names_{}".format(path_to_dir, keyword), "rb") as g:
-                    names = pickle.load(g)
-                    X = X[:, [names.index(i) for i in dim]]
+            y = QuantileTransformer(output_distribution="normal").fit_transform(y.reshape(-1, 1)).flatten() #TODO do it before choosing
     else:
         if balanced:
             with open("{}/numerical_only/balanced/data_{}".format(path_to_dir, keyword), "rb") as f:
