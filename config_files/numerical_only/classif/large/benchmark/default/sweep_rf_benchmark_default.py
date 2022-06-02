@@ -21,29 +21,21 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["electricity",
-                 "covertype",
+      "values": ["covertype",
                  "poker",
-                 "pol",
-                 "house_16H",
-                 "kdd_ipums_la_97-small",
-                 "MagicTelescope",
-                 "bank-marketing",
-                 "phoneme",
                  "MiniBooNE",
                  "Higgs",
-                 "eye_movements",
-                 "jannis",
-                 "credit",
-                 "california",
-                 "wine"]
+                 "jannis"]
     },
     "n_iter": {
       "value": "auto",
     },
     "regression": {
-        "value": False
-    }
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 50000
+    },
   }
 }
 

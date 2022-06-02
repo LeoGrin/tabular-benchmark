@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "resnet_benchmark_numeric",
-  "project": "thesis",
+  "name" : "resnet_benchmark_numeric_checkpoint",
+  "project": "thesis-2",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
@@ -22,6 +22,9 @@ sweep_config = {
     },
     "model_name": {
       "value": "rtdl_resnet"
+    },
+    "model__use_checkpoints": {
+      "value": True
     },
     "model__optimizer": {
       "value": "adamw"
@@ -85,19 +88,19 @@ sweep_config = {
       "value": "real_data"
     },
     "data__keyword": {
-      "values": ["electricity",
-                 "covertype",
-                 "poker",
-                 "pol",
-                 "house_16H",
-                 "kdd_ipums_la_97-small",
-                 "MagicTelescope",
-                 "bank-marketing",
-                 "phoneme",
-                 "MiniBooNE",
-                 "Higgs",
-                 "eye_movements",
-                 "jannis",
+      "values": [#"electricity",
+                 #"covertype",
+                 #"poker",
+                 #"pol",
+                 #"house_16H",
+                 #"kdd_ipums_la_97-small",
+                 #"MagicTelescope",
+                 #"bank-marketing",
+                 #"phoneme",
+                 #"MiniBooNE",
+                 #"Higgs",
+                 #"eye_movements",
+                 #"jannis",
                  "credit",
                  "california",
                  "wine"]
@@ -110,9 +113,18 @@ sweep_config = {
     },
     "n_iter": {
       "value": "auto",
-    }
+    },
+    "regression": {
+          "value": False
+    },
+    "data__regression": {
+          "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-2")

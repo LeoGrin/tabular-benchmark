@@ -9,58 +9,139 @@ df <- read_csv("results/sweeps/sweeps_classif/high_frequency/gbt_high_frequency.
   bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/rf_hf_2.csv")) %>% 
   bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/gbt_hf_2.csv")) %>% 
   bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/resnet_hf_2.csv")) %>% 
-  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/ft_transformer_hf_2.csv"))
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/ft_transformer_hf_2.csv")) %>% 
+  mutate(hp = "random") 
   
-
 df <- read_csv("results/sweeps/sweeps_classif/high_frequency/gbt_hf_full.csv") %>% 
   bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/rf_hf_full.csv")) %>% 
   bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/resnet_hf_full.csv")) %>% 
-  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/ft_transformer_hf_full.csv"))
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/ft_transformer_hf_full.csv")) %>% 
+  mutate(hp = "random")
 
-df <- read_csv("results/sweeps/sweeps_classif/high_frequency/hf.csv")
+df <- read_csv("results/sweeps/sweeps_classif/high_frequency/hf.csv") %>% 
+  mutate(hp="random") %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/hf_default.csv") %>%  mutate(hp="default"))
 
+df <- read_csv("results/sweeps/sweeps_classif/high_frequency/hf_test_2.csv") %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/hf_gbt_bank.csv")) %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/ft_hf.csv")) %>%
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/resnet_hf.csv")) %>%
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/rf_hf.csv")) %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/gpt_hf_005.csv")) %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/resnet_hf_005.csv")) %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/high_frequency/ft_hf_005.csv")) %>% 
+  mutate(hp = "random")
 
 res_datasets <- 
 df %>% 
-filter(transform__1__cov_mult %in% c(0, 0.01, 0.1, 0.5)) %>% 
+#filter(transform__2__cov_mult %in% c(0, 0.001, 0.01, 0.1, 0.5)) %>% 
 filter(!is.na(mean_time)) %>% 
 rename() %>% 
-normalize(variable=transform__1__cov_mult, normalization_type = "quantile", quantile = 0.05) %>% 
-random_search(variable =transform__1__cov_mult, n_shuffles=40)
+normalize(variable=transform__2__cov_mult, normalization_type = "quantile", quantile = 0.1) %>% 
+random_search(variable =transform__2__cov_mult, n_shuffles=15, default_first = T)
   
 
 res_datasets %>% 
   filter(random_rank == 100) %>%
-  #filter(model_name == "GradientBoostingTree") %>%
+  filter(model_name != "MLP") %>%
   filter(data__keyword != "poker", data__keyword != "jannis") %>% #, data__keyword %in% c("electricity", "california")) %>% 
   #filter(data__keyword == "wine") %>% 
-  group_by(model_name, data__keyword, transform__1__cov_mult) %>% 
+  group_by(model_name, data__keyword, transform__2__cov_mult) %>% 
   summarise(mean_test_score = mean(mean_test_score)) %>% 
-  mutate(transform__1__cov_mult = as_factor(transform__1__cov_mult)) %>% 
+  mutate(transform__2__cov_mult = as_factor(transform__2__cov_mult)) %>% 
   ungroup() %>% 
-  pivot_wider(names_from=transform__1__cov_mult, values_from=mean_test_score) %>% 
+  pivot_wider(names_from=transform__2__cov_mult, values_from=mean_test_score) %>% 
   mutate(diff = `0` - `0.1`) %>% 
   ggplot() +
-  geom_jitter(aes(x = model_name, y=diff, color=data__keyword), width=0.1, height=0)
+  #geom_jitter(aes(x = model_name, y=diff, color=data__keyword), width=0.1, height=0)
+  geom_text(aes(x = model_name, y=diff, label=data__keyword))
   #geom_boxplot(aes(x = model_name, y=diff, fill=model_name))
+
+
+library(RColorBrewer)
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+myColors <- gg_color_hue(6)
+names(myColors) <- c("GradientBoostingTree", "RandomForest", "XGBoost", "FT Transformer", "Resnet", "MLP")
+colScale <- list(scale_colour_manual(name = "grp",values = myColors),
+                 scale_fill_manual(name = "grp",values = myColors))
+
+
+
+
+res_datasets %>% 
+  filter(random_rank == 30) %>%
+  filter(model_name != "MLP") %>%
+  filter(data__keyword != "poker") %>% #, data__keyword %in% c("electricity", "california")) %>% 
+  #filter(data__keyword == "wine") %>% 
+  #group_by(model_name, data__keyword, transform__2__cov_mult) %>% 
+  #summarise(mean_test_score = mean(mean_test_score)) %>% 
+  filter(transform__2__cov_mult < 0.5) %>% 
+  mutate(transform__2__cov_mult = as_factor(transform__2__cov_mult)) %>% 
+  ungroup() %>% 
+ # pivot_wider(names_from=transform__1__cov_mult, values_from=mean_test_score) %>% 
+  ggplot() +
+  #geom_jitter(aes(x = model_name, y=diff, color=data__keyword), width=0.1, height=0)
+  geom_boxplot(aes(x = transform__2__cov_mult, y=mean_test_score, color=model_name)) + #, width=0.1, height=0) +
+  facet_wrap(~data__keyword, scales = "free") +
+  xlab("Magnitude of the gaussian blur") + 
+  ylab("Test accuracy of best model \n (on valid set) after 30 random \n search iterations") +
+  theme_minimal(base_size=22) +
+  colScale +
+  theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
+ #geom_boxplot(aes(x = model_name, y=diff, fill=model_name))
+
+ggsave("analyses/plots/high_frequencies_datasets.jpg", width=15, height=9)
+
+
+
+res_datasets %>% 
+  filter(random_rank == 60) %>%
+  filter(model_name != "MLP") %>%
+  filter(data__keyword != "poker") %>% #, data__keyword %in% c("electricity", "california")) %>% 
+  #filter(data__keyword == "wine") %>% 
+  #group_by(model_name, n_dataset, transform__2__cov_mult) %>% 
+  group_by(model_name, n_dataset, transform__2__cov_mult) %>% 
+  summarise(mean_test_score = mean(mean_test_score)) %>% 
+  filter(transform__2__cov_mult < 0.5) %>% 
+  mutate(transform__2__cov_mult = as_factor(transform__2__cov_mult)) %>% 
+  ungroup() %>% 
+  mutate(model_name = fct_relevel(as_factor(model_name), "GradientBoostingTree", "RandomForest", "FT Transformer", "Resnet"))%>%
+  # pivot_wider(names_from=transform__1__cov_mult, values_from=mean_test_score) %>% 
+  ggplot() +
+  #geom_jitter(aes(x = model_name, y=diff, color=data__keyword), width=0.1, height=0)
+  geom_boxplot(aes(x = transform__2__cov_mult, y=mean_test_score, color=model_name)) + #, width=0.1, height=0) +
+  #geom_dl(aes(label = model_name, x=transform__2__cov_mult, y=mean_test_score, color=model_name), method = list(dl.combine("smart.grid"), cex=1.3))  +
+  xlab(expression("Lengthscale of the Gaussian kernel smoother")) + 
+  ylab("Normalized test score of best model \n (on valid set) after 30 random search \n iterations, averaged across datasets") +
+  theme_minimal(base_size=22) +
+  colScale + 
+  theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
+  #facet_wrap(~data__keyword, scales = "free")
+
+ggsave("analyses/plots/high_frequencies.jpg", width=13, height=7.3)
+
+
   
 res_datasets %>% 
-  filter(random_rank == 20) %>%
+  filter(random_rank == 30) %>%
   #filter(model_name == "GradientBoostingTree") %>%
   filter(data__keyword != "poker", data__keyword != "jannis") %>% #, data__keyword %in% c("electricity", "california")) %>% 
   #filter(data__keyword == "wine") %>% 
-  group_by(model_name, data__keyword, transform__1__cov_mult) %>% 
+  group_by(model_name, data__keyword, transform__2__cov_mult) %>% 
   summarise(mean_test_score = mean(mean_test_score)) %>% 
-  mutate(transform__1__cov_mult = as_factor(transform__1__cov_mult)) %>% 
+  mutate(transform__2__cov_mult = as_factor(transform__2__cov_mult)) %>% 
   #mutate(transform__2__cov_mult = as_factor(100 * transform__2__cov_mult)) %>% 
   #mutate(transform__2__cov_mult = paste0(transform__2__cov_mult, "%")) %>% 
   #mutate(transform__2__cov_mult = as.character(transform__2__cov_mult)) %>% 
   #mutate(model_name = fct_relevel(as_factor(model_name), "GradientBoostingTree", "RandomForest", "FT_Transformer", "Resnet"))%>%
   mutate(model_name = factor(model_name, levels = c("GradientBoostingTree", "RandomForest", "FT Transformer", "Resnet"))) %>% 
   ggplot() +
-  geom_boxplot(aes(x = transform__1__cov_mult, y=mean_test_score, fill=model_name))+
+  geom_boxplot(aes(x = transform__2__cov_mult, y=mean_test_score, fill=model_name))+
   #geom_jitter(aes(x = transform__1__cov_mult, y=mean_test_score, color=model_name), height = 0, width=0.1)+
-  #geom_dl(aes(label = model_name, x=transform__2__cov_mult, y=mean_test_score, color=model_name), method = list(dl.combine("smart.grid"), cex=1.3))  +
+  geom_dl(aes(label = model_name, x=transform__2__cov_mult, y=mean_test_score, color=model_name), method = list(dl.combine("smart.grid"), cex=1.3))  +
   xlab("Variance of the Gaussian blur \n applied to the target") +
   ylab("Normalized test score of best model \n (on valid set) after 10 random search iterations") +
   theme_minimal(base_size=22) +
@@ -73,14 +154,14 @@ res_datasets %>%
   filter(random_rank == 20) %>%
   filter(model_name == "GradientBoostingTree") %>%
   filter(data__keyword != "poker") %>% 
-  group_by(model_name, data__keyword, transform__1__cov_mult, n_dataset) %>% 
+  group_by(model_name, data__keyword, transform__2__cov_mult, n_dataset) %>% 
   summarise(mean_test_score = mean(mean_test_score)) %>% 
-  mutate(transform__1__cov_mult = as_factor(100 * transform__1__cov_mult)) %>% 
-  mutate(transform__1__cov_mult = paste0(transform__1__cov_mult, "%")) %>% 
+  mutate(transform__2__cov_mult = as_factor(100 * transform__2__cov_mult)) %>% 
+  mutate(transform__2__cov_mult = paste0(transform__2__cov_mult, "%")) %>% 
   #mutate(transform__2__cov_mult = as.character(transform__2__cov_mult)) %>% 
   #mutate(model_name = fct_relevel(model_name, c("RandomForest", "GradientBoostingTree", "FT_Transformer"))) %>%
   ggplot() +
-  geom_line(aes(x = transform__1__cov_mult, y =mean_test_score, color = data__keyword, group=data__keyword)) +
+  geom_line(aes(x = transform__2__cov_mult, y =mean_test_score, color = data__keyword, group=data__keyword)) +
   #geom_boxplot(aes(x = transform__2__cov_mult, y=mean_test_score, fill=model_name))+
   #geom_dl(aes(label = method, x=transform__2__cov_mult, y=mean_test_score, color=method), method = list(dl.combine("smart.grid"), cex=1.3))  +
   #facet_wrap(~model_name, ncol=1) +

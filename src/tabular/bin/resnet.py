@@ -27,6 +27,7 @@ class ResNet(nn.Module):
             hidden_dropout: float,
             residual_dropout: float,
             d_out: int,
+            regression: bool,
     ) -> None:
         super().__init__()
 
@@ -34,7 +35,7 @@ class ResNet(nn.Module):
             return {'batchnorm': nn.BatchNorm1d, 'layernorm': nn.LayerNorm}[
                 normalization
             ](d)
-
+        self.regression = regression
         self.main_activation = lib.get_activation_fn(activation)
         self.last_activation = lib.get_nonglu_activation_fn(activation)
         self.residual_dropout = residual_dropout
@@ -98,7 +99,8 @@ class ResNet(nn.Module):
         x = self.last_normalization(x)
         x = self.last_activation(x)
         x = self.head(x)
-        x = x.squeeze(-1)
+        if not self.regression:
+            x = x.squeeze(-1)
         return x
 
 class InputShapeSetterResnet(skorch.callbacks.Callback):

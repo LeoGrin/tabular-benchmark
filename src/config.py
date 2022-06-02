@@ -171,7 +171,7 @@ def config(keyword):
                                       "type": ["standard", "robust", "quantile", "power", "quantile_uniform"]}]
                                      ]
 
-    elif keyword == "rotation":
+    elif keyword == "random_rotation":
         data_generation_functions = [{"method": import_real_data,
                                       "method_name": "real_data",
                                       "keyword": ["219", "3904", "california", "covtype", "spam"],

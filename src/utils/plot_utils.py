@@ -70,19 +70,20 @@ def plot_decision_boudaries(X_train, y_train, X_test, y_test, clf, title="decisi
     # Plot the training points
     ax.scatter(
         # X_train[:, 0], X_train[:, 1], c=y_train, cmap=cm_bright, edgecolors="k"
-        X_train[:, 0], X_train[:, 1], c=y_train, cmap=cm_bright, s=1, edgecolors="k", linewidth=0.2
+        X_train[:, 0], X_train[:, 1], c=y_train, cmap=cm_bright, s=6, edgecolors="k", linewidth=0.2
     )
     # # Plot the testing points
-    # ax.scatter(
-    #     X_test[:, 0],
-    #     X_test[:, 1],
-    #     c=y_test,
-    #     cmap=cm_bright,
-    #     edgecolors="k",
-    #     alpha=0.6,
-    #     s=1,
-    #     linewidth=0.2
-    # )
+    ax.scatter(
+        X_test[:, 0],
+        X_test[:, 1],
+        c=y_test,
+        cmap=cm_bright,
+        edgecolors="k",
+        alpha=1,
+        marker="^",
+        s=6,
+        linewidth=0.2
+    )
 
     # plt.xlim(xx.min(), xx.max())
     # plt.ylim(yy.min(), yy.max())
@@ -155,7 +156,7 @@ def plot_comparison(df, data_dic, target_dic, transform_dic_list, model_names):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('../../results/clean_results_15_10.csv')
+    df = pd.read_csv('../../results/old/clean_results_15_10.csv')
     data_generation_dic = {"method_name": "gaussian",
                            "num_samples": 1000,
                            "num_features": 15,

@@ -163,9 +163,39 @@ res_datasets %>%
   ylab("Normalized GBT test score of best model \n (on valid set) after 20 random search iterations") +
   theme_minimal(base_size=22) +
   theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
+
+#TODO:remove dataset from bin where one value is missing
+
+res_datasets %>% 
+  filter(random_rank == 20) %>%
+  filter(model_name == "GradientBoostingTree") %>%
+  filter(data__keyword != "poker") %>% 
+  group_by(model_name, data__keyword, transform__0__num_features_to_remove, method) %>% 
+  summarise(mean_test_score = mean(mean_test_score)) %>% 
+  ungroup() %>% 
+  group_by(model_name, transform__0__num_features_to_remove, method) %>% 
+  mutate(test_score_high=quantile(mean_test_score, 0.9, na.rm=T), test_score_low=quantile(mean_test_score, 0.1, na.rm=T),
+         mean_test_score=mean(mean_test_score, na.rm=T)) %>% 
+  mutate(transform__0__num_features_to_remove = as_factor(100 * transform__0__num_features_to_remove)) %>% 
+  mutate(transform__0__num_features_to_remove = paste0(transform__0__num_features_to_remove, "%")) %>% 
+  #mutate(transform__0__num_features_to_remove = as.character(transform__0__num_features_to_remove)) %>% 
+  #mutate(model_name = fct_relevel(model_name, c("RandomForest", "GradientBoostingTree", "FT_Transformer"))) %>%
+  mutate(method = case_when(
+    method == "keep" ~ "Fit on removed features only",
+    method == "remove" ~ "Fit without removed features")) %>% 
+  ggplot() +
+  #geom_line(aes(x = transform__0__num_features_to_remove, y =mean_test_score, color = data__keyword)) +
+  geom_ribbon(aes(x = transform__0__num_features_to_remove, ymax=test_score_high, ymin=test_score_low, fill = method, group=method), alpha=0.4) +
+  geom_line(aes(x = transform__0__num_features_to_remove, y=mean_test_score, color = method, group=method), size=2)+
+  #geom_dl(aes(label = method, x=transform__0__num_features_to_remove, y=mean_test_score, color=method), method = list(dl.combine("smart.grid"), cex=1.3))  +
+  #facet_wrap(~method, ncol=1) +
+  xlab("Percentage of features removed \n (in decreasing order of RF importance)") +
+  ylab("Normalized GBT test score of \n best model (on valid set) after \n 20 random search iterations") +
+  theme_minimal(base_size=22) +
+  theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
   
 
-ggsave("analyses/plots/removed_features_2.jpg", width=16, height=9)
+ggsave("analyses/plots/removed_features_2.jpg", width=13, height=6)
 
   
 

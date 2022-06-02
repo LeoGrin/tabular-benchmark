@@ -25,8 +25,11 @@ class MLP(nn.Module):
         d_out: int,
         categories: ty.Optional[ty.List[int]],
         d_embedding: int,
+        regression: bool,
     ) -> None:
         super().__init__()
+
+        self.regression = regression
 
         if categories is not None:
             d_in += len(categories) * d_embedding
@@ -67,7 +70,8 @@ class MLP(nn.Module):
             if self.dropout:
                 x = F.dropout(x, self.dropout, self.training)
         x = self.head(x)
-        x = x.squeeze(-1)
+        if not self.regression:
+            x = x.squeeze(-1)
         return x
 
 class InputShapeSetterMLP(skorch.callbacks.Callback):

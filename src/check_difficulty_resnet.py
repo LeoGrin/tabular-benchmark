@@ -1,4 +1,3 @@
-print("here")
 import os
 os.environ["PROJECT_DIR"] = "test"
 from skorch_models import create_resnet_skorch
@@ -8,26 +7,45 @@ print("ho")
 from sklearn.preprocessing import LabelEncoder
 from pathlib import Path
 import sys
-path_root = Path(__file__).parents[1]
 sys.path.append("/Users/leo/PycharmProjets/ToyTabular")
 print(sys.path)
 from data.data_utils import *
 import torch
 from train import *
+from sklearn.compose import TransformedTargetRegressor
 
-df = pd.read_csv("/Users/leo/PycharmProjets/ToyTabular/data/all_datasets_numerical_classif.csv")
+df = pd.read_csv("/Users/leo/PycharmProjets/ToyTabular/data/all_datasets_regression_numerical.csv")
 
-regression = False
+regression = True
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(device)
 
-resnet_config =  {"model_name": "rtdl_resnet",
+# resnet_config =  {"model_name": "rtdl_resnet",
+#                   "model_type": "skorch",
+#                   "model__use_checkpoints": True,
+#                   "model__optimizer": "adamw",
+#                   "model__lr_scheduler": True,
+#                   "model__verbose":100,
+#                   "model__batch_size": 512,
+#                   "model__max_epochs": 300,
+#                   "model__module__activation": "reglu",
+#                   "model__module__normalization": "batchnorm",
+#                   "model__module__n_layers": 8,
+#                   "model__module__d": 256,
+#                   "model__module__d_hidden_factor": 2,
+#                   "model__module__hidden_dropout":  0.2,
+#                   "model__module__residual_dropout":  0.2,
+#                   "model__lr": 1e-3,
+#                   "model__optimizer__weight_decay":  1e-7,
+#                   "model__module__d_embedding": 128,
+#                   "regression": False}
+
+resnet_config =  {"model_name": "rtdl_resnet_regressor",
                   "model_type": "skorch",
                   "model__use_checkpoints": True,
                   "model__optimizer": "adamw",
                   "model__lr_scheduler": True,
-                  "model__verbose":100,
                   "model__batch_size": 512,
                   "model__max_epochs": 300,
                   "model__module__activation": "reglu",
@@ -40,7 +58,9 @@ resnet_config =  {"model_name": "rtdl_resnet",
                   "model__lr": 1e-3,
                   "model__optimizer__weight_decay":  1e-7,
                   "model__module__d_embedding": 128,
-                  "regression": False}
+                  "regression": True}
+
+
 
 
 res_df = pd.DataFrame()
@@ -101,6 +121,9 @@ for index, row in df.iterrows():
                 n_iters = 5
             for iter in range(n_iters):
                 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_prop)
+                if resnet_config["regression"] == True:
+                    y_train, y_test = y_train.reshape(-1, 1), y_test.reshape(-1, 1)
+                    y_train, y_test = y_train.astype(np.float32), y_test.astype(np.float32)
                 if X_test.shape[0] > 30000:  # for speed
                     indices = np.random.choice(X_test.shape[0], 30000, replace=False)
                     try:
@@ -109,7 +132,7 @@ for index, row in df.iterrows():
                         X_test = X_test[indices]
                     y_test = y_test[indices]
                 if regression:
-                    linear_model = LinearRegression()
+                    linear_model = TransformedTargetRegressor(LinearRegression(), QuantileTransformer(output_distribution="normal"))
                 else:
                     linear_model = LogisticRegression()
                 linear_model.fit(X_train, y_train)
@@ -163,4 +186,4 @@ for index, row in df.iterrows():
          print("FAILED")
          pass
 
-res_df.to_csv("results_resnet.csv")
+res_df.to_csv("results_resnet_regression.csv")

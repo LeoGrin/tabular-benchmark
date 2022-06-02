@@ -67,7 +67,7 @@ def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num
     if regression:
         with open("{}/numerical_only/regression/data_{}".format(path_to_dir, keyword), "rb") as f:
             X, y = pickle.load(f)
-            y = QuantileTransformer(output_distribution="normal").fit_transform(y.reshape(-1, 1)).flatten() #TODO do it before choosing
+            #y = QuantileTransformer(output_distribution="normal").fit_transform(y.reshape(-1, 1)).flatten() #TODO do it before choosing
     else:
         if balanced:
             with open("{}/numerical_only/balanced/data_{}".format(path_to_dir, keyword), "rb") as f:

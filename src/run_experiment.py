@@ -1,12 +1,15 @@
 import os
+
 os.environ["PROJECT_DIR"] = "test"
 from generate_dataset_pipeline import generate_dataset
-import  traceback  # Needed for pulling out your full stackframe info
+import traceback  # Needed for pulling out your full stackframe info
 from train import *
 import wandb
 import platform
 import time
 import torch
+
+os.environ["WANDB_MODE"] = "offline"
 
 
 # def modify_config(config):
@@ -30,7 +33,7 @@ def train_model_on_config(config=None):
     CONFIG_DEFAULT = {"train_prop": 0.70,
                       "val_test_prop": 0.3,
                       "max_val_samples": 50000,
-                     "max_test_samples": 50000}
+                      "max_test_samples": 50000}
     # "model__use_checkpoints": True} #TODO
     # Initialize a new wandb run
     with wandb.init(config=config) as run:
@@ -43,12 +46,14 @@ def train_model_on_config(config=None):
                 "model__module__n_heads"]
         # config = modify_config(config)
 
-
-        #print(config)
+        # print(config)
         try:
             train_scores = []
             val_scores = []
             test_scores = []
+            r2_train_scores = []
+            r2_val_scores = []
+            r2_test_scores = []
             times = []
             if config["n_iter"] == "auto":
                 x_train, x_val, x_test, y_train, y_val, y_test = generate_dataset(config, np.random.RandomState(0))
@@ -72,38 +77,66 @@ def train_model_on_config(config=None):
                 x_train, x_val, x_test, y_train, y_val, y_test = generate_dataset(config, rng)
                 data_generation_time = time.time() - t
                 print("Data generation time:", data_generation_time)
-                #print(y_train)
+                # print(y_train)
                 print(x_train.shape)
 
                 if config["model_type"] == "skorch" and config["regression"] == True:
+                    print("YES")
                     y_train, y_val, y_test = y_train.reshape(-1, 1), y_val.reshape(-1, 1), y_test.reshape(-1, 1)
-                    y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(np.float32)
+                    y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(
+                        np.float32)
                 else:
                     y_train, y_val, y_test = y_train.reshape(-1), y_val.reshape(-1), y_test.reshape(-1)
-                   # y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(np.float32)
-                    x_train, x_val, x_test = x_train.astype(np.float32), x_val.astype(np.float32), x_test.astype(np.float32)
+                    # y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(np.float32)
+                    x_train, x_val, x_test = x_train.astype(np.float32), x_val.astype(np.float32), x_test.astype(
+                        np.float32)
 
                 start_time = time.time()
+                print(y_train.shape)
                 model, model_id = train_model(i, x_train, y_train, config)
+                if config["regression"]:
+                    try:
+                        r2_train, r2_val, r2_test = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
+                                                                   y_test, config, model_id, return_r2=True)
+                    except:
+                        print("R2 score cannot be computed")
+                        print(np.any(np.isnan(y_train)))
+                        r2_train, r2_val, r2_test = np.nan, np.nan, np.nan
+                    r2_train_scores.append(r2_train)
+                    r2_val_scores.append(r2_val)
+                    r2_test_scores.append(r2_test)
+                else:
+                    r2_train, r2_val, r2_test = np.nan, np.nan, np.nan
+                    r2_train_scores.append(r2_train)
+                    r2_val_scores.append(r2_val)
+                    r2_test_scores.append(r2_test)
                 train_score, val_score, test_score = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
                                                                     y_test, config, model_id)
+
                 end_time = time.time()
                 print("Train score:", train_score)
                 print("Val score:", val_score)
                 print("Test score:", test_score)
                 if config["model_type"] == "skorch":
                     if config["regression"]:
-                        wandb.log({"num_epochs": len(model.history),
-                                   "train_accuracy_vector": [model.history[i * 10]["train_accuracy"] for i in
-                                                             range(len(model.history) // 10)],
-                                   "valid_loss_vector": [model.history[i * 10]["valid_loss"] for i in
-                                                             range(len(model.history) // 10)]})
+                        if config["transformed_target"]:
+                            history = model.regressor_.history
+                        else:
+                            history = model.history
+                        wandb.log({"num_epochs": len(history),
+                                   "train_accuracy_vector": [history[i * 10]["train_accuracy"] for i in
+                                                             range(len(history) // 10)],
+                                   "valid_loss_vector": [history[i * 10]["valid_loss"] for i in
+                                                         range(len(history) // 10)]},
+                                  commit=False)
                     else:
-                        wandb.log({"num_epochs": len(model.history),
-                                   "train_accuracy_vector": [model.history[i * 10]["train_accuracy"] for i in
-                                                             range(len(model.history) // 10)],
-                                   "valid_accuracy_vector": [model.history[i * 10]["valid_acc"] for i in
-                                                             range(len(model.history) // 10)]})
+                        history = model.history
+                        wandb.log({"num_epochs": len(history),
+                                   "train_accuracy_vector": [history[i * 10]["train_accuracy"] for i in
+                                                             range(len(history) // 10)],
+                                   "valid_accuracy_vector": [history[i * 10]["valid_acc"] for i in
+                                                             range(len(history) // 10)]},
+                                  commit=False)
 
                 times.append(end_time - start_time)
                 # wandb.log({"train_score": train_score})
@@ -136,16 +169,25 @@ def train_model_on_config(config=None):
                            "min_train_score": np.min(train_scores),
                            "min_val_score": np.min(val_scores),
                            "min_test_score": np.min(test_scores),
+                           "mean_r2_train": np.mean(r2_train_scores),
+                           "mean_r2_val": np.mean(r2_val_scores),
+                           "mean_r2_test": np.mean(r2_test_scores),
+                           "std_r2_train": np.std(r2_train_scores),
+                           "std_r2_val": np.std(r2_val_scores),
+                           "std_r2_test": np.std(r2_test_scores),
                            "mean_time": np.mean(times),
                            "std_time": np.std(times),
                            "times": times,
-                           "processor": processor})
+                           "processor": processor}, commit=False)
             else:
                 wandb.log({"mean_train_score": train_score,
                            "mean_val_score": val_score,
                            "mean_test_score": test_score,
+                           "mean_r2_train": r2_train,
+                           "mean_r2_val": r2_val,
+                           "mean_r2_test": r2_test,
                            "mean_time": end_time - start_time,
-                           "processor": processor})
+                           "processor": processor}, commit=False)
 
             wandb.log({"n_train": x_train.shape[0], "n_test": x_test.shape[0],
                        "n_features": x_train.shape[1],
@@ -157,6 +199,13 @@ def train_model_on_config(config=None):
             # To get the traceback information
             print(traceback.format_exc())
             print(config)
+            if config["model_type"] == "skorch" and config["model__use_checkpoints"]:
+                print("crashed, trying to remove checkpoint files")
+                try:
+                    os.remove(r"skorch_cp/params_{}.pt".format(model_id))
+                except:
+                    print("could not remove params file")
+                    pass
 
 
 if __name__ == """__main__""":

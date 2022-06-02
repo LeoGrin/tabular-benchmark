@@ -7,6 +7,8 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 import utils.keyword_to_function_conversion
 from scipy.stats import multivariate_normal
+from sklearn.covariance import EmpiricalCovariance, MinCovDet
+
 
 def marginal_transformations(x, y, function, vectorized=False, rng=None):
     """
@@ -35,10 +37,13 @@ def marginal_transformations(x, y, function, vectorized=False, rng=None):
     return new_x, y
 
 
-def apply_random_rotation(x_train, x_val, x_test, y_train, y_val, y_test, rng=None):
+def apply_random_rotation(x_train, x_val, x_test, y_train, y_val, y_test, deactivated=False, rng=None):
+    if deactivated:
+        return x_train, x_val, x_test, y_train, y_val, y_test
     num_samples, num_features = x_train.shape
     rotation_matrix = special_ortho_group.rvs(num_features, random_state=rng)
     return x_train @ rotation_matrix, x_val @ rotation_matrix, x_test @ rotation_matrix, y_train, y_val, y_test
+
 
 def add_noise(x, y, noise_type="white", scale=1, rng=None):
     if noise_type != "white":
@@ -50,7 +55,7 @@ def add_noise(x, y, noise_type="white", scale=1, rng=None):
 
 def add_uninformative_features(x_train, x_val, x_test, y_train, y_val, y_test, multiplier=2, rng=None):
     """
-    Add num_uninformatives uninformative gaussain columns to x, imitating the mean and interquartile range of
+    Add num_uninformatives uninformative gaussian columns to x, imitating the mean and interquartile range of
     a randomly chosen subset of x columns
     :param x: data to which the features are added
     :param num_uninformatives: number of uninformative columns to add
@@ -65,21 +70,29 @@ def add_uninformative_features(x_train, x_val, x_test, y_train, y_val, y_test, m
     cols_to_imitate = rng.choice(range(num_features),
                                  num_uninformatives)  # columns whose mean and interquartile we'll imitate in the uninformative columns
     new_features_train = rng.multivariate_normal(mean=np.mean(x_train, axis=0)[cols_to_imitate],
-                                           cov=np.diag(((np.quantile(x_train, 0.75, axis=0) - np.quantile(x_train, 0.25, axis=0))[
-                                                            cols_to_imitate] / 1.349) ** 2),
-                                           size=num_samples_train)  # for a gaussian, interquartile range is 1.349σ
+                                                 cov=np.diag(((np.quantile(x_train, 0.75, axis=0) - np.quantile(x_train,
+                                                                                                                0.25,
+                                                                                                                axis=0))[
+                                                                  cols_to_imitate] / 1.349) ** 2),
+                                                 size=num_samples_train)  # for a gaussian, interquartile range is 1.349σ
     num_samples_val = x_val.shape[0]
     new_features_val = rng.multivariate_normal(mean=np.mean(x_train, axis=0)[cols_to_imitate],
-                                           cov=np.diag(((np.quantile(x_train, 0.75, axis=0) - np.quantile(x_train, 0.25, axis=0))[
-                                            cols_to_imitate] / 1.349) ** 2),
-                                           size=num_samples_val)
+                                               cov=np.diag(((np.quantile(x_train, 0.75, axis=0) - np.quantile(x_train,
+                                                                                                              0.25,
+                                                                                                              axis=0))[
+                                                                cols_to_imitate] / 1.349) ** 2),
+                                               size=num_samples_val)
     num_samples_test = x_test.shape[0]
     new_features_test = rng.multivariate_normal(mean=np.mean(x_train, axis=0)[cols_to_imitate],
-                                           cov=np.diag(((np.quantile(x_train, 0.75, axis=0) - np.quantile(x_train, 0.25, axis=0))[
-                                            cols_to_imitate] / 1.349) ** 2),
-                                           size=num_samples_test)
+                                                cov=np.diag(((np.quantile(x_train, 0.75, axis=0) - np.quantile(x_train,
+                                                                                                               0.25,
+                                                                                                               axis=0))[
+                                                                 cols_to_imitate] / 1.349) ** 2),
+                                                size=num_samples_test)
 
-    return np.concatenate((x_train, new_features_train), axis=1), np.concatenate((x_val, new_features_val), axis=1), np.concatenate((x_test, new_features_test), axis=1), y_train, y_val, y_test
+    return np.concatenate((x_train, new_features_train), axis=1), np.concatenate((x_val, new_features_val),
+                                                                                 axis=1), np.concatenate(
+        (x_test, new_features_test), axis=1), y_train, y_val, y_test
 
 
 def gaussienize(x_train, x_val, x_test, y_train, y_val, y_test, type="standard", rng=None):
@@ -124,27 +137,31 @@ def cluster_1d(x, y, type="kmeans", rng=None, **kwargs):
 
 
 def remove_useless_features(x_train, x_val, x_test, y_train, y_val, y_test, max_rel_decrease=0.01, n_iter=3, rng=None):
-    #TODO test
+    # TODO test
+    if max_rel_decrease == 0:
+        return x_train, x_val, x_test, y_train, y_val, y_test
     print("Removing useless_features...")
-    rf = RandomForestClassifier(random_state=rng) # used to compute features importance
-    gbt = GradientBoostingClassifier(random_state=rng) # used to compute accuracy decrease
+    rf = RandomForestClassifier(random_state=rng)  # used to compute features importance
+    gbt = GradientBoostingClassifier(random_state=rng)  # used to compute accuracy decrease
     rf.fit(x_train, y_train)
     sorted_features = np.argsort(rf.feature_importances_)
     score_full_list = []
     for i in range(n_iter):
-        x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train, y_train, test_size=0.5, random_state=rng)
+        x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train, y_train, test_size=0.5,
+                                                                            random_state=rng)
         gbt.fit(x_train_bis, y_train_bis)
         score_full = gbt.score(x_test_bis, y_test_bis)
         score_full_list.append(score_full)
     i = 0
     features_to_remove = []
-    for feature in sorted_features[:-1]: # in order of increasing importance
+    for feature in sorted_features[:-1]:  # in order of increasing importance
         features_to_remove.append(feature)
         i += 1
         x_train_new = np.delete(x_train, features_to_remove, axis=1)
         score_new_list = []
         for j in range(n_iter):
-            x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train_new, y_train, test_size=0.5, random_state=rng)
+            x_train_bis, x_test_bis, y_train_bis, y_test_bis = train_test_split(x_train_new, y_train, test_size=0.5,
+                                                                                random_state=rng)
             gbt.fit(x_train_bis, y_train_bis)
             score_new = gbt.score(x_test_bis, y_test_bis)
             score_new_list.append(score_new)
@@ -153,12 +170,8 @@ def remove_useless_features(x_train, x_val, x_test, y_train, y_val, y_test, max_
             features_to_remove.pop()
             break
 
-    return np.delete(x_train, features_to_remove, axis=1), np.delete(x_val, features_to_remove, axis=1), np.delete(x_test, features_to_remove, axis=1), y_train, y_val, y_test
-
-
-
-
-
+    return np.delete(x_train, features_to_remove, axis=1), np.delete(x_val, features_to_remove, axis=1), np.delete(
+        x_test, features_to_remove, axis=1), y_train, y_val, y_test
 
 
 def select_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_features=None, importance_cutoff=None,
@@ -169,7 +182,7 @@ def select_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_
     rf = RandomForestClassifier(random_state=rng)
     rf.fit(x_train, y_train)
     if importance_cutoff is not None:
-        num_features = max(1, np.sum(rf.feature_importances_ > importance_cutoff)) # At least one feature
+        num_features = max(1, np.sum(rf.feature_importances_ > importance_cutoff))  # At least one feature
 
     x_train = x_train[:, np.argsort(rf.feature_importances_)[-num_features:]]
     x_val = x_val[:, np.argsort(rf.feature_importances_)[-num_features:]]
@@ -180,7 +193,8 @@ def select_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_
         return x_train, x_val, x_test, y_train, y_val, y_test, np.argsort(rf.feature_importances_)[-num_features:]
 
 
-def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_features_to_remove=None, importance_cutoff=None,
+def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_features_to_remove=None,
+                       importance_cutoff=None,
                        keep_removed_features=False,
                        return_features=False, model_to_use="rf_c"):
     assert (num_features_to_remove is None) + (importance_cutoff is None) == 1  # xor
@@ -190,9 +204,10 @@ def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_
     model = utils.keyword_to_function_conversion.convert_keyword_to_function(model_to_use)(random_state=rng)
     model.fit(x_train, y_train)
     if importance_cutoff is not None:
-        num_features_to_remove = min(x_train.shape[1] - 1, np.sum(model.feature_importances_ < importance_cutoff)) # At least one feature
+        num_features_to_remove = min(x_train.shape[1] - 1,
+                                     np.sum(model.feature_importances_ < importance_cutoff))  # At least one feature
     features_to_keep = np.argsort(model.feature_importances_)[- (x_train.shape[1] - num_features_to_remove):]
-    if keep_removed_features: # for experiment purposes, keep the features we should have removed
+    if keep_removed_features:  # for experiment purposes, keep the features we should have removed
         features_to_keep = [i for i in range(x_train.shape[1]) if i not in features_to_keep]
     x_train = x_train[:, features_to_keep]
     x_val = x_val[:, features_to_keep]
@@ -201,7 +216,8 @@ def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_
     if not return_features:
         return x_train, x_val, x_test, y_train, y_val, y_test
     else:
-        return x_train, x_val, x_test, y_train, y_val, y_test, np.argsort(model.feature_importances_)[-(x_train.shape[1] - num_features_to_remove):]
+        return x_train, x_val, x_test, y_train, y_val, y_test, np.argsort(model.feature_importances_)[
+                                                               -(x_train.shape[1] - num_features_to_remove):]
 
 
 def tree_quantile_transformer(x_train, x_test, y_train, y_test, regression=False, normalize=True, rng=None):
@@ -221,11 +237,11 @@ def tree_quantile_transformer(x_train, x_test, y_train, y_test, regression=False
         thresholds_belonging_train = np.floor(x_train_[:, i] * len(thresholds)).astype(
             np.int) - 1  # to which threshold does each value belong
         x_train_[:, i] = thresholds[thresholds_belonging_train] + (x_train_[:, i] % len(thresholds)) * (
-                    thresholds[1] - thresholds[0])
+                thresholds[1] - thresholds[0])
         thresholds_belonging_test = np.floor(x_test_[:, i] * len(thresholds)).astype(
             np.int) - 1  # to which threshold does each value belong
         x_test_[:, i] = thresholds[thresholds_belonging_test] + (x_test_[:, i] % len(thresholds)) * (
-                    thresholds[1] - thresholds[0])
+                thresholds[1] - thresholds[0])
     if normalize:
         x_train_ -= np.mean(x_train_, axis=0)
         x_train_ /= np.std(x_train_, axis=0)
@@ -289,16 +305,38 @@ def limit_size(x, y, n_samples, rng):
     return x[chosen_indices], y[chosen_indices]
 
 
-def remove_high_frequency_from_train(x_train, x_val, x_test, y_train, y_val, y_test, rng=None, cov_mult=0.001, classif=True):
+def remove_high_frequency_from_train(x_train, x_val, x_test, y_train, y_val, y_test, rng=None, cov_mult=0.001,
+                                     covariance_estimation="classic", classif=True):
     if cov_mult == 0:
         return x_train, x_val, x_test, y_train, y_val, y_test
     y_train_new = np.zeros(y_train.shape)
-    empirical_cov = np.cov(x_train, rowvar=False)
+    # empirical_cov = np.cov(x_train, rowvar=False)
+    # empirical_cov = MinCovDet(support_fraction=1.0,
+    #                          assume_centered=True).fit(x_train).covariance_
+    if covariance_estimation == "robust":
+        cov_method = MinCovDet(support_fraction=None,
+                               assume_centered=False)
+    elif covariance_estimation == "classic":
+        cov_method = EmpiricalCovariance()
+    else:
+        raise NotImplemented
+    empirical_cov = cov_method.fit(x_train).covariance_
+    print(np.diag(empirical_cov))
     empirical_cov = cov_mult * empirical_cov
     for i in range(x_train.shape[0]):
-        gaussian_kernel = multivariate_normal(mean=x_train[i], cov= empirical_cov)
+        try:
+            gaussian_kernel = multivariate_normal(mean=x_train[i], cov=empirical_cov)
+        except:
+            assert covariance_estimation == "robust"
+            print("Issue with robust covaraince estimation, going for classic empirical estimation")
+            cov_method = EmpiricalCovariance()
+            empirical_cov = cov_method.fit(x_train).covariance_
+            gaussian_kernel = multivariate_normal(mean=x_train[i], cov=empirical_cov)
+
         gaussian_densities = gaussian_kernel.pdf(x_train)
+        #print(sorted(gaussian_densities)[-10:][::-1] / np.sum(gaussian_densities))
         y_train_new[i] = np.dot(y_train, gaussian_densities) / np.sum(gaussian_densities)
+        #y_train_new[i] = (- y_train[i] * gaussian_densities[i] + np.dot(y_train, gaussian_densities)) / (np.sum(gaussian_densities) - gaussian_densities[i])
     if classif:
         y_train_new = (y_train_new > 0.5).astype(int)
         print(np.unique(y_train_new, return_counts=True))

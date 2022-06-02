@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "resnet_benchmark_numeric",
-  "project": "thesis",
+  "name" : "resnet_benchmark_classif_default_cpu_2",
+  "project": "thesis-3",
   "method" : "grid",
   "metric": {
     "name": "mean_test_score",
@@ -15,7 +15,7 @@ sweep_config = {
       "value": True
     },
     "model__device": {
-      "value": "cuda"
+      "value": "cpu"
     },
     "model_type": {
       "value": "skorch"
@@ -24,7 +24,7 @@ sweep_config = {
       "value": "rtdl_resnet"
     },
     "model__use_checkpoints": {
-      "value": False
+      "value": True
     },
     "model__optimizer": {
       "value": "adamw"
@@ -84,7 +84,7 @@ sweep_config = {
                  "MiniBooNE",
                  "Higgs",
                  "eye_movements",
-                 #"jannis",
+                 "jannis",
                  "credit",
                  "california",
                  "wine"]
@@ -100,9 +100,15 @@ sweep_config = {
     },
     "regression": {
       "value": False
-    }
+    },
+    "data__regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-3")

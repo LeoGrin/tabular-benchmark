@@ -31,6 +31,7 @@ def generate_target(x, config, rng):
 
 def transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng):
     i = 0
+    print("transforming data...")
     while True:
         if f"transform__{i}__method_name" in config.keys():
             print("transform", i)
@@ -48,12 +49,27 @@ def transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng):
 
 def data_to_train_test(x, y, config, rng=None):
     n_rows = x.shape[0]
-    if not config["max_train_samples"] is None:
-        train_set_prop = min(config["max_train_samples"] / n_rows, config["train_prop"])
+    if "data__keyword" in config.keys() and config["data__keyword"] == "year":
+        if config["max_train_samples"] < 463715:
+            indices_train = rng.choice(list(range(463715)), config["max_train_samples"],
+                                             replace=False)
+            x_train = x[indices_train]
+            y_train = y[indices_train]
+        else:
+            x_train = x[:463715]
+            y_train = y[:463715]
+
+        x_val_test = x[463715:]
+        y_val_test = y[463715:]
+        x_val, x_test, y_val, y_test = train_test_split(x_val_test, y_val_test, train_size=config["val_test_prop"],
+                                                        random_state=rng)
     else:
-        train_set_prop = config["train_prop"]
-    x_train, x_val_test, y_train, y_val_test = train_test_split(x, y, train_size= train_set_prop, random_state=rng)
-    x_val, x_test, y_val, y_test = train_test_split(x_val_test, y_val_test, train_size= config["val_test_prop"], random_state=rng)
+        if not config["max_train_samples"] is None:
+            train_set_prop = min(config["max_train_samples"] / n_rows, config["train_prop"])
+        else:
+            train_set_prop = config["train_prop"]
+        x_train, x_val_test, y_train, y_val_test = train_test_split(x, y, train_size= train_set_prop, random_state=rng)
+        x_val, x_test, y_val, y_test = train_test_split(x_val_test, y_val_test, train_size= config["val_test_prop"], random_state=rng)
     if not config["max_val_samples"] is None and x_val.shape[0] > config["max_val_samples"]:
         x_val = x_val[:config["max_val_samples"]]
         y_val = y_val[:config["max_val_samples"]]

@@ -122,6 +122,7 @@ def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
         module__d_numerical=1,  # will be change when fitted
         module__categories=None,  # will be change when fitted
         module__d_out=1,  # idem
+        module__regression=False,
         verbose=verbose,
         callbacks=callbacks,
         **kwargs
@@ -175,6 +176,7 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
         module__d_in=1,  # will be change when fitted
         module__categories=None,  # will be change when fitted
         module__d_out=1,  # idem
+        module__regression=False,
         verbose=0,
         callbacks=callbacks,
         **kwargs
@@ -228,6 +230,7 @@ def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True, **kwa
         module__d_numerical=1,  # will be change when fitted
         module__categories=None,  # will be change when fitted
         module__d_out=1,  # idem
+        module__regression=False,
         verbose=0,
         callbacks=callbacks,
         **kwargs

@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "xgb_benchmark_numeric_default",
-  "project": "thesis",
+  "name" : "xgb_benchmark_classif_default",
+  "project": "thesis-2",
   "method" : "grid",
   "metric": {
     "name": "mean_test_score",
@@ -43,9 +43,15 @@ sweep_config = {
     },
     "regression": {
       "value": False
-    }
+    },
+    "data__regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-2")

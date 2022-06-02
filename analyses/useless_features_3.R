@@ -67,13 +67,13 @@ res_datasets %>%
   geom_dl(aes(label = model_name, x=transform__0__num_features_to_remove, y=mean_test_score, color=model_name), method = list(dl.combine("smart.grid"), cex=1.8))  +
   scale_x_continuous(labels = scales::percent) +
   xlab("Percentage of features removed \n (in decreasing order of RF importance)") +
-  ylab("Normalized GBT test score of best model \n (on valid set) after 20 random search iterations") +
+  ylab("Normalized GBT test score of \n best model (on valid set) after \n 20 random search iterations") +
   theme_minimal(base_size=22) +
   #theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22)) +
   theme(legend.position="none") +
   colScale
 
-ggsave("analyses/plots/useless_features.jpg", width=16, height=9)
+ggsave("analyses/plots/useless_features.jpg", width=13, height=5.5)
 
 
 res_datasets %>% 

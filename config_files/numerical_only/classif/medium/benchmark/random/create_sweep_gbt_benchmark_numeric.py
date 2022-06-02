@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "gpt_benchmark_numeric",
-  "project": "thesis",
+  "name" : "gpt_benchmark_numeric_classif_bonus_2",
+  "project": "thesis-3",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
@@ -56,25 +56,35 @@ sweep_config = {
       "values": ["electricity",
                  "covertype",
                  "poker",
-                 "pol",
-                 "house_16H",
-                 "kdd_ipums_la_97-small",
-                 "MagicTelescope",
-                 "bank-marketing",
-                 "phoneme",
+                 #"pol",
+                 #"house_16H",
+                 #"kdd_ipums_la_97-small",
+                 #"MagicTelescope",
+                 #"bank-marketing",
+                 #"phoneme",
                  "MiniBooNE",
                  "Higgs",
-                 "eye_movements",
+                 #"eye_movements",
                  "jannis",
-                 "credit",
+                 #"credit",
                  "california",
-                 "wine"]
+                 #"wine"]
+      ]
     },
     "n_iter": {
       "value": "auto",
-    }
+    },
+    "regression": {
+      "value": False
+    },
+    "data__regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-3")

@@ -1,4 +1,5 @@
 library(tidyverse)
+source("analyses/random_search_utils.R")
 
 
 df <- read_csv("results/sweeps/sweep_gbt.csv") %>%
@@ -56,7 +57,42 @@ df <- read_csv("results/sweeps/sweeps_classif/benchmark/medium/gbt_classif.csv")
               mutate(hp = "default")) %>% 
   bind_rows(read_csv("results/sweeps/sweeps_classif/benchmark/medium/ft_transformer_classif_default.csv") %>% 
               mutate(hp = "default")) %>% 
-  filter(data__keyword != "poker", data__keyword != "jannis")
+  select(model_name, data__keyword, mean_val_score, mean_test_score, mean_time, hp) %>% 
+  filter(!(model_name %in% c("ft_transformer", "rtdl_mlp", "rtdl_resnet"))) %>% 
+  #rename() %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_classif/benchmark_classif_random_medium_checkpoint.csv") %>% 
+              mutate(hp = "random") %>% 
+              mutate(model_name = str_c(model_name, "_checkpoint")) %>% 
+              select(model_name, data__keyword, mean_val_score, mean_test_score, mean_time, hp))%>% 
+  filter(!is.na(mean_test_score), !is.na(mean_val_score)) #%>% 
+  #filter(data__keyword != "poker", data__keyword != "jannis")
+
+
+df <- read_csv("results/sweeps/sweeps_classif/benchmark_classif_random_large.csv") %>% 
+  mutate(hp = "random") %>% 
+  filter(!is.na(mean_test_score), !is.na(mean_val_score)) %>% 
+  rename()
+
+df <- read_csv("results/sweeps/sweeps_regression/benchmark_regression_random_medium.csv") %>% 
+  mutate(hp = "random") %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_regression/benchmark_regression_default_medium.csv") %>% 
+              mutate(hp="default")) %>% 
+  filter(!is.na(mean_test_score), !is.na(mean_val_score)) %>% 
+  mutate(mean_test_score = -mean_test_score,
+         mean_val_score = -mean_val_score,
+         mean_train_score = -mean_val_score) %>% 
+  rename()# %>% 
+  #filter(!(data__keyword %in% c("isolet")))
+
+df <- read_csv("results/sweeps/sweeps_regression/benchmark_regression_random_medium_numerical.csv") %>% 
+  mutate(hp = "random") %>% 
+  bind_rows(read_csv("results/sweeps/sweeps_regression/benchmark_regression_default_medium_numerical.csv") %>% 
+              mutate(hp="default")) %>% 
+  filter(!is.na(mean_test_score), !is.na(mean_val_score)) %>% 
+  mutate(mean_test_score = -mean_test_score,
+         mean_val_score = -mean_val_score,
+         mean_train_score = -mean_val_score) %>% 
+  rename()
 
 
 # 
@@ -71,7 +107,7 @@ df %>%
   group_by(model_name, data__keyword) %>% 
   filter(mean_val_score == max(mean_val_score, na.rm=T)) %>% 
   ggplot() +
-  geom_point(aes(x = mean_test_score, y = data__keyword, color = model_name))
+  geom_point(aes(x = mean_test_score, y = data__keyword, color = model_name), alpha=0.4)
   #geom_point(aes(x = mean_val_score, y = data__keyword, color = model_name))
 
 
@@ -81,23 +117,15 @@ df %>%
   #group_by(model_name, data__keyword) %>% 
   #filter(mean_val_score == max(mean_val_score, na.rm=T)) %>% 
   ggplot() +
-  geom_point(aes(x = mean_val_score, y = data__keyword, color = model_name))
+  geom_point(aes(x = mean_val_score, y = data__keyword, color = model_name, alpha=0.1))
 
-
+View(df %>% filter(hp == "default"))
 
 
 
 #################
 
 df_normalized <- df %>% 
-  mutate(model_name = case_when(
-    model_name == "rf_c" ~ "RandomForest",
-    model_name == "xgb_c" ~ "XGBoost",
-    model_name == "gbt_c" ~ "GradientBoostingTree",
-    model_name == "ft_transformer" ~ "FT Transformer",
-    model_name == "rtdl_resnet" ~ "Resnet",
-    model_name == "rtdl_mlp" ~ "MLP",
-    model_name == "rotation_forest" ~ "RotationForest")) %>% 
   filter(!is.na(mean_time)) %>% 
   group_by(data__keyword) %>% 
   #mutate(mean_val_score = mean_val_score / max(mean_val_score, na.rm=T), mean_test_score = mean_test_score / max(mean_test_score, na.rm=T)) %>% 
@@ -114,7 +142,7 @@ df_normalized %>%
 
 
 # Default
-df %>% 
+df_normalized %>% 
   filter(hp == "default") %>% 
   #group_by(model_name, data__keyword) %>% 
   #filter(mean_val_score == max(mean_val_score, na.rm=T)) %>% 
@@ -163,7 +191,7 @@ library(zoo)
 
 breaks <- c(10, 20, 30, 50, 100, 150, 200, 400, 500, 800, 1200, 2000, 3000, 4000, 5000, 7000, 10000, 15000, 20000, 30000, 40000, 50000, 100000)
 
-N_SHUFFLE_TIME <- 10
+N_SHUFFLE_TIME <- 20
 
 res_time <- tibble()
 
@@ -214,7 +242,7 @@ for (i in 1:N_SHUFFLE_TIME) {
 
 # ITERS
 
-N_SHUFFLE <- 10
+N_SHUFFLE <- 20
 
 res <- tibble()
 
@@ -257,7 +285,7 @@ for (i in 1:N_SHUFFLE) {
 
 # ITERS on datasets
 
-N_SHUFFLE <- 10
+N_SHUFFLE <- 20
 
 res_datasets <- tibble()
 
@@ -266,6 +294,7 @@ for (i in 1:N_SHUFFLE) {
     add_column(random_number = runif(nrow(.))) %>% 
     group_by(model_name, data__keyword) %>% 
     mutate(random_rank = if_else(hp=="default", 0, rank(random_number)))%>% #default hp as first iter 
+    #mutate(random_rank = rank(random_number)) %>% 
     select(-random_number) %>% 
     arrange(random_rank)
   
@@ -322,6 +351,7 @@ ggplot() +
   #geom_text(aes(x=150, y=mean_test_score + 0.0007, color=model_name, label=str_c(model_name, " (Default)")), data=res_datasets_ %>% filter(random_rank == 0), size=7) +
   facet_wrap(~data__keyword, scales="free") + 
   scale_x_log10() +
+  ylim(0.7, 1.0) +
   xlab("Number of random search iterations") +
   ylab("Normalized test score of best model \n (on valid set) up to this iteration") +
   theme_minimal(base_size=22) +
@@ -347,7 +377,7 @@ ggplot() +
   #geom_text(aes(x=150, y=mean_test_score + 0.0007, color=model_name, label=str_c(model_name, " (Default)")), data=res_ %>% filter(random_rank == 0), size=7) +
   geom_dl(aes(label = model_name, x=random_rank, y=mean_test_score, color=model_name), method = list(dl.combine("smart.grid"), cex=1.3), data=res_)  +
   #ylim(0.6, 1.0) + 
-  coord_cartesian(ylim=c(0.6, 1.0)) + 
+  #coord_cartesian(ylim=c(0.6, 1.0)) + 
   scale_x_log10() +
   xlab("Number of random search iterations") +
   ylab("Normalized test score of best model \n (on valid set) up to this iteration") +

@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "mlp_benchmark_numeric",
-  "project": "thesis",
+  "name" : "mlp_benchmark_classif_default",
+  "project": "thesis-2",
   "method" : "grid",
   "metric": {
     "name": "mean_test_score",
@@ -24,7 +24,7 @@ sweep_config = {
       "value": "rtdl_mlp"
     },
     "model__use_checkpoints": {
-      "value": False
+      "value": True
     },
     "model__optimizer": {
       "value": "adamw"
@@ -72,7 +72,7 @@ sweep_config = {
                  "MiniBooNE",
                  "Higgs",
                  "eye_movements",
-                 #"jannis",
+                 "jannis",
                  "credit",
                  "california",
                  "wine"]
@@ -88,9 +88,15 @@ sweep_config = {
     },
     "regression": {
       "value": False
-    }
+    },
+    "data__regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-2")

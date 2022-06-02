@@ -1,11 +1,10 @@
 from target_function_classif import *
 from generate_data import *
 from data_transforms import *
-from utils.skorch_utils import create_mlp_skorch_regressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor
 from xgboost import XGBClassifier
 from skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_NPT_skorch
-from skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch
+from skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch
 from rotation_forest import RotationForestClassifier
 
 
@@ -36,7 +35,7 @@ def convert_keyword_to_function(keyword):
     if keyword == "xgb_c":
         return XGBClassifier
     if keyword == 'mlp_skorch_regressor':
-        return create_mlp_skorch_regressor
+        return create_rtdl_mlp_regressor_skorch
     elif keyword == "uniform_data":
         return generate_uniform_data
     elif keyword == "periodic_triangle":

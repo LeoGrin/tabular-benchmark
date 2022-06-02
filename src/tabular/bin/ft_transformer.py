@@ -180,12 +180,15 @@ class Transformer(nn.Module):
         kv_compression_sharing: ty.Optional[str],
         #
         d_out: int,
+        regression: bool,
     ) -> None:
         assert (kv_compression is None) ^ (kv_compression_sharing is not None)
 
         super().__init__()
         self.tokenizer = Tokenizer(d_numerical, categories, d_token, token_bias)
         n_tokens = self.tokenizer.n_tokens
+
+        self.regression = regression
 
         def make_kv_compression():
             assert kv_compression
@@ -298,7 +301,8 @@ class Transformer(nn.Module):
             x = self.last_normalization(x)
         x = self.last_activation(x)
         x = self.head(x)
-        x = x.squeeze(-1)
+        if not self.regression:
+            x = x.squeeze(-1)
         return x
 
 

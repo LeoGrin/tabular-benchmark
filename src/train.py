@@ -3,10 +3,11 @@ from create_models import create_model
 import os
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.preprocessing import QuantileTransformer
+from sklearn.metrics import r2_score, mean_squared_error
 
 
 
-def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, config, model_id):
+def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, config, model_id, return_r2):
     """
     Evaluate the model
     """
@@ -16,28 +17,45 @@ def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, con
     y_hat_test = model.predict(x_test)
 
     if "regression" in config.keys() and config["regression"]:
-        train_score = np.sqrt(np.mean((y_hat_train - y_train.reshape(-1)) ** 2))
+        if return_r2:
+            print(np.any(np.isnan(y_hat_train)))
+            train_score = r2_score(y_train.reshape(-1), y_hat_train.reshape(-1))
+        else:
+            train_score = np.sqrt(np.mean((y_hat_train.reshape(-1) - y_train.reshape(-1)) ** 2))
     else:
         train_score = np.sum((y_hat_train == y_train)) / len(y_train)
 
     if "model__use_checkpoints" in config.keys() and config["model__use_checkpoints"]:
-        print("Using checkpoint")
-        model.load_params(r"skorch_cp/params_{}.pt".format(model_id))
+        if not config["regression"]:
+            print("Using checkpoint")
+            model.load_params(r"skorch_cp/params_{}.pt".format(model_id))
+        else:
+            #TransformedTargetRegressor
+            if config["transformed_target"]:
+                model.regressor_.load_params(r"skorch_cp/params_{}.pt".format(model_id))
+            else:
+                model.load_params(r"skorch_cp/params_{}.pt".format(model_id))
 
     if x_val is not None:
         if "regression" in config.keys() and config["regression"]:
-            val_score = np.sqrt(np.mean((y_hat_val - y_val.reshape(-1)) ** 2))
+            if return_r2:
+                val_score = r2_score(y_val.reshape(-1), y_hat_val.reshape(-1))
+            else:
+                val_score = np.sqrt(np.mean((y_hat_val.reshape(-1) - y_val.reshape(-1)) ** 2))
         else:
             val_score = np.sum((y_hat_val == y_val)) / len(y_val)
     else:
         val_score = None
 
     if "regression" in config.keys() and config["regression"]:
-        test_score = np.sqrt(np.mean((y_hat_test - y_test.reshape(-1)) ** 2))
+        if return_r2:
+            test_score = r2_score(y_test.reshape(-1), y_hat_test.reshape(-1))
+        else:
+            test_score = np.sqrt(np.mean((y_hat_test.reshape(-1) - y_test.reshape(-1)) ** 2))
     else:
         test_score = np.sum((y_hat_test == y_test)) / len(y_test)
 
-    if "model__use_checkpoints" in config.keys() and config["model__use_checkpoints"]:
+    if "model__use_checkpoints" in config.keys() and config["model__use_checkpoints"] and not return_r2:
         try:
             os.remove(r"skorch_cp/params_{}.pt".format(model_id))
         except:
@@ -48,7 +66,7 @@ def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, con
 
     return train_score, val_score, test_score
 
-def sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config):
+def sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, return_r2):
     """
     Evaluate a fitted model from sklearn
     """
@@ -57,31 +75,40 @@ def sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_t
     y_hat_test = fitted_model.predict(x_test)
 
     if "regression" in config.keys() and config["regression"]:
-        train_score = np.sqrt(np.mean((y_hat_train - y_train.reshape(-1)) ** 2))
+        if return_r2:
+            train_score = r2_score(y_train.reshape(-1), y_hat_train.reshape(-1))
+        else:
+            train_score = np.sqrt(np.mean((y_hat_train.reshape(-1) - y_train.reshape(-1)) ** 2))
     else:
         train_score = np.sum((y_hat_train == y_train)) / len(y_train)
 
     if "regression" in config.keys() and config["regression"]:
-        val_score = np.sqrt(np.mean((y_hat_val - y_val.reshape(-1)) ** 2))
+        if return_r2:
+            val_score = r2_score(y_val.reshape(-1), y_hat_val.reshape(-1))
+        else:
+            val_score = np.sqrt(np.mean((y_hat_val.reshape(-1) - y_val.reshape(-1)) ** 2))
     else:
         val_score = np.sum((y_hat_val == y_val)) / len(y_val)
 
     if "regression" in config.keys() and config["regression"]:
-        test_score = np.sqrt(np.mean((y_hat_test - y_test.reshape(-1)) ** 2))
+        if return_r2:
+            test_score = r2_score(y_test.reshape(-1), y_hat_test.reshape(-1))
+        else:
+            test_score = np.sqrt(np.mean((y_hat_test.reshape(-1) - y_test.reshape(-1)) ** 2))
     else:
         test_score = np.sum((y_hat_test == y_test)) / len(y_test)
 
     return train_score, val_score, test_score
 
-def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test, config, model_id=None):
+def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test, config, model_id=None, return_r2=False):
     """
     Evaluate the model
     """
 
     if config["model_type"] == "sklearn":
-        train_score, val_score, test_score = sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config)
+        train_score, val_score, test_score = sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, return_r2=return_r2)
     elif config["model_type"] == "skorch":
-        train_score, val_score, test_score = skorch_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, model_id)
+        train_score, val_score, test_score = skorch_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, model_id, return_r2=return_r2)
 
     return train_score, val_score, test_score
 
@@ -91,15 +118,17 @@ def train_model(iter, x_train, y_train, config):
     """
     if config["model_type"] == "skorch":
         id = hash(".".join(list(config.keys())) + "." + str(iter)) # uniquely identify the run (useful for checkpointing)
-        model = create_model(config, id)  # TODO rng ??
+        model_raw = create_model(config, id)  # TODO rng ??
     elif config["model_type"] == "sklearn":
         id = None
-        model = create_model(config)
+        model_raw = create_model(config)
 
-    #if config["regression"]:
-    #    model = TransformedTargetRegressor(model_, transformer=QuantileTransformer(output_distribution="normal"))
-    #else:
-    #    model = model_
+    if config["regression"] and config["transformed_target"]:
+        model = TransformedTargetRegressor(model_raw, transformer=QuantileTransformer(output_distribution="normal"))
+    else:
+        model = model_raw
+
+    print(y_train.shape)
 
     model.fit(x_train, y_train)
 
