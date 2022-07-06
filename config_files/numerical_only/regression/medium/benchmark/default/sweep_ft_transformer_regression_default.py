@@ -4,7 +4,7 @@ import numpy as np
 sweep_config = {
   "program": "run_experiment.py",
   "name" : "ft_transformer_default_numeric_regression",
-  "project": "thesis-3",
+  "project": "thesis-4",
   "method" : "grid",
   "metric": {
     "name": "mean_test_score",
@@ -129,7 +129,7 @@ sweep_config = {
           "value": True
     },
     "transformed_target": {
-        "value": False
+        "value": True
     },
     "max_train_samples": {
       "value": 10000

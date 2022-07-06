@@ -72,7 +72,8 @@ def create_NPT_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
     return mlp_skorch
 
 
-def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
+def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True,
+                         categorical_indicator=None, **kwargs):
     if "verbose" not in kwargs:
         verbose = 0
     else:
@@ -97,7 +98,7 @@ def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
     elif optimizer == "sgd":
         optimizer = SGD
     batch_size = kwargs.pop('batch_size')
-    callbacks = [InputShapeSetterResnet(),
+    callbacks = [InputShapeSetterResnet(categorical_indicator=categorical_indicator),
                  EarlyStopping(monitor="valid_loss",
                                patience=es_patience)]  # TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='accuracy', name='train_accuracy', on_train=True))
@@ -112,6 +113,9 @@ def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
 
+    if not categorical_indicator is None:
+        categorical_indicator = torch.BoolTensor(categorical_indicator)
+
     mlp_skorch = NeuralNetClassifier(
         ResNet,
         # Shuffle training data on each epoch
@@ -123,6 +127,7 @@ def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
         module__categories=None,  # will be change when fitted
         module__d_out=1,  # idem
         module__regression=False,
+        module__categorical_indicator=categorical_indicator,
         verbose=verbose,
         callbacks=callbacks,
         **kwargs
@@ -131,7 +136,8 @@ def create_resnet_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
     return mlp_skorch
 
 
-def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
+def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True,
+                           categorical_indicator=None, **kwargs):
     if "lr_scheduler" not in kwargs:
         lr_scheduler = False
     else:
@@ -166,6 +172,9 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
 
+    if not categorical_indicator is None:
+        categorical_indicator = torch.BoolTensor(categorical_indicator)
+
     mlp_skorch = NeuralNetClassifier(
         MLP,
         # Shuffle training data on each epoch
@@ -177,6 +186,7 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
         module__categories=None,  # will be change when fitted
         module__d_out=1,  # idem
         module__regression=False,
+        module__categorical_indicator=categorical_indicator,
         verbose=0,
         callbacks=callbacks,
         **kwargs
@@ -185,7 +195,8 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
     return mlp_skorch
 
 
-def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
+def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True,
+                                 categorical_indicator=None, **kwargs):
     if "lr_scheduler" not in kwargs:
         lr_scheduler = False
     else:
@@ -206,7 +217,7 @@ def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True, **kwa
     elif optimizer == "sgd":
         optimizer = SGD
     batch_size = kwargs.pop('batch_size')
-    callbacks = [InputShapeSetterResnet(),
+    callbacks = [InputShapeSetterResnet(categorical_indicator=categorical_indicator),
                  EarlyStopping(monitor="valid_loss",
                                patience=es_patience)]  # TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='accuracy', name='train_accuracy', on_train=True))
@@ -220,6 +231,10 @@ def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True, **kwa
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
 
+    if not categorical_indicator is None:
+        categorical_indicator = torch.BoolTensor(categorical_indicator)
+
+
     model_skorch = NeuralNetClassifier(
         Transformer,
         # Shuffle training data on each epoch
@@ -231,6 +246,7 @@ def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True, **kwa
         module__categories=None,  # will be change when fitted
         module__d_out=1,  # idem
         module__regression=False,
+        module__categorical_indicator=categorical_indicator,
         verbose=0,
         callbacks=callbacks,
         **kwargs

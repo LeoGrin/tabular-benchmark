@@ -1,0 +1,26 @@
+# A model parameter file for the Adult data set.
+parameters: {
+    SAINT: {
+        dim: 64,
+        depth: 1,
+        heads: 2,
+        dropout: 0.2},
+
+    TabTransformer: {
+        dim: 128,
+        depth: 1,
+        heads: 24,
+        weight_decay: -5,
+        learning_rate: -5,
+        dropout: 0.4},
+
+    TabNet: {
+        n_d: 14,
+        n_steps: 3,
+        gamma: 1.76,
+        cat_emb_dim: 3,
+        n_independent: 2,
+        n_shared: 3,
+        momentum: 0.319,
+        mask_type: entmax}
+}

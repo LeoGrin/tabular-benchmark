@@ -4,7 +4,7 @@ import numpy as np
 sweep_config = {
   "program": "run_experiment.py",
   "name" : "rf_random_rotation",
-  "project": "thesis",
+  "project": "thesis-4",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
@@ -51,7 +51,7 @@ sweep_config = {
     "data__keyword": {
       "values": ["electricity",
                  "covertype",
-                 "poker",
+                 #"poker",
                  "pol",
                  "house_16H",
                  "kdd_ipums_la_97-small",
@@ -61,19 +61,19 @@ sweep_config = {
                  "MiniBooNE",
                  "Higgs",
                  "eye_movements",
-                 "jannis",
+                 #"jannis",
                  "credit",
                  "california",
                  "wine"]
     },
       "transform__0__method_name": {
-          "value": "remove_useless_features"
+          "value": "remove_features_rf"
       },
-      "transform__0__max_rel_decrease": {
-          "values": [0, 0.01, 0.02, 0.05],
+      "transform__0__num_features_to_remove": {
+          "values": [0.0, 0.5],
       },
-      "transform__0__n_iter": {
-          "value": 2,
+      "transform__0__model_to_use": {
+          "values": ["rf_c"],
       },
       "transform__1__method_name": {
           "value": "gaussienize"
@@ -85,7 +85,7 @@ sweep_config = {
           "value": "random_rotation"
       },
       "transform__2__deactivated": {
-          "values": [True]
+          "values": [True, False]
       },
       "n_iter": {
           "value": "auto",
@@ -103,4 +103,4 @@ sweep_config = {
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis-2")
+sweep_id = wandb.sweep(sweep_config, project="thesis-4")

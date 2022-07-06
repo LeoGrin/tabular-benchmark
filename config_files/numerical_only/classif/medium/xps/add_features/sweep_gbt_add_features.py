@@ -55,7 +55,7 @@ sweep_config = {
     "data__keyword": {
       "values": ["electricity",
                  "covertype",
-                 "poker",
+                 #"poker",
                  "pol",
                  "house_16H",
                  "kdd_ipums_la_97-small",
@@ -65,7 +65,7 @@ sweep_config = {
                  "MiniBooNE",
                  "Higgs",
                  "eye_movements",
-                 "jannis",
+                 #"jannis",
                  "credit",
                  "california",
                  "wine"]

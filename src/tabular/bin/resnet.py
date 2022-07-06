@@ -28,13 +28,15 @@ class ResNet(nn.Module):
             residual_dropout: float,
             d_out: int,
             regression: bool,
+            categorical_indicator
     ) -> None:
         super().__init__()
-
+        #categories = None #TODO
         def make_normalization():
             return {'batchnorm': nn.BatchNorm1d, 'layernorm': nn.LayerNorm}[
                 normalization
             ](d)
+        self.categorical_indicator = categorical_indicator #Added
         self.regression = regression
         self.main_activation = lib.get_activation_fn(activation)
         self.last_activation = lib.get_nonglu_activation_fn(activation)
@@ -46,9 +48,11 @@ class ResNet(nn.Module):
 
         if categories is not None:
             d_in += len(categories) * d_embedding
+            print(type(categories))
+            print([0] + categories[:-1])
             category_offsets = torch.tensor([0] + categories[:-1]).cumsum(0)
             self.register_buffer('category_offsets', category_offsets)
-            self.category_embeddings = nn.Embedding(sum(categories), d_embedding)
+            self.category_embeddings = nn.Embedding(int(sum(categories)), d_embedding)
             nn.init.kaiming_uniform_(self.category_embeddings.weight, a=math.sqrt(5))
             print(f'{self.category_embeddings.weight.shape=}')
 
@@ -70,8 +74,13 @@ class ResNet(nn.Module):
         self.last_normalization = make_normalization()
         self.head = nn.Linear(d, d_out)
 
-    def forward(self, x_num) -> Tensor:
-        x_cat = None # FIXME
+    def forward(self, x) -> Tensor:
+        if not self.categorical_indicator is None:
+            x_num = x[:, ~self.categorical_indicator]
+            x_cat = x[:, self.categorical_indicator].long() #TODO
+        else:
+            x_num = x
+            x_cat = None
         x = []
         if x_num is not None:
             x.append(x_num)
@@ -104,13 +113,24 @@ class ResNet(nn.Module):
         return x
 
 class InputShapeSetterResnet(skorch.callbacks.Callback):
-    def __init__(self, regression=False, batch_size=None):
+    def __init__(self, regression=False, batch_size=None,
+                 categorical_indicator=None):
+        self.categorical_indicator = categorical_indicator
         self.regression = regression
         self.batch_size = batch_size
     def on_train_begin(self, net, X, y):
-        net.set_params(module__d_numerical=X.shape[1], # FIXME for categorical and numerical
-        module__categories=None, #FIXME #lib.get_categories(X_cat),
+        print("categorical_indicator", self.categorical_indicator)
+        if self.categorical_indicator is None:
+            d_numerical = X.shape[1]
+            categories = None
+        else:
+            d_numerical = X.shape[1] - sum(self.categorical_indicator)
+            categories = list((X[:, self.categorical_indicator].max(0) + 1).astype(int))
+        net.set_params(module__d_numerical=d_numerical, # FIXME for categorical and numerical
+        module__categories=categories, #FIXME #lib.get_categories(X_cat),
         module__d_out=2 if self.regression == False else 1) #FIXME#D.info['n_classes'] if D.is_multiclass else 1,
+        print("Numerical features: {}".format(d_numerical))
+        print("Categories {}".format(categories))
 
 #
 #

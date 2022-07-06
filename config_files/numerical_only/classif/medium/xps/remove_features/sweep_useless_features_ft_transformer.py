@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "ft_transformer_add_features",
-  "project": "thesis",
+  "name" : "ft_useless_features_bonus",
+  "project": "thesis-3",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
@@ -105,7 +105,7 @@ sweep_config = {
     "data__keyword": {
       "values": ["electricity",
                  "covertype",
-                 "poker",
+                 #"poker",
                  "pol",
                  "house_16H",
                  "kdd_ipums_la_97-small",
@@ -115,7 +115,7 @@ sweep_config = {
                  "MiniBooNE",
                  "Higgs",
                  "eye_movements",
-                 "jannis",
+                 #"jannis",
                  "credit",
                  "california",
                  "wine"]
@@ -140,9 +140,15 @@ sweep_config = {
     },
     "regression": {
       "value": False
-    }
+    },
+    "data__regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-3")

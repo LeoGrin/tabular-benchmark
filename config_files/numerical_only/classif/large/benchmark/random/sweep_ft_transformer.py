@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "ft_transformer_benchmark_numeric_large",
-  "project": "thesis",
+  "name" : "ft_transformer_classif_numeric_large_bonus",
+  "project": "thesis-5",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
@@ -104,7 +104,7 @@ sweep_config = {
     },
     "data__keyword": {
       "values": ["covertype",
-                 "poker",
+                 #"poker",
                  "MiniBooNE",
                  "Higgs",
                  "jannis"]
@@ -128,4 +128,4 @@ sweep_config = {
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-5")

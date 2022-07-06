@@ -29,18 +29,29 @@ def generate_target(x, config, rng):
     data = method(x, **target_config, rng=rng)
     return data
 
-def transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng):
+def transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng, categorical_indicator=None):
     i = 0
     print("transforming data...")
     while True:
         if f"transform__{i}__method_name" in config.keys():
             print("transform", i)
             method = convert_keyword_to_function(config[f"transform__{i}__method_name"])
+            if categorical_indicator is None:
+                apply_on = "all"
+            else:
+                apply_on = config[f"transform__{i}__apply_on"]
             target_config = {}
             for key in config.keys():
-                if key.startswith(f"transform__{i}__") and key != f"transform__{i}__method_name":
+                if key.startswith(f"transform__{i}__") and key != f"transform__{i}__method_name" and key != f"transform__{i}__apply_on":
                     target_config[key[len(f"transform__{i}__"):]] = config[key]
-            x_train, x_val, x_test, y_train, y_val, y_test = method(x_train, x_val, x_test, y_train, y_val, y_test, **target_config, rng=rng)
+            if apply_on == "all":
+                x_train, x_val, x_test, y_train, y_val, y_test = method(x_train, x_val, x_test, y_train, y_val, y_test, **target_config, rng=rng)
+            elif apply_on == "numerical":
+                if not np.all(categorical_indicator):
+                    x_train[:, ~categorical_indicator], x_val[:, ~categorical_indicator], x_test[:, ~categorical_indicator], y_train, y_val, y_test = method(x_train[:, ~categorical_indicator], x_val[:, ~categorical_indicator], x_test[:, ~categorical_indicator], y_train, y_val, y_test, **target_config, rng=rng)
+            elif apply_on == "categorical":
+                if np.any(categorical_indicator):
+                    x_train[:, categorical_indicator], x_val[:, categorical_indicator], x_test[:, categorical_indicator], y_train, y_val, y_test = method(x_train[:, categorical_indicator], x_val[:, categorical_indicator], x_test[:, categorical_indicator], y_train, y_val, y_test, **target_config, rng=rng)
         else:
             break
         i += 1
@@ -83,7 +94,12 @@ def generate_dataset(config, rng):
     data = generate_data(config, rng)
     if data is None:
         return None
-    if len(data) == 2: #if generate data returns x, y #TODO something cleaner
+    categorical_indicator = None
+    if len(data) == 3:
+        x, y, categorical_indicator = data
+    #if "data__categorical" in config.keys() and config["data__categorical"]:
+    #    x, y, categorical_indicator = data
+    elif len(data) == 2: #if generate data returns x, y #TODO something cleaner
         x, y = data
         x = x.astype(np.float32) #FIXME
     else:
@@ -93,5 +109,6 @@ def generate_dataset(config, rng):
 
     x_train, x_val, x_test, y_train, y_val, y_test = data_to_train_test(x, y, config, rng=rng)
 
-    x_train, x_val, x_test, y_train, y_val, y_test = transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng)
-    return x_train, x_val, x_test, y_train, y_val, y_test
+    x_train, x_val, x_test, y_train, y_val, y_test = transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng,
+                                                                    categorical_indicator=categorical_indicator)
+    return x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator

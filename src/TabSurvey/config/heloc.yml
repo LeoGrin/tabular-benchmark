@@ -1,0 +1,36 @@
+# General parameters
+dataset: Heloc
+model_name: DNFNet # LinearModel, KNN, SVM, DecisionTree, RandomForest, XGBoost, CatBoost, LightGBM, ModelTree
+                # MLP, TabNet, VIME, TabTransformer, NODE, DeepGBM, RLN, DNFNet, STG, NAM, DeepFM, SAINT
+objective: binary # Don't change
+optimize_hyperparameters: True
+
+# GPU parameters
+use_gpu: False
+gpu_ids: [0, 1]
+data_parallel: True
+
+# Optuna parameters - https://optuna.org/
+n_trials: 2
+direction: maximize
+
+# Cross validation parameters
+num_splits: 5
+shuffle: True
+seed: 221 # Don't change
+
+# Preprocessing parameters
+scale: True
+target_encode: False
+one_hot_encode: False
+
+# Training parameters
+batch_size: 128
+val_batch_size: 256
+early_stopping_rounds: 20
+epochs: 10
+logging_period: 100
+
+# About the data
+num_classes: 1  # for classification
+num_features: 23

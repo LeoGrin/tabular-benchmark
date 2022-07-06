@@ -4,3 +4,6 @@
 [submodule "src/non-parametric-transformers"]
 	path = src/non-parametric-transformers
 	url = https://github.com/OATML/non-parametric-transformers.git
+[submodule "TabSurvey"]
+	path = TabSurvey
+	url = https://github.com/kathrinse/TabSurvey.git

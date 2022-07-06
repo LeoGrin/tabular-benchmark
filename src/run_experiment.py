@@ -9,7 +9,7 @@ import platform
 import time
 import torch
 
-os.environ["WANDB_MODE"] = "offline"
+#os.environ["WANDB_MODE"] = "offline"
 
 
 # def modify_config(config):
@@ -56,7 +56,7 @@ def train_model_on_config(config=None):
             r2_test_scores = []
             times = []
             if config["n_iter"] == "auto":
-                x_train, x_val, x_test, y_train, y_val, y_test = generate_dataset(config, np.random.RandomState(0))
+                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator  = generate_dataset(config, np.random.RandomState(0))
                 if x_test.shape[0] > 6000:
                     n_iter = 1
                 elif x_test.shape[0] > 3000:
@@ -74,7 +74,7 @@ def train_model_on_config(config=None):
                 print(rng.randn(1))
                 # TODO: separate numeric and categorical features
                 t = time.time()
-                x_train, x_val, x_test, y_train, y_val, y_test = generate_dataset(config, rng)
+                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator = generate_dataset(config, rng)
                 data_generation_time = time.time() - t
                 print("Data generation time:", data_generation_time)
                 # print(y_train)
@@ -88,12 +88,12 @@ def train_model_on_config(config=None):
                 else:
                     y_train, y_val, y_test = y_train.reshape(-1), y_val.reshape(-1), y_test.reshape(-1)
                     # y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(np.float32)
-                    x_train, x_val, x_test = x_train.astype(np.float32), x_val.astype(np.float32), x_test.astype(
-                        np.float32)
+                x_train, x_val, x_test = x_train.astype(np.float32), x_val.astype(np.float32), x_test.astype(
+                    np.float32)
 
                 start_time = time.time()
                 print(y_train.shape)
-                model, model_id = train_model(i, x_train, y_train, config)
+                model, model_id = train_model(i, x_train, y_train, categorical_indicator, config)
                 if config["regression"]:
                     try:
                         r2_train, r2_val, r2_test = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
@@ -203,6 +203,12 @@ def train_model_on_config(config=None):
                 print("crashed, trying to remove checkpoint files")
                 try:
                     os.remove(r"skorch_cp/params_{}.pt".format(model_id))
+                except:
+                    print("could not remove params file")
+                    pass
+            if config["model_type"] == "tab_survey":
+                try:
+                    os.remove(r"output/saint/{}/tmp/m_{}_best.pt".format(config["data__keyword"], model_id))
                 except:
                     print("could not remove params file")
                     pass

@@ -16,7 +16,9 @@ class NeuralNetRegressorBis(NeuralNetRegressor):
             y = y.reshape(-1, 1)
         return super().fit(X, y)
 
-def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
+def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
+                                   categorical_indicator=None, **kwargs):
+    print("resnet regressor")
     if "lr_scheduler" not in kwargs:
         lr_scheduler = False
     else:
@@ -37,7 +39,8 @@ def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True, **k
     elif optimizer == "sgd":
         optimizer = SGD
     batch_size = kwargs.pop('batch_size')
-    callbacks = [InputShapeSetterResnet(regression=True),
+    callbacks = [InputShapeSetterResnet(regression=True,
+                                        categorical_indicator=categorical_indicator),
                        EarlyStopping(monitor="valid_loss", patience=es_patience)] #TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='neg_root_mean_squared_error', name='train_accuracy', on_train=True))
 
@@ -49,7 +52,8 @@ def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True, **k
     if not wandb_run is None:
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
-
+    if not categorical_indicator is None:
+        categorical_indicator = torch.BoolTensor(categorical_indicator)
 
     mlp_skorch = NeuralNetRegressorBis(
         ResNet,
@@ -61,14 +65,15 @@ def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True, **k
         module__categories=None, # will be change when fitted
         module__d_out=1,  # idem
         module__regression=True,
-        verbose=0,
+        module__categorical_indicator=categorical_indicator,
         callbacks=callbacks,
         **kwargs
     )
 
     return mlp_skorch
 
-def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
+def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
+                                     categorical_indicator=None, **kwargs):
     if "lr_scheduler" not in kwargs:
         lr_scheduler = False
     else:
@@ -101,6 +106,9 @@ def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True, *
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
 
+    if not categorical_indicator is None:
+        categorical_indicator = torch.BoolTensor(categorical_indicator)
+
 
     mlp_skorch = NeuralNetRegressorBis(
         MLP,
@@ -112,6 +120,7 @@ def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True, *
         module__categories=None, # will be change when fitted
         module__d_out=1,  # idem
         module__regression=True,
+        module__categorical_indicator=categorical_indicator,
         verbose=0,
         callbacks=callbacks,
         **kwargs
@@ -120,7 +129,8 @@ def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True, *
     return mlp_skorch
 
 
-def create_ft_transformer_regressor_skorch(id, wandb_run=None, use_checkpoints=True, **kwargs):
+def create_ft_transformer_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
+                                           categorical_indicator=None, **kwargs):
     if "lr_scheduler" not in kwargs:
         lr_scheduler = False
     else:
@@ -141,7 +151,7 @@ def create_ft_transformer_regressor_skorch(id, wandb_run=None, use_checkpoints=T
     elif optimizer == "sgd":
         optimizer = SGD
     batch_size = kwargs.pop('batch_size')
-    callbacks = [InputShapeSetterResnet(regression=True),
+    callbacks = [InputShapeSetterResnet(regression=True, categorical_indicator=categorical_indicator),
                        EarlyStopping(monitor="valid_loss", patience=es_patience)] #TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='neg_root_mean_squared_error', name='train_accuracy', on_train=True))
     if lr_scheduler:
@@ -152,6 +162,9 @@ def create_ft_transformer_regressor_skorch(id, wandb_run=None, use_checkpoints=T
     if not wandb_run is None:
         callbacks.append(WandbLogger(wandb_run, save_model=False))
         callbacks.append(LearningRateLogger())
+
+    if not categorical_indicator is None:
+        categorical_indicator = torch.BoolTensor(categorical_indicator)
 
 
     model_skorch = NeuralNetRegressorBis(
@@ -166,6 +179,7 @@ def create_ft_transformer_regressor_skorch(id, wandb_run=None, use_checkpoints=T
         verbose=0,
         callbacks=callbacks,
         module__regression=True,
+        module__categorical_indicator=categorical_indicator,
         **kwargs
     )
 

@@ -23,18 +23,19 @@ import matplotlib.pyplot as plt
 #           "max_val_samples": 50000,
 #          "max_test_samples": 50000}
 
-config = {"model_name": "rf_c",
-          "model_type": "sklearn",
-          "model__n_estimators": 2000,
+config = {"model_name": "rtdl_resnet",
+          "model_type": "skorch",
+          #"model__n_estimators": 2000,
           "data__method_name": "real_data",
-          "data__keyword": "bank-marketing",
-          "transform__0__method_name": "gaussienize",
-          "transform__0__type": "quantile",
-          "transform__1__method_name": "select_features_rf",
-          "transform__1__num_features": 5,
-          "transform__2__method_name": "remove_high_frequency_from_train",
-          "transform__2__cov_mult": 0.5,
-          "transform__2__covariance_estimation": "robust",
+          "data__categorical": True,
+          "data__keyword": "compass",
+          # "transform__0__method_name": "gaussienize",
+          # "transform__0__type": "quantile",
+          # "transform__1__method_name": "select_features_rf",
+          # "transform__1__num_features": 5,
+          # "transform__2__method_name": "remove_high_frequency_from_train",
+          # "transform__2__cov_mult": 0.5,
+          # "transform__2__covariance_estimation": "robust",
           "train_prop": 0.70,
           "max_train_samples": 10000,
           "val_test_prop": 0.3,
@@ -42,7 +43,7 @@ config = {"model_name": "rf_c",
          "max_test_samples": 10000}
 
 rng = np.random.RandomState(32)
-x_train, x_val, x_test, y_train, y_val, y_test= generate_dataset(config, rng)
+x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator = generate_dataset(config, rng)
 
 print(x_train.shape)
 

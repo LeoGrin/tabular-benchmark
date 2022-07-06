@@ -114,7 +114,7 @@ sweep_config = {
           "value": True
     },
     "transformed_target": {
-        "value": False
+        "value": True
     },
     "max_train_samples": {
       "value": 10000

@@ -1,8 +1,10 @@
+import os
+os.environ["PROJECT_DIR"] = "test"
 import streamlit as st
-from src.plot_utils import plot_decision_boudaries
+from utils.plot_utils import plot_decision_boudaries
 import pickle
 import numpy as np
-from utils import create_mlp_skorch
+from skorch_models import create_rtdl_mlp_skorch
 
 st.title('Decision boundaries')
 
@@ -43,7 +45,7 @@ for model_name in model_names.split(","):
     params.pop("method")
     params.pop("method_name")
     params["device"] = "cpu"
-    model = create_mlp_skorch(id=None, wandb_run=None,
+    model = create_rtdl_mlp_skorch(id=None, wandb_run=None,
                               module__input_size=x_train.shape[1],
                               module__output_size=2,
                               **params)

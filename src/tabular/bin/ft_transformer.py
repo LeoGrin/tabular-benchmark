@@ -25,6 +25,7 @@ class Tokenizer(nn.Module):
         d_token: int,
         bias: bool,
     ) -> None:
+        #categories = None
         super().__init__()
         if categories is None:
             d_bias = d_numerical
@@ -181,13 +182,15 @@ class Transformer(nn.Module):
         #
         d_out: int,
         regression: bool,
+        categorical_indicator
     ) -> None:
         assert (kv_compression is None) ^ (kv_compression_sharing is not None)
-
         super().__init__()
         self.tokenizer = Tokenizer(d_numerical, categories, d_token, token_bias)
         n_tokens = self.tokenizer.n_tokens
+        print("d_token {}".format(d_token))
 
+        self.categorical_indicator = categorical_indicator
         self.regression = regression
 
         def make_kv_compression():
@@ -268,8 +271,14 @@ class Transformer(nn.Module):
             x = layer[f'norm{norm_idx}'](x)
         return x
 
-    def forward(self, x_num) -> Tensor:
-        x_cat = None #FIXME
+    def forward(self, x) -> Tensor:
+        if not self.categorical_indicator is None:
+            x_num = x[:, ~self.categorical_indicator]
+            x_cat = x[:, self.categorical_indicator].long() #TODO
+        else:
+            x_num = x
+            x_cat = None
+        #x_cat = None #FIXME
         x = self.tokenizer(x_num, x_cat)
 
         for layer_idx, layer in enumerate(self.layers):

@@ -1,6 +1,16 @@
 library(tidyverse)
 library(zoo)
 
+library(RColorBrewer)
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+myColors <- gg_color_hue(8)
+names(myColors) <- c("GradientBoostingTree", "RandomForest", "HistGradientBoostingTree", "XGBoost", "FT Transformer", "Resnet", "MLP", "SAINT")
+colScale <- list(scale_colour_manual(name = "grp",values = myColors, limits=force),
+                 scale_fill_manual(name = "grp",values = myColors, limits=force))
+
 rename <- function(df) {
   return(df %>% 
            mutate(model_name = case_when(
@@ -10,12 +20,16 @@ rename <- function(df) {
              model_name == "xgb_r" ~ "XGBoost",
              model_name == "gbt_c" ~ "GradientBoostingTree",
              model_name == "gbt_r" ~ "GradientBoostingTree",
+             model_name == "hgbt_c" ~ "HistGradientBoostingTree",
+             model_name == "hgbt_r" ~ "HistGradientBoostingTree",
              model_name == "ft_transformer" ~ "FT Transformer",
              model_name == "ft_transformer_regressor" ~ "FT Transformer",
              model_name == "rtdl_resnet" ~ "Resnet",
              model_name == "rtdl_resnet_regressor" ~ "Resnet",
              model_name == "rtdl_mlp" ~ "MLP",
-             model_name == "rtdl_mlp_regressor" ~ "MLP")))
+             model_name == "rtdl_mlp_regressor" ~ "MLP",
+             model_name == "saint" ~ "SAINT",
+             TRUE ~ model_name)))
 }
 
 
@@ -144,9 +158,17 @@ random_search_no_variable <- function(df, n_shuffles, default_first=F){
         select(-random_number) %>% 
         arrange(random_rank)
     }
+    new_df <- new_df %>% 
+      group_by(model_name, data__keyword) %>%  #for fairness, match the min number of iteration for each dataset and model
+      mutate(num_iters = sum(!is.na(mean_val_score))) %>% 
+      ungroup() %>% 
+      group_by(data__keyword) %>% 
+      filter(random_rank <= min(num_iters)) %>% 
+      ungroup()
+    
     
     res <- res %>%  bind_rows(new_df %>% 
-                                
+                                group_by(model_name, data__keyword) %>% 
                                 mutate(best_val_score_so_far = cummax(mean_val_score)) %>% 
                                 mutate(mean_test_score = if_else(mean_val_score == best_val_score_so_far, mean_test_score, NA_real_)) %>% 
                                 # Only keep the scores for the first time we beat valid score, put the other to NA
@@ -156,6 +178,63 @@ random_search_no_variable <- function(df, n_shuffles, default_first=F){
                                 #for every dataset and {{variable}}, prolong the curve by the last best value when there is no value left
                                 ungroup() %>% 
                                 complete(model_name, data__keyword, random_rank) %>%
+                                group_by(model_name, data__keyword) %>% 
+                                mutate(mean_test_score = na.locf(mean_test_score, na.rm=F))%>% 
+                                ungroup() %>% 
+                                mutate(n_dataset = i))
+  }
+  return(res)
+}
+
+random_search_no_variable_time <- function(df, n_shuffles, default_first=F){
+ breaks <- c(10, 20, 30, 50, 100, 150, 200, 400, 500, 800, 1200, 2000, 3000, 4000, 5000, 7000, 10000, 15000, 20000, 30000, 40000, 50000, 100000)
+  #breaks <- c(10, 20, 30, 50, 500, 1200, 3000, 5000, 10000, 20000)
+  
+  res <- tibble()
+  
+  for (i in 1:n_shuffles) {
+    if (default_first) {
+      new_df <- df %>% 
+        add_column(random_number = runif(nrow(.))) %>% 
+        group_by(model_name, data__keyword) %>% 
+        mutate(random_rank = if_else(hp=="default", 0, rank(random_number)))%>% #default hp as first iter 
+        select(-random_number) %>% 
+        arrange(random_rank)
+    }
+    else {
+      new_df <- df %>% 
+        add_column(random_number = runif(nrow(.))) %>% 
+        group_by(model_name, data__keyword) %>% 
+        mutate(random_rank = rank(random_number))%>%
+        select(-random_number) %>% 
+        arrange(random_rank)
+    }
+    new_df <- new_df %>% 
+      mutate(cum_time = cumsum(mean_time)) %>% 
+      mutate(cum_time_factor = findInterval(cum_time, breaks)) #%>% 
+      #group_by(model_name, data__keyword) %>%  #for fairness, match the min time for each dataset and model
+      #mutate(total_time = sum(mean_time)) %>% 
+      #ungroup() %>% 
+      #group_by(data__keyword) %>% 
+      #filter(cum_time <= min(total_time)) %>% 
+      #ungroup()
+    
+    
+    res <- res %>%  bind_rows(new_df %>% 
+                                group_by(model_name, data__keyword, cum_time_factor) %>% 
+                                # max on val inside a time bin
+                                filter(mean_val_score == max(mean_val_score, na.rm=T)) %>% 
+                                ungroup(cum_time_factor) %>% 
+                                arrange(cum_time_factor) %>% 
+                                mutate(best_val_score_so_far = cummax(mean_val_score)) %>% 
+                                mutate(mean_test_score = if_else(mean_val_score == best_val_score_so_far, mean_test_score, NA_real_)) %>% 
+                                # Only keep the scores for the first time we beat valid score, put the other to NA
+                                group_by(model_name, data__keyword, mean_val_score) %>% 
+                                mutate(mean_test_score = if_else(rank(cum_time) == min(rank(cum_time)), mean_test_score, NA_real_)) %>% 
+                                ungroup(mean_val_score) %>% 
+                                #for every dataset and {{variable}}, prolong the curve by the last best value when there is no value left
+                                ungroup() %>% 
+                                complete(model_name, data__keyword, cum_time_factor) %>%
                                 group_by(model_name, data__keyword) %>% 
                                 mutate(mean_test_score = na.locf(mean_test_score, na.rm=F))%>% 
                                 ungroup() %>% 

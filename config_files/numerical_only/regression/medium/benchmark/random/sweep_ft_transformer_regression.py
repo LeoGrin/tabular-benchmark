@@ -3,7 +3,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "ft_transformer_benchmark_numeric_regression",
+  "name" : "ft_transformer_benchmark_numeric_regression_2",
   "project": "thesis-3",
   "method" : "random",
   "metric": {

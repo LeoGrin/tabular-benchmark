@@ -3,7 +3,7 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "resnet_benchmark_numeric_regressor",
+  "name" : "resnet_benchmark_numeric_regressor_2",
   "project": "thesis-3",
   "method" : "random",
   "metric": {

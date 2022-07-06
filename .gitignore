@@ -3,11 +3,15 @@
 .RData
 .Ruserdata
 /data
-!/data/clean_data.py
-!/data/clean_data_cat.py
-!/data/clean_data_regression.py
+!/data/gather_data/clean_data.py
+!/data/gather_data/clean_data_cat.py
+!/data/gather_data/clean_data_regression.py
 !/data/data_utils.py
 !data/dirty_data_fetcher.py
+analyses/old/
+analyses/plots/
+nam/
+saved_models
 !trash/re_temp.py
 /features
 /history
@@ -18,4 +22,8 @@
 /trash
 /trees
 /wandb
+ToyTabular.Rproj
+*/__pycache__/
+features/
+plots/
 

@@ -164,9 +164,45 @@ res_datasets %>%
   theme_minimal(base_size=22) +
   theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
 
+res_datasets %>% 
+  filter(random_rank == 20) %>%
+  filter(model_name == "GradientBoostingTree") %>%
+  filter(data__keyword != "poker") %>% 
+  #group_by(model_name, data__keyword, transform__0__num_features_to_remove, method) %>% 
+  #summarise(mean_test_score = mean(mean_test_score)) %>% 
+  #mutate(transform__0__num_features_to_remove = as_factor(100 * transform__0__num_features_to_remove)) %>% 
+  mutate(transform__0__num_features_to_remove = as_factor(100 * transform__0__num_features_to_remove)) %>% 
+  #mutate(transform__0__num_features_to_remove = paste0(transform__0__num_features_to_remove, "%")) %>% 
+  group_by(model_name, data__keyword, method, transform__0__num_features_to_remove) %>% 
+  summarise(max_test_score = max(mean_test_score), min_test_score = min(mean_test_score), mean_test_score = mean(mean_test_score)) %>% 
+  ungroup() %>% 
+  #mutate(transform__0__num_features_to_remove = as.character(transform__0__num_features_to_remove)) %>% 
+  #mutate(model_name = fct_relevel(model_name, c("RandomForest", "GradientBoostingTree", "FT_Transformer"))) %>%
+  mutate(method = case_when(
+    method == "keep" ~ "Fit on removed features only",
+    method == "remove" ~ "Fit without removed features")) %>% 
+  ggplot() +
+  #geom_line(aes(x = transform__0__num_features_to_remove, y =mean_test_score, color = data__keyword)) +
+  geom_ribbon(aes(x = transform__0__num_features_to_remove, ymax=max_test_score, ymin=min_test_score, fill = method, group=method), alpha=0.4) +
+  geom_line(aes(x = transform__0__num_features_to_remove, y=mean_test_score, color=method, group=method), size=1.5) +
+  #geom_boxplot(aes(x = transform__0__num_features_to_remove, y=mean_test_score, fill = method))+
+  #geom_dl(aes(label = method, x=transform__0__num_features_to_remove, y=mean_test_score, color=method), method = list(dl.combine("smart.grid"), cex=1.3))  +
+  #facet_wrap(~method, ncol=1) +
+  facet_wrap(~data__keyword, scales="free") +
+  scale_x_discrete(guide = guide_axis(check.overlap = TRUE))+
+  #scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  xlab("Percentage of features removed \n (in decreasing order of RF importance)") +
+  ylab("Normalized GBT test score of best model \n (on valid set) after 20 random search iterations") +
+  theme_minimal(base_size=20) +
+  theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
+
+ggsave("analyses/plots/remove_features_datasets.jpg", width=15, height=9)
+
+
+
 #TODO:remove dataset from bin where one value is missing
 
-res_datasets %>% 
+res_datasets_ <- res_datasets %>% 
   filter(random_rank == 20) %>%
   filter(model_name == "GradientBoostingTree") %>%
   filter(data__keyword != "poker") %>% 
@@ -182,20 +218,32 @@ res_datasets %>%
   #mutate(model_name = fct_relevel(model_name, c("RandomForest", "GradientBoostingTree", "FT_Transformer"))) %>%
   mutate(method = case_when(
     method == "keep" ~ "Fit on removed features only",
-    method == "remove" ~ "Fit without removed features")) %>% 
+    method == "remove" ~ "Fit without removed features"))
+res_datasets_ %>% 
   ggplot() +
   #geom_line(aes(x = transform__0__num_features_to_remove, y =mean_test_score, color = data__keyword)) +
   geom_ribbon(aes(x = transform__0__num_features_to_remove, ymax=test_score_high, ymin=test_score_low, fill = method, group=method), alpha=0.4) +
   geom_line(aes(x = transform__0__num_features_to_remove, y=mean_test_score, color = method, group=method), size=2)+
+  geom_text_repel(aes(label=method, 
+                      color = method,
+                      x = transform__0__num_features_to_remove,
+                      y =  mean_test_score),
+                  data= (res_datasets_ %>% 
+                           filter(data__keyword=="phoneme",
+                                  transform__0__num_features_to_remove == "10%")),
+                  bg.color='white', size = 6.5, bg.r=0.15,
+                  nudge_y = -0.05, nudge_x = 0.1, min.segment.length=10,
+                  max.overlaps=100)+
   #geom_dl(aes(label = method, x=transform__0__num_features_to_remove, y=mean_test_score, color=method), method = list(dl.combine("smart.grid"), cex=1.3))  +
   #facet_wrap(~method, ncol=1) +
   xlab("Percentage of features removed \n (in decreasing order of RF importance)") +
   ylab("Normalized GBT test score of \n best model (on valid set) after \n 20 random search iterations") +
   theme_minimal(base_size=22) +
-  theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
+  theme(legend.position="none")
+  #theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
   
 
-ggsave("analyses/plots/removed_features_2.jpg", width=13, height=6)
+ggsave("analyses/plots/removed_features_2.jpg", width=7, height=6)
 
   
 

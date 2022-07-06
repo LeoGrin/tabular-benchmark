@@ -3,8 +3,8 @@ import numpy as np
 
 sweep_config = {
   "program": "run_experiment.py",
-  "name" : "useless_features_gbt",
-  "project": "thesis",
+  "name" : "useless_features_gbt_bonus",
+  "project": "thesis-3",
   "method" : "random",
   "metric": {
     "name": "mean_test_score",
@@ -55,7 +55,7 @@ sweep_config = {
     "data__keyword": {
       "values": ["electricity",
                  "covertype",
-                 "poker",
+                 #"poker",
                  "pol",
                  "house_16H",
                  "kdd_ipums_la_97-small",
@@ -65,7 +65,7 @@ sweep_config = {
                  "MiniBooNE",
                  "Higgs",
                  "eye_movements",
-                 "jannis",
+                 #"jannis",
                  "credit",
                  "california",
                  "wine"]
@@ -77,13 +77,22 @@ sweep_config = {
       "values": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
     },
     "transform__0__model_to_use": {
-      "values": ["rf_c", "gbt_c"],
+      "values": ["rf_c"],
     },
     "n_iter": {
       "value": "auto",
-    }
+    },
+    "regression": {
+      "value": False
+    },
+    "data__regression": {
+      "value": False
+    },
+    "max_train_samples": {
+      "value": 10000
+    },
   }
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-3")

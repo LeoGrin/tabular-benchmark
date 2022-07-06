@@ -4,7 +4,7 @@ import numpy as np
 sweep_config = {
   "program": "run_experiment.py",
   "name" : "gpt_benchmark_numeric_default",
-  "project": "thesis",
+  "project": "thesis-3",
   "method" : "grid",
   "metric": {
     "name": "mean_test_score",
@@ -33,6 +33,9 @@ sweep_config = {
     "regression": {
       "value": False
     },
+    "data__regression": {
+      "value": False
+    },
     "max_train_samples": {
       "value": 50000
     },
@@ -40,4 +43,4 @@ sweep_config = {
 }
 
 
-sweep_id = wandb.sweep(sweep_config, project="thesis")
+sweep_id = wandb.sweep(sweep_config, project="thesis-3")

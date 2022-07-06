@@ -2,8 +2,10 @@ import numpy as np
 from create_models import create_model
 import os
 from sklearn.compose import TransformedTargetRegressor
-from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import QuantileTransformer, OneHotEncoder
 from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
 
 
 
@@ -109,27 +111,49 @@ def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test,
         train_score, val_score, test_score = sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, return_r2=return_r2)
     elif config["model_type"] == "skorch":
         train_score, val_score, test_score = skorch_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, model_id, return_r2=return_r2)
+    elif config["model_type"] == "tab_survey":
+        train_score, val_score, test_score = sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val, y_test, config, return_r2=return_r2)
 
     return train_score, val_score, test_score
 
-def train_model(iter, x_train, y_train, config):
+def train_model(iter, x_train, y_train, categorical_indicator, config):
     """
     Train the model
     """
+    print("Training")
+    print(categorical_indicator)
     if config["model_type"] == "skorch":
         id = hash(".".join(list(config.keys())) + "." + str(iter)) # uniquely identify the run (useful for checkpointing)
-        model_raw = create_model(config, id)  # TODO rng ??
+        model_raw = create_model(config, categorical_indicator, id=id)  # TODO rng ??
     elif config["model_type"] == "sklearn":
         id = None
-        model_raw = create_model(config)
+        model_raw = create_model(config, categorical_indicator)
+    elif config["model_type"] == "tab_survey":
+        id = hash(".".join(list(config.keys())) + "." + str(iter)) # uniquely identify the run (useful for checkpointing)
+        model_raw = create_model(config, categorical_indicator, num_features=x_train.shape[1], id=id,
+                                 cat_dims=list((x_train[:, categorical_indicator].max(0) + 1).astype(int)))
 
     if config["regression"] and config["transformed_target"]:
         model = TransformedTargetRegressor(model_raw, transformer=QuantileTransformer(output_distribution="normal"))
     else:
         model = model_raw
 
-    print(y_train.shape)
+    if "one_hot_encoder" in config.keys() and config["one_hot_encoder"]:
+        preprocessor = ColumnTransformer([("one_hot", OneHotEncoder(categories="auto", handle_unknown="ignore"),
+                                           [i for i in range(x_train.shape[1]) if categorical_indicator[i]]),
+                                          ("numerical", "passthrough",
+                                           [i for i in range(x_train.shape[1]) if not categorical_indicator[i]])])
+        model = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
 
-    model.fit(x_train, y_train)
+
+    if config["model_type"] == "tab_survey":
+        x_val = x_train[int(len(x_train) * 0.8):]
+        y_val = y_train[int(len(y_train) * 0.8):]
+        x_train = x_train[:int(len(x_train) * 0.8)]
+        y_train = y_train[:int(len(y_train) * 0.8)]
+        model.fit(x_train, y_train, x_val, y_val)
+    else:
+        model.fit(x_train, y_train)
+
 
     return model, id
