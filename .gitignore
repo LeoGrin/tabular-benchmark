@@ -11,7 +11,7 @@
 analyses/old/
 analyses/plots/
 nam/
-saved_models
+saved_models/
 !trash/re_temp.py
 /features
 /history
