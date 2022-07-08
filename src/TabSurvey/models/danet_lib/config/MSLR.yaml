@@ -1,0 +1,15 @@
+dataset: 'MSLR'
+task: 'regression'
+resume_dir: ''
+logname: 'layer20'
+
+fit:
+  max_epochs: 2000
+  patience: 500
+  lr: 0.008
+
+model:
+  layer: 20
+  base_outdim: 64
+  k: 5
+  drop_rate: 0.1
