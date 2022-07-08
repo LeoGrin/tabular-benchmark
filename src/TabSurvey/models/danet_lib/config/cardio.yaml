@@ -1,0 +1,15 @@
+dataset: 'cardio'
+task: 'classification'
+resume_dir: ''
+logname: 'layer8'
+
+fit:
+  max_epochs: 500
+  patience: 200
+  lr: 0.008
+
+model:
+  layer: 8
+  base_outdim: 64
+  k: 5
+  drop_rate: 0.1

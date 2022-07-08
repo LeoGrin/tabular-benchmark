@@ -1,0 +1,40 @@
+wandb_version: 1
+
+data__keyword:
+  value: electricity
+data__method_name:
+  value: real_data
+model__learning_rate:
+  value: 0.0002477168607314831
+model__loss:
+  value: deviance
+model__max_depth:
+  value: null
+model__min_samples_leaf:
+  value: 10
+model__min_samples_split:
+  value: 2
+model__n_estimators:
+  value: 201
+model__subsample:
+  value: 0.7272444091965826
+model_name:
+  value: gbt_c
+model_type:
+  value: sklearn
+n_iter:
+  value: auto
+transform__0__method_name:
+  value: gaussienize
+transform__0__type:
+  value: quantile
+transform__1__max_rel_decrease:
+  value: 0.02
+transform__1__method_name:
+  value: remove_useless_features
+transform__1__n_iter:
+  value: 3
+transform__2__cov_mult:
+  value: 0.001
+transform__2__method_name:
+  value: remove_high_frequency
