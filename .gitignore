@@ -23,8 +23,8 @@ saved_models/
 /trees
 /wandb
 ToyTabular.Rproj
+.DS_store
 */__pycache__/
 features/
 plots/
 analyses/utils/
-
