@@ -26,4 +26,5 @@ ToyTabular.Rproj
 */__pycache__/
 features/
 plots/
+analyses/utils/
 
