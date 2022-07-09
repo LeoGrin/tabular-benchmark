@@ -1,5 +1,4 @@
 import os
-
 os.environ["PROJECT_DIR"] = "test"
 from generate_dataset_pipeline import generate_dataset
 import traceback  # Needed for pulling out your full stackframe info
@@ -205,13 +204,13 @@ def train_model_on_config(config=None):
                     os.remove(r"skorch_cp/params_{}.pt".format(model_id))
                 except:
                     print("could not remove params file")
-                    pass
             if config["model_type"] == "tab_survey":
                 try:
                     os.remove(r"output/saint/{}/tmp/m_{}_best.pt".format(config["data__keyword"], model_id))
                 except:
                     print("could not remove params file")
-                    pass
+            return -1
+    return 0
 
 
 if __name__ == """__main__""":
