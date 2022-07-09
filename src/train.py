@@ -138,7 +138,7 @@ def train_model(iter, x_train, y_train, categorical_indicator, config):
     else:
         model = model_raw
 
-    if "one_hot_encoder" in config.keys() and config["one_hot_encoder"]:
+    if config["data__categorical"] and "one_hot_encoder" in config.keys() and config["one_hot_encoder"]:
         preprocessor = ColumnTransformer([("one_hot", OneHotEncoder(categories="auto", handle_unknown="ignore"),
                                            [i for i in range(x_train.shape[1]) if categorical_indicator[i]]),
                                           ("numerical", "passthrough",
