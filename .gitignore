@@ -26,6 +26,6 @@ ToyTabular.Rproj
 .DS_store
 */__pycache__/
 features/
-plots/
+plots
 analyses/utils/
 .idea
