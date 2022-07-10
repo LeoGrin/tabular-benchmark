@@ -31,3 +31,4 @@ analyses/utils/
 .idea
 wandb/
 output/
+skorch_cp/
