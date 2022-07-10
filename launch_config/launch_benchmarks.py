@@ -156,5 +156,6 @@ if __name__ == "__main__":
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects})
     df.to_csv("sweeps/benchmark_sweeps.csv", index=False)
+    print("Check the sweeps id saved at sweeps/benchmark_sweeps.csv")
 
 
