@@ -7,7 +7,7 @@ data/*
 !/data/gather_data/clean_data_cat.py
 !/data/gather_data/clean_data_regression.py
 !/data/data_utils.py
-!data/dirty_data_fetcher.py
+!/data/download_data.py
 analyses/old/
 analyses/plots/
 nam/
