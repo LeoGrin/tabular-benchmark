@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-/data
+data/*
 !/data/gather_data/clean_data.py
 !/data/gather_data/clean_data_cat.py
 !/data/gather_data/clean_data_regression.py
@@ -32,3 +32,5 @@ analyses/utils/
 wandb/
 output/
 skorch_cp/
+launch_config/sweeps/*
+launch_config/results/*
