@@ -55,7 +55,7 @@ def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
     if not categorical_indicator is None:
         categorical_indicator = torch.BoolTensor(categorical_indicator)
 
-    mlp_skorch = NeuralNetRegressorBis(
+    model = NeuralNetRegressorBis(
         ResNet,
         # Shuffle training data on each epoch
         optimizer=optimizer,
@@ -70,7 +70,7 @@ def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
         **kwargs
     )
 
-    return mlp_skorch
+    return model
 
 def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
                                      categorical_indicator=None, **kwargs):
@@ -94,7 +94,8 @@ def create_rtdl_mlp_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
     elif optimizer == "sgd":
         optimizer = SGD
     batch_size = kwargs.pop('batch_size')
-    callbacks = [InputShapeSetterMLP(regression=True),
+    callbacks = [InputShapeSetterMLP(regression=True,
+                                        categorical_indicator=categorical_indicator),
                        EarlyStopping(monitor="valid_loss", patience=es_patience)] #TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='neg_root_mean_squared_error', name='train_accuracy', on_train=True))
     if lr_scheduler:

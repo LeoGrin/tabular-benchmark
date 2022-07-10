@@ -26,10 +26,13 @@ class MLP(nn.Module):
         categories: ty.Optional[ty.List[int]],
         d_embedding: int,
         regression: bool,
+        categorical_indicator
     ) -> None:
         super().__init__()
 
         self.regression = regression
+        self.categorical_indicator = categorical_indicator #Added
+
 
         if categories is not None:
             d_in += len(categories) * d_embedding
@@ -51,8 +54,13 @@ class MLP(nn.Module):
         self.dropout = dropout
         self.head = nn.Linear(d_layers[-1] if d_layers else d_in, d_out)
 
-    def forward(self, x_num):
-        x_cat = None #FIXME
+    def forward(self, x):
+        if not self.categorical_indicator is None:
+            x_num = x[:, ~self.categorical_indicator]
+            x_cat = x[:, self.categorical_indicator].long() #TODO
+        else:
+            x_num = x
+            x_cat = None
         x = []
         if x_num is not None:
             x.append(x_num)
@@ -75,13 +83,25 @@ class MLP(nn.Module):
         return x
 
 class InputShapeSetterMLP(skorch.callbacks.Callback):
-    def __init__(self, regression=False, batch_size=None):
+    def __init__(self, regression=False, batch_size=None,
+                 categorical_indicator=None):
+        self.categorical_indicator = categorical_indicator
         self.regression = regression
         self.batch_size = batch_size
+
     def on_train_begin(self, net, X, y):
-        net.set_params(module__d_in=X.shape[1], # FIXME for categorical and numerical
-        module__categories=None, #FIXME #lib.get_categories(X_cat),
-        module__d_out=2 if self.regression == False else 1) #FIXME#D.info['n_classes'] if D.is_multiclass else 1,
+        print("categorical_indicator", self.categorical_indicator)
+        if self.categorical_indicator is None:
+            d_in = X.shape[1]
+            categories = None
+        else:
+            d_in = X.shape[1] - sum(self.categorical_indicator)
+            categories = list((X[:, self.categorical_indicator].max(0) + 1).astype(int))
+        net.set_params(module__d_in=d_in,
+                       module__categories=categories,  # FIXME #lib.get_categories(X_cat),
+                       module__d_out=2 if self.regression == False else 1)  # FIXME#D.info['n_classes'] if D.is_multiclass else 1,
+        print("Numerical features: {}".format(d_in))
+        print("Categories {}".format(categories))
 
 #
 # # %%

@@ -7,27 +7,28 @@ os.environ["WANDB_MODE"]="offline"
 def test_models():
     # Run all models on one dataset per benchmark for a few epochs
     # to check that everything is working
-    test_benchmarks = [{"task": "regression",
-                        "dataset_size": "medium",
-                        "categorical": False,
-                        "datasets": ["fifa"]},
-
-                       {"task": "regression",
-                        "dataset_size": "large",
-                        "categorical": False,
-                        "datasets": ["nyc-taxi-green-dec-2016"]},
-
-                       {"task": "classif",
-                        "dataset_size": "medium",
-                        "categorical": False,
-                        "datasets": ["phoneme"]
-                        },
-
-                       {"task": "classif",
-                        "dataset_size": "large",
-                        "categorical": False,
-                        "datasets": ["MiniBooNE"],
-                        },
+    test_benchmarks = [
+                       #  {"task": "regression",
+                       #  "dataset_size": "medium",
+                       #  "categorical": False,
+                       #  "datasets": ["fifa"]},
+                       #
+                       # {"task": "regression",
+                       #  "dataset_size": "large",
+                       #  "categorical": False,
+                       #  "datasets": ["house_16H"]},
+                       #
+                       #  {"task": "classif",
+                       #  "dataset_size": "medium",
+                       #  "categorical": False,
+                       #  "datasets": ["phoneme"]
+                       #  },
+                       #
+                       # {"task": "classif",
+                       #  "dataset_size": "large",
+                       #  "categorical": False,
+                       #  "datasets": ["MiniBooNE"],
+                       #  },
 
                        {"task": "regression",
                         "dataset_size": "medium",
@@ -50,7 +51,7 @@ def test_models():
                         "categorical": True,
                         "datasets": ["covertype"]
                         }
-                       ]
+                           ]
 
     data_transform_config = {
         "data__method_name": {
@@ -87,11 +88,11 @@ def test_models():
                 data_transform_config["data__categorical"] = {"value": False}
 
             if benchmark["task"] == "regression":
-                data_transform_config["regression"] = {"value": "True"}
-                data_transform_config["data__regression"] = {"value": "True"}
+                data_transform_config["regression"] = {"value": True}
+                data_transform_config["data__regression"] = {"value": True}
             else:
-                data_transform_config["regression"] = {"value": "False"}
-                data_transform_config["data__regression"] = {"value": "False"}
+                data_transform_config["regression"] = {"value": False}
+                data_transform_config["data__regression"] = {"value": False}
 
             data_transform_config["data__keyword"] = {"values": benchmark["datasets"]}
 
@@ -104,6 +105,7 @@ def test_models():
                 if type(new_value) == list:
                     new_value = new_value[0]
                 config[key] = new_value
+            print(config)
 
             # Make the training fast enough for a test
             # and make it run on cpu

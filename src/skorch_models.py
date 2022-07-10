@@ -97,7 +97,7 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True,
     elif optimizer == "sgd":
         optimizer = SGD
     batch_size = kwargs.pop('batch_size')
-    callbacks = [InputShapeSetterMLP(),
+    callbacks = [InputShapeSetterMLP(categorical_indicator=categorical_indicator),
                  EarlyStopping(monitor="valid_loss",
                                patience=es_patience)]  # TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='accuracy', name='train_accuracy', on_train=True))

@@ -1,9 +1,7 @@
-import random
 from utils.tree import Forest, Tree
 import numpy as np
 from utils.utils import softmax
 import matplotlib.pyplot as plt
-import torch.nn.functional as F
 
 def generate_random_tree(x, n_classes, depth, split_distribution="uniform", split_param=1, rng=None):
     """

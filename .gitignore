@@ -29,3 +29,5 @@ features/
 plots/
 analyses/utils/
 .idea
+wandb/
+output/

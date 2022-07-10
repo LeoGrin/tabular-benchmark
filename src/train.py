@@ -121,7 +121,6 @@ def train_model(iter, x_train, y_train, categorical_indicator, config):
     Train the model
     """
     print("Training")
-    print(categorical_indicator)
     if config["model_type"] == "skorch":
         id = hash(".".join(list(config.keys())) + "." + str(iter)) # uniquely identify the run (useful for checkpointing)
         model_raw = create_model(config, categorical_indicator, id=id)  # TODO rng ??

@@ -10,6 +10,7 @@ import pickle
 
 def import_open_ml_data(openml_task_id=None, path_to_dir="openML_data", max_num_samples=None, rng=None) -> pd.DataFrame:
     """
+    WARNING Depreciated, use import_real_data
     :param int openml_task_id:
     :param path_to_file:
     :return:
