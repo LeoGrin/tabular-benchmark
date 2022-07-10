@@ -34,3 +34,6 @@ output/
 skorch_cp/
 launch_config/sweeps/*
 launch_config/results/*
+models/
+!/models/torch_models
+__pycache__/
