@@ -33,7 +33,7 @@ All the R code used to generate the analyses and figures in available in the `an
 The datasets used in the benchmark have been uploaded as OpenML
 benchmarks, with the same transformations that are used in the paper.
 
-To download these datasets, simply run
+To download these datasets, simply run `python data/download_data.py`.
 
 ```
 import openml

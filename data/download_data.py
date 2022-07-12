@@ -8,9 +8,9 @@ openml.config.apikey = 'ccf7828a775a10f3b7ffe26c140d2c18'
 def save_suite(suite_id, dir_name, save_categorical_indicator=False):
     benchmark_suite = openml.study.get_suite(suite_id)  # obtain the benchmark suite
     for task_id in benchmark_suite.tasks:  # iterate over all tasks
-        print(task_id)
         task = openml.tasks.get_task(task_id)  # download the OpenML task
         dataset = task.get_dataset()
+        print(f"Downloading dataset {dataset.name}")
         # retrieve categorical data for encoding
         X, y, categorical_indicator, attribute_names = dataset.get_data(
             dataset_format="dataframe", target=dataset.default_target_attribute
@@ -26,16 +26,24 @@ def save_suite(suite_id, dir_name, save_categorical_indicator=False):
 suites_id = {"numerical_regression": 297,
           "numerical_classification": 298,
           "categorical_regression": 299,
-          "categorical_classification": 333}
+          "categorical_classification": 300}
 
+print("Saving datasets from suite: {}".format("numerical_regression"))
 save_suite(suites_id["numerical_regression"],
            "numerical_only/regression",
            save_categorical_indicator=False)
 
+print("Saving datasets from suite: {}".format("numerical_classification"))
 save_suite(suites_id["numerical_classification"],
            "numerical_only/balanced",
            save_categorical_indicator=False)
 
+print("Saving datasets from suite: {}".format("categorical_regression"))
 save_suite(suites_id["categorical_regression"],
            "num_and_cat/regression",
+           save_categorical_indicator=True)
+
+print("Saving datasets from suite: {}".format("categorical_classification"))
+save_suite(suites_id["categorical_classification"],
+           "num_and_cat/balanced",
            save_categorical_indicator=True)
