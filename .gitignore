@@ -41,3 +41,4 @@ launch_config/results/*
 models/
 !/models/torch_models
 __pycache__/
+config/

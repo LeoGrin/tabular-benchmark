@@ -21,7 +21,8 @@ You can re-run the training using WandB sweeps.
 5. Run the generated sweeps using `wandb agent <USERNAME/PROJECTNAME/SWEEPID>` on the machine of your choice. 
 More infos
 [in the WandB doc](https://docs.wandb.ai/guides/sweeps/quickstart#4.-launch-agent-s)
-6. After you've stopped the runs, download the results: `python launch_config/download_data.py`
+6. After you've stopped the runs, download the results: `python launch_config/download_data.py`, after entering your wandb
+login in `launch_config/download_data.py`.
 
 We're planning to release a version allowing to use Benchopt instead of WandB to make it easier to run.
 

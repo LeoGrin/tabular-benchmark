@@ -2,8 +2,6 @@ import openml
 import numpy as np
 import pickle
 
-#openml.config.apikey = 'FILL_IN_OPENML_API_KEY'  # set the OpenML Api Key
-
 def save_suite(suite_id, dir_name, save_categorical_indicator=False):
     benchmark_suite = openml.study.get_suite(suite_id)  # obtain the benchmark suite
     for task_id in benchmark_suite.tasks:  # iterate over all tasks

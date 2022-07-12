@@ -3,13 +3,15 @@ import pandas as pd
 import wandb
 import time
 
-api = wandb.Api()
-WANDB_ID = "leogrin"  # set to your entity and project
+WANDB_ID = "default"#INSERT WANDB ENTITY
 
-sweep_id_filename = "sweeps/xps_sweeps.csv"
+api = wandb.Api()
+
+
+sweep_id_filename = "launch_config/sweeps/xps_sweeps.csv"
 #weep_id_filename = "sweeps/benchmark_sweeps.csv"
 
-output_filename = "results/xps_results.csv"
+output_filename = "launch_config/results/xps_results.csv"
 #output_filename = "results/benchmark_results.csv"
 
 df = pd.read_csv(sweep_id_filename)
