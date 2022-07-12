@@ -6,6 +6,10 @@ Accompanying repository for the paper *Why do tree-based models still outperform
 
 # Replicating the paper's results
 
+## Downloading the datasets
+
+To download these datasets, simply run `python data/download_data.py`.
+
 ## Training the models
 
 You can re-run the training using WandB sweeps.
@@ -32,8 +36,6 @@ All the R code used to generate the analyses and figures in available in the `an
 
 The datasets used in the benchmark have been uploaded as OpenML
 benchmarks, with the same transformations that are used in the paper.
-
-To download these datasets, simply run `python data/download_data.py`.
 
 ```
 import openml
