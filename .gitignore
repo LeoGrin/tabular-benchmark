@@ -8,6 +8,10 @@ data/*
 !/data/gather_data/clean_data_regression.py
 !/data/data_utils.py
 !/data/download_data.py
+!/data/numerical_only/balanced
+!/data/numerical_only/regression
+!/data/num_and_cat/balanced
+!/data/num_and_cat/regression
 analyses/old/
 analyses/plots/
 nam/

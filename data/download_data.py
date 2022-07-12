@@ -3,7 +3,6 @@ import numpy as np
 import pickle
 
 #openml.config.apikey = 'FILL_IN_OPENML_API_KEY'  # set the OpenML Api Key
-openml.config.apikey = 'ccf7828a775a10f3b7ffe26c140d2c18'
 
 def save_suite(suite_id, dir_name, save_categorical_indicator=False):
     benchmark_suite = openml.study.get_suite(suite_id)  # obtain the benchmark suite
@@ -30,20 +29,20 @@ suites_id = {"numerical_regression": 297,
 
 print("Saving datasets from suite: {}".format("numerical_regression"))
 save_suite(suites_id["numerical_regression"],
-           "numerical_only/regression",
+           "data/numerical_only/regression",
            save_categorical_indicator=False)
 
 print("Saving datasets from suite: {}".format("numerical_classification"))
 save_suite(suites_id["numerical_classification"],
-           "numerical_only/balanced",
+           "data/numerical_only/balanced",
            save_categorical_indicator=False)
 
 print("Saving datasets from suite: {}".format("categorical_regression"))
 save_suite(suites_id["categorical_regression"],
-           "num_and_cat/regression",
+           "data/num_and_cat/regression",
            save_categorical_indicator=True)
 
 print("Saving datasets from suite: {}".format("categorical_classification"))
 save_suite(suites_id["categorical_classification"],
-           "num_and_cat/balanced",
+           "data/num_and_cat/balanced",
            save_categorical_indicator=True)
