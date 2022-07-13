@@ -42,6 +42,5 @@ models/
 !/models/torch_models
 __pycache__/
 config/
-analyses/results/*
 analyses/save_benchmarks.R
 
