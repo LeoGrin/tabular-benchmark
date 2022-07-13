@@ -59,7 +59,7 @@ for task_id in benchmark_suite.tasks:  # iterate over all tasks
 If you want to compare you own algorithms with the models used in 
 this benchmark for a given number of random search iteration,
 you can use the results from our random searches, which we share 
-as a csv file at this address.
+as two csv files located in the `analyses/results` folder.
 
 ## Using our code
 
