@@ -30,15 +30,15 @@ def test_models():
                        #  "datasets": ["MiniBooNE"],
                        #  },
 
-                       # {"task": "regression",
-                       #  "dataset_size": "medium",
-                       #  "categorical": True,
-                       #  "datasets": ["diamonds"]},
-                       #
-                       # {"task": "regression",
-                       #  "dataset_size": "large",
-                       #  "categorical": True,
-                       #  "datasets": ["black_friday"]},
+                       {"task": "regression",
+                        "dataset_size": "medium",
+                        "categorical": True,
+                        "datasets": ["diamonds"]},
+
+                       {"task": "regression",
+                        "dataset_size": "large",
+                        "categorical": True,
+                        "datasets": ["black_friday"]},
 
                        {"task": "classif",
                         "dataset_size": "medium",

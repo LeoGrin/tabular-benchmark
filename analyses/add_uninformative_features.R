@@ -1,21 +1,7 @@
 source("analyses/random_search_utils.R")
 
-#old results
-#df <- read_csv("results/sweeps/add_features/resnet_add_features.csv") %>% 
-#  bind_rows(read_csv("results/sweeps/add_features/ft_transformer_add_features.csv")) %>% 
-#  bind_rows(read_csv("results/sweeps/add_features/rf_add_features.csv")) %>% 
-#  bind_rows(read_csv("results/sweeps/add_features/gpt_add_features.csv")) %>% 
-##  mutate(transform__0__multiplier = as_factor(transform__0__multiplier)) %>% 
-#  filter(data__keyword %in% c("heloc", "electricity", "california", "covtype", "churn", "cpu", "wine"))
-
-
-df <- read_csv("results/sweeps/sweeps_classif/add_useless/ft_transformer_add_features.csv") %>% 
-  bind_rows(read_csv("results/sweeps/sweeps_classif/add_useless/rf_add_features.csv")) %>% 
-  bind_rows(read_csv("results/sweeps/sweeps_classif/add_useless/gbt_add_features.csv")) %>% 
-  bind_rows(read_csv("results/sweeps/sweeps_classif/add_useless/resnet_add_features.csv")) %>% 
-  mutate(hp = "random") %>% 
-  bind_rows(read_csv("results/sweeps/sweeps_classif/add_useless/add_features_default.csv") %>% 
-              mutate(hp = "default"))
+df <- read_csv("analyses/results/random_search_xps.csv") %>% 
+  filter(xp == "add_uninformative_features")
  
 
 res_datasets <- 
