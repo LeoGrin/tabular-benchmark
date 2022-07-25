@@ -1,8 +1,9 @@
 import openml
 import numpy as np
 import pickle
+from sklearn.preprocessing import LabelEncoder
 
-def save_suite(suite_id, dir_name, save_categorical_indicator=False):
+def save_suite(suite_id, dir_name, save_categorical_indicator=False, regression=True):
     benchmark_suite = openml.study.get_suite(suite_id)  # obtain the benchmark suite
     for task_id in benchmark_suite.tasks:  # iterate over all tasks
         task = openml.tasks.get_task(task_id)  # download the OpenML task
@@ -13,7 +14,11 @@ def save_suite(suite_id, dir_name, save_categorical_indicator=False):
             dataset_format="dataframe", target=dataset.default_target_attribute
         )
         X = np.array(X).astype(np.float32)
-        y = np.array(y).astype(np.int32)
+        if regression:
+            y = np.array(y).astype(np.int32)
+        else:
+            le = LabelEncoder()
+            y = le.fit_transform(np.array(y))
         with open("{}/data_{}".format(dir_name, dataset.name), "wb") as f:
             if save_categorical_indicator:
                 pickle.dump((X, y, categorical_indicator), f)
@@ -23,7 +28,7 @@ def save_suite(suite_id, dir_name, save_categorical_indicator=False):
 suites_id = {"numerical_regression": 297,
           "numerical_classification": 298,
           "categorical_regression": 299,
-          "categorical_classification": 300}
+          "categorical_classification": 304}
 
 print("Saving datasets from suite: {}".format("numerical_regression"))
 save_suite(suites_id["numerical_regression"],
@@ -33,7 +38,8 @@ save_suite(suites_id["numerical_regression"],
 print("Saving datasets from suite: {}".format("numerical_classification"))
 save_suite(suites_id["numerical_classification"],
            "data/numerical_only/balanced",
-           save_categorical_indicator=False)
+           save_categorical_indicator=False,
+           regression=False)
 
 print("Saving datasets from suite: {}".format("categorical_regression"))
 save_suite(suites_id["categorical_regression"],
@@ -43,4 +49,5 @@ save_suite(suites_id["categorical_regression"],
 print("Saving datasets from suite: {}".format("categorical_classification"))
 save_suite(suites_id["categorical_classification"],
            "data/num_and_cat/balanced",
-           save_categorical_indicator=True)
+           save_categorical_indicator=True,
+           regression=False)

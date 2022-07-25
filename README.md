@@ -44,7 +44,7 @@ import openml
 SUITE_ID = 297 # Regression on numerical features
 #SUITE_ID = 298 # Classification on numerical features
 #SUITE_ID = 299 # Regression on numerical and categorical features
-#SUITE_ID = 300 # Classification on numerical and categorical features
+#SUITE_ID = 304 # Classification on numerical and categorical features
 benchmark_suite = openml.study.get_suite(SUITE_ID)  # obtain the benchmark suite
 for task_id in benchmark_suite.tasks:  # iterate over all tasks
     task = openml.tasks.get_task(task_id)  # download the OpenML task
