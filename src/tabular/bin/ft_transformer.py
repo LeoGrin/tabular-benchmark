@@ -273,7 +273,7 @@ class Transformer(nn.Module):
 
     def forward(self, x) -> Tensor:
         if not self.categorical_indicator is None:
-            x_num = x[:, ~self.categorical_indicator]
+            x_num = x[:, ~self.categorical_indicator].float()
             x_cat = x[:, self.categorical_indicator].long() #TODO
         else:
             x_num = x

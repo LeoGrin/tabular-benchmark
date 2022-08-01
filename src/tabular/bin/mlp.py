@@ -55,8 +55,9 @@ class MLP(nn.Module):
         self.head = nn.Linear(d_layers[-1] if d_layers else d_in, d_out)
 
     def forward(self, x):
+
         if not self.categorical_indicator is None:
-            x_num = x[:, ~self.categorical_indicator]
+            x_num = x[:, ~self.categorical_indicator].float()
             x_cat = x[:, self.categorical_indicator].long() #TODO
         else:
             x_num = x

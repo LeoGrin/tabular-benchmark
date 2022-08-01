@@ -155,7 +155,7 @@ if __name__ == "__main__":
                 print(f"In project {WANDB_PROJECT_NAMES[i]}")
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects})
-    df.to_csv("sweeps/benchmark_sweeps.csv", index=False)
+    df.to_csv("launch_config/sweeps/benchmark_sweeps.csv", index=False)
     print("Check the sweeps id saved at sweeps/benchmark_sweeps.csv")
 
 
