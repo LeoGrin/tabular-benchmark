@@ -26,11 +26,11 @@ def create_sweep(data_transform_config, model_name, regression, default, project
         data_transform_config["data__categorical"] = {"value": False}
 
     if regression:
-        data_transform_config["regression"] = {"value": "True"}
-        data_transform_config["data__regression"] = {"value": "True"}
+        data_transform_config["regression"] = {"value": True}
+        data_transform_config["data__regression"] = {"value": True}
     else:
-        data_transform_config["regression"] = {"value": "False"}
-        data_transform_config["data__regression"] = {"value": "False"}
+        data_transform_config["regression"] = {"value": False}
+        data_transform_config["data__regression"] = {"value": False}
 
     data_transform_config["data__keyword"] = {"values": datasets}
 

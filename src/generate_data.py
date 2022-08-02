@@ -71,12 +71,8 @@ def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num
                 X, y = pickle.load(f)
                 #y = QuantileTransformer(output_distribution="normal").fit_transform(y.reshape(-1, 1)).flatten() #TODO do it before choosing
         else:
-            if balanced:
-                with open("{}/numerical_only/balanced/data_{}".format(path_to_dir, keyword), "rb") as f:
-                    X, y = pickle.load(f)
-            else:
-                with open("{}/numerical_only/full/data_{}".format(path_to_dir, keyword), "rb") as f:
-                    X, y = pickle.load(f)
+            with open("{}/numerical_only/balanced/data_{}".format(path_to_dir, keyword), "rb") as f:
+                X, y = pickle.load(f)
             y = np.array(y).astype(np.int64)
         categorical_indicator = None
     else:
@@ -85,23 +81,10 @@ def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num
                 X, y, categorical_indicator = pickle.load(f)
                 # y = QuantileTransformer(output_distribution="normal").fit_transform(y.reshape(-1, 1)).flatten() #TODO do it before choosing
         else:
-            if balanced:
-                with open("{}/num_and_cat/balanced/data_{}".format(path_to_dir, keyword), "rb") as f:
-                    X, y, categorical_indicator = pickle.load(f)
-
-            else:
-                with open("{}/num_and_cat/full/data_{}".format(path_to_dir, keyword), "rb") as f:
-                    X, y, categorical_indicator = pickle.load(f)
+            with open("{}/num_and_cat/balanced/data_{}".format(path_to_dir, keyword), "rb") as f:
+                X, y, categorical_indicator = pickle.load(f)
             y = np.array(y).astype(np.int64)
         categorical_indicator = np.array(categorical_indicator).astype(np.bool)
-
-
-    # handled in run_experiment2 now
-    # if not (max_num_samples is None):
-    #     if max_num_samples < X.shape[0]:
-    #         indices = rng.choice(range(X.shape[0]), max_num_samples, replace=False)
-    #         X = X[indices]
-    #         y = y[indices]
 
     return np.array(X), np.array(y), categorical_indicator
 

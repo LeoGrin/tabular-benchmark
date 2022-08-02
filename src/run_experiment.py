@@ -55,7 +55,7 @@ def train_model_on_config(config=None):
             r2_test_scores = []
             times = []
             if config["n_iter"] == "auto":
-                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator  = generate_dataset(config, np.random.RandomState(0))
+                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator = generate_dataset(config, np.random.RandomState(0))
                 if x_test.shape[0] > 6000:
                     n_iter = 1
                 elif x_test.shape[0] > 3000:
@@ -79,7 +79,7 @@ def train_model_on_config(config=None):
                 # print(y_train)
                 print(x_train.shape)
 
-                if config["model_type"] == "skorch" and config["regression"] == True:
+                if config["model_type"] == "skorch" and config["regression"]:
                     print("YES")
                     y_train, y_val, y_test = y_train.reshape(-1, 1), y_val.reshape(-1, 1), y_test.reshape(-1, 1)
                     y_train, y_val, y_test = y_train.astype(np.float32), y_val.astype(np.float32), y_test.astype(
