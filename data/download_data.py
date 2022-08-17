@@ -2,6 +2,8 @@ import openml
 import numpy as np
 import pickle
 from sklearn.preprocessing import LabelEncoder
+import os
+openml.config.cache_directory = os.path.expanduser(os.getcwd() + "/openml_cache")
 
 def save_suite(suite_id, dir_name, save_categorical_indicator=False, regression=True):
     benchmark_suite = openml.study.get_suite(suite_id)  # obtain the benchmark suite
