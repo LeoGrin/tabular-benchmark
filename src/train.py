@@ -151,6 +151,13 @@ def train_model(iter, x_train, y_train, categorical_indicator, config):
         x_train = x_train[:int(len(x_train) * 0.8)]
         y_train = y_train[:int(len(y_train) * 0.8)]
         model.fit(x_train, y_train, x_val, y_val)
+    if config["model_name"].startswith("xgb") and "model__early_stopping_rounds" in config.keys() \
+            and config["model__early_stopping_rounds"]:
+        x_val = x_train[int(len(x_train) * 0.8):]
+        y_val = y_train[int(len(y_train) * 0.8):]
+        x_train = x_train[:int(len(x_train) * 0.8)]
+        y_train = y_train[:int(len(y_train) * 0.8)]
+        model.fit(x_train, y_train, eval_set=(x_val, y_val))
     else:
         model.fit(x_train, y_train)
 
