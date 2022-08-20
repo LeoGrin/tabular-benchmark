@@ -17,7 +17,7 @@ def save_suite(suite_id, dir_name, save_categorical_indicator=False, regression=
         )
         X = np.array(X).astype(np.float32)
         if regression:
-            y = np.array(y).astype(np.int32)
+            y = np.array(y).astype(np.float32)
         else:
             le = LabelEncoder()
             y = le.fit_transform(np.array(y))
