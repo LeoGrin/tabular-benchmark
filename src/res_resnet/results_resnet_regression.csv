@@ -1,7 +1,0 @@
-,dataset_id,dataset_name,heterogeneous,num_categorical_columns,num_columns_missing,num_pseudo_categorical_columns,num_rows_missing,original_n_features,original_n_samples,score_linear,score_resnet,too_easy
-0,416.0,yprop_4_1,,0.0,0.0,209.0,0.0,251.0,8885.0,-0.028204431757330894,,
-1,40753.0,delays_zurich_transport,,,,,,,,,,
-2,42571.0,Allstate_Claims_Severity,,116.0,0.0,0.0,0.0,14.0,188318.0,-0.8025426268577576,,
-3,42724.0,OnlineNewsPopularity,,0.0,0.0,14.0,0.0,59.0,39644.0,-0.9049993753433228,,
-4,42726.0,abalone,,1.0,0.0,0.0,0.0,7.0,4177.0,-2.3871405124664307,,
-5,42737.0,fps-in-video-games,,14.0,1.0,3.0,234289.0,30.0,425833.0,-75.67826843261719,,
