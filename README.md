@@ -9,6 +9,7 @@ Accompanying repository for the paper *Why do tree-based models still outperform
 ## Downloading the datasets
 
 To download these datasets, simply run `python data/download_data.py`.
+You can also find these datasets on [Hugging Face Hub](https://huggingface.co/datasets/inria-soda/tabular-benchmark).
 
 ## Training the models
 
