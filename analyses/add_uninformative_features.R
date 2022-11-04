@@ -6,7 +6,7 @@ df <- read_csv("analyses/results/random_search_xps.csv") %>%
 
 res_datasets <- 
   df %>% 
-  filter(!is.na(mean_time), !is.na(mean_test_score), !is.na(mean_val_score)) %>% 
+  filter(!is.na(mean_time), !is.na(mean_test_score), !is.na(mean_val_score), !is.na(model_name)) %>% 
   rename() %>% 
   normalize(variable=transform__0__multiplier, normalization_type = "quantile", quantile=0.1) %>% 
   random_search(variable =transform__0__multiplier, n_shuffles=15, default_first = T)
@@ -80,8 +80,19 @@ res_datasets_ %>%
   colScale
 
 
-ggsave("analyses/plots/add_features.jpg", width=7, height=6)
+ggsave("analyses/plots/add_features.pdf", width=7, height=6)
 
+##################
+
+# Statistical analysis
+library(broom)
+tidy(summary(lm(mean_test_score~dataset + model_name + prop_added + model_name * prop_added, 
+                data=res_datasets %>% 
+                  filter(data__keyword != "poker", data__keyword != "jannis") %>% 
+                  filter(random_rank == 20) %>% 
+                  mutate(dataset = data__keyword, prop_added = transform__0__multiplier)))) %>% 
+  filter(! startsWith(term, "data")) %>% 
+  mutate_if(is.numeric, ~round(., 3)) %>% write_csv("analyses/results/tests_add_features.csv")
 
 ##################
 # Dataset by dataset
@@ -131,6 +142,6 @@ res_datasets %>%
   theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22)) +
   colScale
 
-ggsave("analyses/plots/add_features_datasets.jpg", width=15, height=10)
+ggsave("analyses/plots/add_features_datasets.pdf", width=15, height=10)
  
 

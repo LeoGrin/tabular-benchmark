@@ -3,22 +3,32 @@ from model_configs import config_dic
 
 
 def create_sweep(data_transform_config, model_name, regression, default, project, name,
-                 dataset_size, categorical, datasets, remove_tranforms_from_model_config=False):
+                 dataset_size, categorical, datasets, remove_tranforms_from_model_config=False,
+                 max_val_samples=None, max_test_samples=None):
     # Use the appropriate model config
     model_config = config_dic[model_name]["regression" if regression else "classif"]["default" if default else "random"]
+    print(model_config)
     if remove_tranforms_from_model_config:  # prevent conflicts with data_transform_config
         model_config = model_config.copy()
         for key in model_config.keys():
             if key.startswith("transform__"):
                 del model_config[key]
 
-    if dataset_size == "medium":
-        data_transform_config["max_train_samples"] = {"value": 10000}
-    elif dataset_size == "large":
-        data_transform_config["max_train_samples"] = {"value": 50000}
-    else:
-        assert type(dataset_size) == int
-        data_transform_config["max_train_samples"] = {"value": dataset_size}
+    if "max_train_samples" not in data_transform_config.keys():
+        if dataset_size == "small":
+            data_transform_config["max_train_samples"] = {"value": 1000}
+        elif dataset_size == "medium":
+            data_transform_config["max_train_samples"] = {"value": 10000}
+        elif dataset_size == "large":
+            data_transform_config["max_train_samples"] = {"value": 50000}
+        else:
+            assert type(dataset_size) == int
+            data_transform_config["max_train_samples"] = {"value": dataset_size}
+
+    if max_val_samples is not None:
+        data_transform_config["max_val_samples"] = {"value": max_val_samples}
+    if max_test_samples is not None:
+        data_transform_config["max_test_samples"] = {"value": max_test_samples}
 
     if categorical:
         data_transform_config["data__categorical"] = {"value": True}

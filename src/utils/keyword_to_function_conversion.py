@@ -5,67 +5,48 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, Grad
 from xgboost import XGBClassifier, XGBRegressor
 from skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch#, create_NPT_skorch
 from skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch
-from rotation_forest import RotationForestClassifier
 from TabSurvey.models.saint import SAINT
+from tabpfn.scripts.transformer_prediction_interface import TabPFNClassifier
 
 
-def convert_keyword_to_function(keyword):
-    print(keyword)
-    #if keyword == "npt":
-    #    return create_NPT_skorch
-    if keyword == "rotation_forest":
-        return RotationForestClassifier
-    if keyword == "rtdl_mlp":
-        return create_rtdl_mlp_skorch
-    if keyword == 'rtdl_mlp_regressor':
-        return create_rtdl_mlp_regressor_skorch
-    if keyword == "ft_transformer":
-        return create_ft_transformer_skorch
-    if keyword == "ft_transformer_regressor":
-        return create_ft_transformer_regressor_skorch
-    if keyword == "rtdl_resnet":
-        return create_resnet_skorch
-    if keyword == "rtdl_resnet_regressor":
-        return create_resnet_regressor_skorch
-    if keyword == "rf_c":
-        return RandomForestClassifier
-    if keyword == "rf_r":
-        return RandomForestRegressor
-    if keyword == "gbt_c":
-        return GradientBoostingClassifier
-    if keyword == "gbt_r":
-        return GradientBoostingRegressor
-    if keyword == "hgbt_r":
-        return HistGradientBoostingRegressor
-    if keyword == "hgbt_c":
-        return HistGradientBoostingClassifier
-    if keyword == "xgb_c":
-        return XGBClassifier
-    if keyword == "xgb_r":
-        return XGBRegressor
-    if keyword == "saint":
-        return SAINT
-    elif keyword == "uniform_data":
-        return generate_uniform_data
-    elif keyword == "periodic_triangle":
-        return periodic_triangle
-    elif keyword == "real_data":
-        return import_real_data
-    elif keyword == "gaussienize":
-        return gaussienize
-    elif keyword == "select_features_rf":
-        return select_features_rf
-    elif keyword == "remove_features_rf":
-        return remove_features_rf
-    elif keyword == "remove_useless_features":
-        return remove_useless_features
-    elif keyword == "add_uninformative_features":
-        return add_uninformative_features
-    elif keyword == "random_rotation":
-        return apply_random_rotation
-    elif keyword == "remove_high_frequency_from_train":
-        return remove_high_frequency_from_train
-    elif keyword == "no_transform":
-        return None
-    else:
-        raise ValueError("Unknown keyword")
+convert_keyword_to_function = {
+    "tab_pfn": TabPFNClassifier,
+    "rtdl_mlp": create_rtdl_mlp_skorch,
+    "rtdl_mlp_regressor": create_rtdl_mlp_regressor_skorch,
+    "ft_transformer": create_ft_transformer_skorch,
+    "ft_transformer_regressor": create_ft_transformer_regressor_skorch,
+    "rtdl_resnet": create_resnet_skorch,
+    "rtdl_resnet_regressor": create_resnet_regressor_skorch,
+    "rf_c": RandomForestClassifier,
+    "rf_r": RandomForestRegressor,
+    "gbt_c": GradientBoostingClassifier,
+    "gbt_r": GradientBoostingRegressor,
+    "hgbt_r": HistGradientBoostingRegressor,
+    "hgbt_c": HistGradientBoostingClassifier,
+    "xgb_c": XGBClassifier,
+    "xgb_r": XGBRegressor,
+    "saint": SAINT,
+    "uniform_data": generate_uniform_data,
+    "periodic_triangle": periodic_triangle,
+    "real_data": import_real_data,
+    "openml": import_open_ml_data,
+    "gaussienize": gaussienize,
+    "select_features_rf": select_features_rf,
+    "remove_features_rf": remove_features_rf,
+    "remove_useless_features": remove_useless_features,
+    "add_uninformative_features": add_uninformative_features,
+    "random_rotation": apply_random_rotation,
+    "remove_high_frequency_from_train": remove_high_frequency_from_train,
+    "no_transform": None
+}
+
+
+# Prevent circular imports
+#TODO: Find a better way to do this
+from sklearn.ensemble import StackingClassifier
+def create_stacking_classifier(base_estimator_keyword, final_estimator_keyword):
+    base_estimator = convert_keyword_to_function[base_estimator_keyword]
+    final_estimator = convert_keyword_to_function[final_estimator_keyword]
+    return StackingClassifier(estimators=[(base_estimator_keyword, base_estimator())], final_estimator=final_estimator())
+
+convert_keyword_to_function["stacking"] = create_stacking_classifier

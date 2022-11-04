@@ -4,13 +4,14 @@ from model_configs import config_dic
 import numpy as np
 import pandas as pd
 
-WANDB_PROJECT_NAMES = ["bo_1", "bo_2", "bo_3", "bo_4"]
+# Script to create WandB sweeps to launch Bayesian optimization benchmarks.
+
+WANDB_PROJECT_NAMES = ["bo_nn_nouveau"]
 
 def convert_proba_to_repeated_list(values, probabilities):
     # Due to a weird bug in wandb, we need to convert the values, probabilities tuple to a list with repeated elements
     min_proba = min(probabilities)
     multiplier = 10 ** (np.ceil(- np.log10(min_proba)))
-    print(values, probabilities, multiplier)
     return sum([[values[i]] * int(probabilities[i] * multiplier) for i in range(len(values))], [])
 
 def create_sweep_bo(data_transform_config, model_name, regression, project, name,
@@ -56,10 +57,10 @@ def create_sweep_bo(data_transform_config, model_name, regression, project, name
         "project": project,
         "method": "bayes",
         "metric": {
-            "name": "mean_test_score",
-            "goal": "minimize"  # RMSE
+            "name": "mean_r2_val",
+            "goal": "maximize"  # R2 score
         } if regression else {
-            "name": "mean_test_score",
+            "name": "mean_val_score",
             "goal": "maximize"  # accuracy
         },
         "parameters": dict(model_config, **data_transform_config)
@@ -72,38 +73,44 @@ def create_sweep_bo(data_transform_config, model_name, regression, project, name
 
 
 if __name__ == "__main__":
-    models = ["gbt", "xgb", "hgbt"]  # ,
+    #models = ["xgb", "gbt"]
+    #models = ["xgb", "gbt", "rf"]  # ,
     # "ft_transformer", "resnet", "mlp", "saint"]
-    benchmarks_medium = [benchmark for benchmark in benchmarks if benchmark["dataset_size"] == "medium"]
+    models = ["ft_transformer", "resnet"]
+    benchmarks_medium = [benchmark for benchmark in benchmarks if benchmark["dataset_size"] == "medium"
+                         and not benchmark["categorical"]
+                         and benchmark["task"] == "regression"]
+    datasets_to_remove = ["wine_quality", "year", "isolet", "cpu_act", "Bike_Sharing_Demand", "pol"]
     sweep_ids = []
     names = []
     projects = []
     for i, benchmark in enumerate(benchmarks_medium):
         for model_name in models:
             for dataset in benchmark["datasets"]:
-                name = f"{model_name}_{benchmark['task']}_{benchmark['dataset_size']}_{dataset}"
-                if benchmark['categorical']:
-                    name += "_categorical"
-                else:
-                    name += "_numerical"
-                sweep_id = create_sweep_bo(data_transform_config,
-                                           model_name=model_name,
-                                           regression=benchmark["task"] == "regression",
-                                           categorical=benchmark["categorical"],
-                                           dataset_size=benchmark["dataset_size"],
-                                           dataset=dataset,
-                                           project=WANDB_PROJECT_NAMES[i],
-                                           name=name)
-                print(f"Created sweep {name}")
-                print(f"Sweep id: {sweep_id}")
-                sweep_ids.append(sweep_id)
-                names.append(name)
-                projects.append(WANDB_PROJECT_NAMES[i])
-                print(f"Created sweep {name}")
-                print(f"Sweep id: {sweep_id}")
-                print(f"In project {WANDB_PROJECT_NAMES[i]}")
+                if dataset not in datasets_to_remove:
+                    name = f"{model_name}_{benchmark['task']}_{benchmark['dataset_size']}_{dataset}"
+                    if benchmark['categorical']:
+                        name += "_categorical"
+                    else:
+                        name += "_numerical"
+                    sweep_id = create_sweep_bo(data_transform_config,
+                                               model_name=model_name,
+                                               regression=benchmark["task"] == "regression",
+                                               categorical=benchmark["categorical"],
+                                               dataset_size=benchmark["dataset_size"],
+                                               dataset=dataset,
+                                               project=WANDB_PROJECT_NAMES[i],
+                                               name=name)
+                    print(f"Created sweep {name}")
+                    print(f"Sweep id: {sweep_id}")
+                    sweep_ids.append(sweep_id)
+                    names.append(name)
+                    projects.append(WANDB_PROJECT_NAMES[i])
+                    print(f"Created sweep {name}")
+                    print(f"Sweep id: {sweep_id}")
+                    print(f"In project {WANDB_PROJECT_NAMES[i]}")
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects})
-    file_name = "bo_trees"
+    file_name = "bo_nn_nouveau"
     df.to_csv(f"launch_config/sweeps/{file_name}.csv", index=False)
     print(f"Check the sweeps id saved at sweeps/{file_name}.csv")

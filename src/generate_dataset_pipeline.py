@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 
 
 def generate_data(config, rng):
-    method = convert_keyword_to_function(config["data__method_name"])
+    method = convert_keyword_to_function[config["data__method_name"]]
     data_config = {}
     for key in config.keys():
         if key.startswith("data__") and key != "data__method_name":
@@ -21,7 +21,7 @@ def generate_data(config, rng):
     return data
 
 def generate_target(x, config, rng):
-    method = convert_keyword_to_function(config["target__method_name"])
+    method = convert_keyword_to_function[config["target__method_name"]]
     target_config = {}
     for key in config.keys():
         if key.startswith("target__") and key != "target__method_name":
@@ -35,7 +35,7 @@ def transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng, 
     while True:
         if f"transform__{i}__method_name" in config.keys():
             print("transform", i)
-            method = convert_keyword_to_function(config[f"transform__{i}__method_name"])
+            method = convert_keyword_to_function[config[f"transform__{i}__method_name"]]
             if categorical_indicator is None:
                 apply_on = "all"
             else:

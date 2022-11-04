@@ -1,0 +1,16 @@
+dataset_name,n_samples,n_features,new_link
+credit,16714,10,https://www.openml.org/d/44089
+california,20634,8,https://www.openml.org/d/44090
+wine,2554,11,https://www.openml.org/d/44091
+electricity,38474,7,https://www.openml.org/d/44120
+covertype,566602,10,https://www.openml.org/d/44121
+pol,10082,26,https://www.openml.org/d/44122
+house_16H,13488,16,https://www.openml.org/d/44123
+kdd_ipums_la_97-small,5188,20,https://www.openml.org/d/44124
+MagicTelescope,13376,10,https://www.openml.org/d/44125
+bank-marketing,10578,7,https://www.openml.org/d/44126
+phoneme,3172,5,https://www.openml.org/d/44127
+MiniBooNE,72998,50,https://www.openml.org/d/44128
+Higgs,940160,24,https://www.openml.org/d/44129
+eye_movements,7608,20,https://www.openml.org/d/44130
+jannis,57580,54,https://www.openml.org/d/44131

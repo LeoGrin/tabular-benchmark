@@ -33,6 +33,10 @@ res_datasets_ <-res_datasets  %>%
   mutate(random_rotation_num = 1 - as.numeric(transform__2__deactivated)) %>%
   filter(transform__0__num_features_to_remove == 0.0) #CHANGE HERE TO REMOVE FEATURES 
 
+small_df <- res_datasets_ %>% filter(n_dataset==1, model_name == "FT Transformer")
+small_df_2 <- res_datasets_ %>% filter(n_dataset==1, model_name == "FT Transformer", data__keyword=="electricity") #prevent label aliasing
+
+
 
 res_datasets_ %>% 
   droplevels() %>% 
@@ -67,8 +71,21 @@ res_datasets_ %>%
 
 ggsave("analyses/plots/random_rotation_features_removed.jpg", width=15, height=9)
 
+#############
+# Statistical analysis
 
+library(broom)
+tidy(summary(lm(mean_test_score~dataset + model_name + rotation + features_removed + rotation * model_name + rotation * features_removed, 
+                data = res_datasets  %>% 
+                  filter(random_rank == 20) %>%
+                  filter(data__keyword != "poker")  %>% 
+                  mutate(dataset = data__keyword, 
+                         rotation = !transform__2__deactivated,
+                         features_removed = transform__0__num_features_to_remove != 0)))) %>% 
+  filter(! startsWith(term, "data")) %>% 
+  mutate_if(is.numeric, ~round(., 3)) %>% write_csv("analyses/results/tests_rotations.csv")
 
+##################
 
 
 
@@ -104,7 +121,7 @@ res_datasets_ <-res_datasets  %>%
          transform__0__num_features_to_remove = as_factor(transform__0__num_features_to_remove)) %>% 
   mutate(model_name = factor(model_name, levels = c("GradientBoostingTree", "RandomForest", "FT Transformer", "Resnet"))) %>% 
   mutate(random_rotation = if_else(transform__2__deactivated == T, "No Rotation", "Rotation")) %>% 
-  filter(transform__0__num_features_to_remove == 0) #CHANGE HERE TO REMOVE FEATURES
+  filter(transform__0__num_features_to_remove == 0.5) #CHANGE HERE TO REMOVE FEATURES
 
 res_datasets_2 <- res_datasets_ %>% mutate(random_rotation_num = 1 - as.numeric(transform__2__deactivated)) %>% #to invert order
   group_by(model_name, n_dataset, data__keyword) %>% 
@@ -136,6 +153,6 @@ res_datasets_2 %>%
   colScale +
   guides(alpha="none")
 
-ggsave("analyses/plots/random_rotation_datasets.jpg", width=15, height=9)
+ggsave("analyses/plots/random_rotation_datasets_features_removed.pdf", width=15, height=9)
 
 

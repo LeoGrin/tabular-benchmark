@@ -1,0 +1,9 @@
+Criterion,count
+Deterministic,2
+High dimensional,1
+Not enough features,1
+Not heterogeneous,3
+Too easy,12
+Too small after preprocessing,11
+Too small before processing,39
+Used,3

@@ -55,8 +55,22 @@ res_datasets_ %>%
   theme(legend.position="none") +
   colScale
 
-ggsave("analyses/plots/useless_features.jpg", width=7, height=6)
+ggsave("analyses/plots/useless_features.pdf", width=7, height=6)
 #ggsave("analyses/plots/random_search_classif_numerical.jpg", width=7, height=6)
+
+#######################
+# Statistical analysis
+
+library(broom)
+tidy(summary(lm(mean_test_score~dataset + model_name + prop_removed + model_name * prop_removed, 
+                data=res_datasets %>% 
+                  filter(data__keyword != "poker", data__keyword != "jannis") %>% 
+                  filter(random_rank == 30) %>% 
+                  mutate(dataset = data__keyword, prop_removed = transform__0__num_features_to_remove)))) %>% 
+  filter(! startsWith(term, "data")) %>% 
+  mutate_if(is.numeric, ~round(., 3)) %>% write_csv("analyses/results/tests_remove_features.csv")
+
+
 
 #######################
 # Dataset by dataset
@@ -104,7 +118,7 @@ res_datasets %>%
 
 
 
-ggsave("analyses/plots/useless_features_datasets.jpg", width=15, height=9)
+ggsave("analyses/plots/useless_features_datasets.pdf", width=15, height=9)
 
 
 

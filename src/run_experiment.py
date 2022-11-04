@@ -152,6 +152,12 @@ def train_model_on_config(config=None):
             else:
                 processor = platform.processor()
 
+            if config["model_name"].startswith("gbt"):
+                print("-" * 20)
+                print("n estimators")
+                print(model.n_estimators_)
+                wandb.log({"n_estimators_": model.n_estimators_})
+
             if n_iter > 1:
                 wandb.log({"train_scores": train_scores,
                            "val_scores": val_scores,
@@ -214,6 +220,15 @@ def train_model_on_config(config=None):
 
 
 if __name__ == """__main__""":
+    # config = {'data__categorical': False, 'data__keyword': 'sulfur', 'data__method_name': 'real_data', 'data__regression': True,
+    #  'max_train_samples': 10000, 'model__criterion': 'squared_error', 'model__learning_rate': 0.0096842939564663,
+    #  'model__loss': 'huber', 'model__max_depth': 5, 'model__max_leaf_nodes': 5, 'model__min_impurity_decrease': 0,
+    #  'model__min_samples_leaf': 25, 'model__min_samples_split': 2, 'model__n_estimators': 1000,
+    #  'model__n_iter_no_change': 20, 'model__subsample': 0.9976203905983656, 'model__validation_fraction': 0.2,
+    #  'model_name': 'gbt_r', 'model_type': 'sklearn', 'n_iter': 'auto', 'one_hot_encoder': True, 'regression': True,
+    #  'transformed_target': False, 'train_prop': 0.7, 'val_test_prop': 0.3, 'max_val_samples': 50000,
+    #  'max_test_samples': 50000}
+
     # config = {"model_type": "sklearn",
     #           "model_name": "rf_c",
     #           "model__n_estimators": 100,

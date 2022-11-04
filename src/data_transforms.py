@@ -201,7 +201,7 @@ def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_
     assert x_train.shape[1] == x_test.shape[1]
     if isinstance(num_features_to_remove, float):
         num_features_to_remove = int(num_features_to_remove * x_train.shape[1])
-    model = utils.keyword_to_function_conversion.convert_keyword_to_function(model_to_use)(random_state=rng)
+    model = utils.keyword_to_function_conversion.convert_keyword_to_function[model_to_use](random_state=rng)
     model.fit(x_train, y_train)
     if importance_cutoff is not None:
         num_features_to_remove = min(x_train.shape[1] - 1,

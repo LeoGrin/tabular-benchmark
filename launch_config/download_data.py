@@ -3,21 +3,22 @@ import pandas as pd
 import wandb
 import time
 
-WANDB_ID = "default"#INSERT WANDB ENTITY
+WANDB_ID = "leogrin"#INSERT WANDB ENTITY
 
 api = wandb.Api()
 
 
-sweep_id_filename = "launch_config/sweeps/xps_sweeps.csv"
+sweep_id_filename = "launch_config/sweeps/resnet_several_random.csv"
 #weep_id_filename = "sweeps/benchmark_sweeps.csv"
 
-output_filename = "launch_config/results/xps_results.csv"
+output_filename = "launch_config/results/resnet_several_random.csv"
 #output_filename = "results/benchmark_results.csv"
 
 df = pd.read_csv(sweep_id_filename)
 sweeps = iter([api.sweep(f"{WANDB_ID}/{row['project']}/{row['sweep_id']}") for i, row in df.iterrows()])
+#sweeps = iter([api.sweep("leogrin/nouveau_trees_1/vyjjbkm7")])
 
-MAX_RUNS_PER_SWEEP = np.Inf  # replace for speed
+MAX_RUNS_PER_SWEEP = 6000#9000#np.Inf  # replace for speed
 
 runs_df = pd.DataFrame()
 
@@ -36,6 +37,9 @@ while True:
     n = len(runs)
     i = 0
     runs = iter(runs)
+    #print("skipping last runs")
+    #for _ in range(n - MAX_RUNS_PER_SWEEP):
+    #    next(runs)
     while True:
         for _ in range(20):
             try:
@@ -53,6 +57,10 @@ while True:
         i += 1
         config = {k: v for k, v in run.config.items()
                   if not k.startswith('_')}
+        run_name = run.name
+        step = int(run.name.split("-")[-1])
+        config["sweep"] = sweep.name
+        config["step"] = step
         summary = run.summary
         dic_to_add = {**config, **summary}
         runs_df = runs_df.append(dic_to_add, ignore_index=True)

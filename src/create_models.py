@@ -8,7 +8,7 @@ class AttrDict(dict):
         self.__dict__ = self
 
 def create_model(config, categorical_indicator, num_features=None, id=None, cat_dims=None):
-    model_function = convert_keyword_to_function(config["model_name"])
+    model_function = convert_keyword_to_function[config["model_name"]]
     model_config = {}
     for key in config.keys():
         if key.startswith("model__"):

@@ -1,4 +1,7 @@
 source("analyses/random_search_utils.R")
+library(directlabels)
+library(ggrepel)
+library(shadowtext)
 
 
 df <- read_csv("analyses/results/random_search_xps.csv") %>% 
@@ -76,7 +79,7 @@ res_datasets_2 %>%
                            filter(transform__2__cov_mult == "0", n_dataset==1)),
                   bg.color='white', size =6.5,bg.r=0.15,
                   nudge_y = -0.01, nudge_x = 0.7
-                  , min.segment.length=100)+
+                  , min.segment.length=1000)+
   scale_x_continuous(breaks=small_df$transform__2__cov_mult_num, labels=small_df$transform__2__cov_mult) + 
   scale_alpha(range = c(0, 0.13)) +  
   xlab("(Squared) lengthscale of the \n Gaussian kernel smoother") + 
@@ -87,8 +90,19 @@ res_datasets_2 %>%
 
 
 
-ggsave("analyses/plots/high_frequencies.jpg", width=7, height=6)
+ggsave("analyses/plots/high_frequencies.pdf", width=7, height=6.1)
 
+##########
+# Statistical analysis
+library(broom)
+tidy(summary(lm(mean_test_score~dataset + model_name + lengthscale + model_name * lengthscale, 
+                data=res_datasets %>% 
+                  filter(random_rank == 60) %>%
+                  filter(model_name != "MLP") %>%
+                  filter(data__keyword != "poker") %>% 
+                  mutate(dataset = data__keyword, lengthscale = transform__2__cov_mult)))) %>% 
+  filter(! startsWith(term, "data")) %>% 
+           mutate_if(is.numeric, ~round(., 3)) %>% write_csv("analyses/results/tests_hf.csv")
 
 #################@
 # Dataset by dataset
@@ -139,7 +153,7 @@ res_datasets_2 %>%
   colScale +
   guides(alpha="none")
 
-ggsave("analyses/plots/high_frequencies_datasets.jpg", width=15, height=10)
+ggsave("analyses/plots/high_frequencies_datasets.pdf", width=15, height=10)
 
 
 

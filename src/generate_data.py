@@ -7,62 +7,105 @@ from sklearn.preprocessing import LabelEncoder, QuantileTransformer
 import openml
 import pickle
 
+def balance_data(x, y):
+    rng = np.random.RandomState(0)
+    print("Balancing")
+    print(x.shape)
+    indices = [(y == i) for i in np.unique(y)]
+    sorted_classes = np.argsort(
+        list(map(sum, indices)))  # in case there are more than 2 classes, we take the two most numerous
 
-def import_open_ml_data(openml_task_id=None, path_to_dir="openML_data", max_num_samples=None, rng=None) -> pd.DataFrame:
+    n_samples_min_class = sum(indices[sorted_classes[-2]])
+    print("n_samples_min_class", n_samples_min_class)
+    indices_max_class = rng.choice(np.where(indices[sorted_classes[-1]])[0], n_samples_min_class, replace=False)
+    indices_min_class = np.where(indices[sorted_classes[-2]])[0]
+    total_indices = np.concatenate((indices_max_class, indices_min_class))
+    y = y[total_indices]
+    indices_first_class = (y == sorted_classes[-1])
+    indices_second_class = (y == sorted_classes[-2])
+    y[indices_first_class] = 0
+    y[indices_second_class] = 1
+
+    return x.iloc[total_indices], y
+def import_open_ml_data(keyword=None, remove_nans=None, impute_nans=None, categorical=False, regression=False, balance=False, rng=None) -> pd.DataFrame:
     """
-    WARNING Depreciated, use import_real_data
+    Import data from openML
     :param int openml_task_id:
     :param path_to_file:
     :return:
     """
-    if openml_task_id is None:
-        raise ValueError('Not implemented yet')
+    # if openml_task_id is not None:
+    #     task = openml.tasks.get_task(openml_task_id)  # download the OpenML task
+    #     dataset = task.get_dataset()
+    # elif openml_dataset_id is not None:
+    dataset = openml.datasets.get_dataset(keyword)
+    # retrieve categorical data for encoding
+    X, y, categorical_indicator, attribute_names = dataset.get_data(
+        dataset_format="dataframe", target=dataset.default_target_attribute
+    )
+    categorical_indicator = np.array(categorical_indicator)
+    print("{} categorical columns".format(sum(categorical_indicator)))
+    print("{} columns".format(X.shape[1]))
+    y_encoder = LabelEncoder()
 
-    if not path_to_dir is None:
-        with open("{}/openML_data_task_{}".format(path_to_dir, openml_task_id), "rb") as f:
-            X, y = pickle.load(f)
-    elif path_to_dir is None:
-        print("No saved file, downloading the data for this task")
-        task = openml.tasks.get_task(openml_task_id)  # download the OpenML task
-        dataset = task.get_dataset()
-        # retrieve categorical data for encoding
-        X, y, categorical_indicator, attribute_names = dataset.get_data(
-            dataset_format="dataframe", target=dataset.default_target_attribute
-        )
-        categorical_indicator = np.array(categorical_indicator)
-        print("{} categorical columns".format(sum(categorical_indicator)))
-        print("{} columns".format(X.shape[1]))
-        y_encoder = LabelEncoder()
-        # remove missing values
+    # Replace categorical values by integers for each categorical column
+    for i, categorical in enumerate(categorical_indicator):
+        X.iloc[:, i] = X.iloc[:, i].astype('category')
+        X.iloc[:, i] = X.iloc[:, i].cat.codes
+        X.iloc[:, i] = X.iloc[:, i].astype('int64')
+
+    # remove missing values
+    assert remove_nans or impute_nans, "You need to remove or impute nans"
+    if remove_nans:
         missing_rows_mask = X.isnull().any(axis=1)
         if sum(missing_rows_mask) > X.shape[0] / 5:
             print("Removed {} rows with missing values on {} rows".format(
                 sum(missing_rows_mask), X.shape[0]))
         X = X[~missing_rows_mask]
         y = y[~missing_rows_mask]
-
         n_rows_non_missing = X.shape[0]
         if n_rows_non_missing == 0:
             print("Removed all rows")
             return None
-
-        print("removing {} categorical features among {} features".format(sum(categorical_indicator), X.shape[1]))
-        X = X.to_numpy()[:, ~categorical_indicator]  # remove all categorical columns
-        if X.shape[1] == 0:
-            print("removed all features, skipping this task")
-            return None
-
-        y = y_encoder.fit_transform(y)
-
-    if not (max_num_samples is None):
-        # max_num_samples = int(max_num_samples)
-        if max_num_samples < X.shape[0]:
-            indices = rng.choice(range(X.shape[0]), max_num_samples, replace=False)
-            X = X[indices]
-            y = y[indices]
-    return X, y
+    elif impute_nans:
+        from sklearn.impute import SimpleImputer
+        # Impute numerical columns with mean and categorical columns with most frequent
+        categorical_imputer = SimpleImputer(strategy="most_frequent")
+        numerical_imputer = SimpleImputer(strategy="mean")
+        # check that there a > 0 categorical columns
+        if sum(categorical_indicator) > 0:
+            X.iloc[:, categorical_indicator] = categorical_imputer.fit_transform(X.iloc[:, categorical_indicator])
+        # check that there a > 0 numerical columns
+        if sum(~categorical_indicator) > 0:
+            X.iloc[:, ~categorical_indicator] = numerical_imputer.fit_transform(X.iloc[:, ~categorical_indicator])
 
 
+
+
+    # print("removing {} categorical features among {} features".format(sum(categorical_indicator), X.shape[1]))
+    # X = X.to_numpy()[:, ~categorical_indicator]  # remove all categorical columns
+    # if X.shape[1] == 0:
+    #     print("removed all features, skipping this task")
+    #     return None
+
+    y = y_encoder.fit_transform(y)
+
+
+
+    if regression:
+        y = y.astype(np.float64)
+    else:
+        y = y.astype(np.int64)
+
+    if balance:
+        X, y = balance_data(X, y)
+
+    X = X.to_numpy()
+
+    if categorical:
+        return X, y, categorical_indicator
+
+    return X, y, None
 def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num_samples=None, regression=False, categorical=False, dim=[],
                      rng=None):
     if not categorical:

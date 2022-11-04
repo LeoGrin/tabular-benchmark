@@ -127,18 +127,18 @@ normalize_no_variable <- function(df, normalization_type="quantile", quantile=0.
   if ("hp" %in% colnames(df_normalized))
     return(
       df_normalized %>% 
-        select(model_name, data__keyword, mean_val_score, mean_test_score, mean_time, hp) %>% 
+        #select(model_name, data__keyword, mean_val_score, mean_test_score, mean_time, hp) %>% 
         ungroup()
     )
   else
     return(
       df_normalized %>% 
-        select(model_name, data__keyword, mean_val_score, mean_test_score, mean_time) %>% 
+        #select(model_name, data__keyword, mean_val_score, mean_test_score, mean_time) %>% 
         ungroup()
     )
 }
 
-random_search_no_variable <- function(df, n_shuffles, default_first=F){
+random_search_no_variable <- function(df, n_shuffles, default_first=F, equalize_n_iteration=T){
   res <- tibble()
   
   for (i in 1:n_shuffles) {
@@ -158,6 +158,8 @@ random_search_no_variable <- function(df, n_shuffles, default_first=F){
         select(-random_number) %>% 
         arrange(random_rank)
     }
+    
+    if (equalize_n_iteration)
     new_df <- new_df %>% 
       group_by(model_name, data__keyword) %>%  #for fairness, match the min number of iteration for each dataset and model
       mutate(num_iters = sum(!is.na(mean_val_score))) %>% 

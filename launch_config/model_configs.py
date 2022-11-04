@@ -26,16 +26,23 @@ gbt_config = {"model_type": {
         'max': 1.0,
     },
     "model__n_estimators": {
-        "distribution": "q_log_uniform_values",
-        "min": 10.5,
-        "max": 1000.5,
-        "q": 1
+        "value": 4_000 # Changed as asked by the reviewer
+        # "distribution": "q_log_uniform_values",
+        # "min": 10.5,
+        # "max": 1000.5,
+        # "q": 1
+    },
+    "model__n_iter_no_change": {
+        "value": 30
+    },
+    "model__validation_fraction": {
+        "value": 0.2
     },
     "model__criterion": {
         "values": ["friedman_mse", "squared_error"]
     },
-    "model__max_depth": {  # Not exactly like Hyperopt
-        "values": [None, 2, 3, 4, 5],
+    "max_depth_temp": {  # Not exactly like Hyperopt
+        "values": ["None", 2, 3, 4, 5],
         "probabilities": [0.1, 0.1, 0.6, 0.1, 0.1]
     },
     "model__min_samples_split": {
@@ -52,8 +59,8 @@ gbt_config = {"model_type": {
         "values": [0.0, 0.01, 0.02, 0.05],
         "probabilities": [0.85, 0.05, 0.05, 0.05],
     },
-    "model__max_leaf_nodes": {
-        "values": [None, 5, 10, 15],
+    "max_leaf_nodes_temp": {
+        "values": ["None", 5, 10, 15],
         "probabilities": [0.85, 0.05, 0.05, 0.05]
     },
     "transformed_target": {
@@ -73,6 +80,15 @@ gbt_config_default = {
     },
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True
+    },
+    "model__n_estimators": {
+        "value": 4_000
+    },
+    "model__n_iter_no_change": {
+        "value": 30
+    },
+    "model__validation_fraction": {
+        "value": 0.2
     },
 }
 
@@ -116,13 +132,11 @@ rf_config = {
     },
     # Parameter space taken from Hyperopt-sklearn except when mentioned
     "model__n_estimators": {
-        "distribution": "q_log_uniform_values",
-        "min": 9.5,
-        "max": 3000.5,
-        "q": 1
-    },
-    "model__criterion": {
-        "values": ["squared_error", "absolute_error"],
+        "value": 250,
+        # "distribution": "q_log_uniform_values",
+        # "min": 9.5,
+        # "max": 3000.5,
+        # "q": 1
     },
     "model__max_features": {  # like Hyperopt ?
         "values": ["sqrt", "sqrt", "log2", None, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -166,11 +180,17 @@ rf_config_default = {
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True
     },
+    "model__n_estimators": {
+        "value": 250,
+    },
 }
 
 rf_config_regression = dict(rf_config, **{
     "model_name": {
         "value": "rf_r"
+    },
+    "model__criterion": {
+        "values": ["squared_error", "absolute_error"],
     },
 })
 
@@ -178,11 +198,15 @@ rf_config_regression_default = dict(rf_config_default, **{
     "model_name": {
         "value": "rf_r"
     },
+
 })
 
 rf_config_classif = dict(rf_config, **{
     "model_name": {
         "value": "rf_c"
+    },
+    "model__criterion": {
+        "values": ["gini", "entropy"],
     },
 })
 
@@ -208,10 +232,14 @@ xgb_config = {"model_type": {
         'max': 0.7,
     },
     "model__n_estimators": {
-        "distribution": "q_uniform",
-        "min": 100,
-        "max": 6000,
-        "q": 200
+        "value": 40_000,
+        #"distribution": "q_uniform",
+        #"min": 100,
+        #"max": 6000,
+        #"q": 200
+    },
+    "early_stopping_rounds": {
+        "value": 100
     },
     "model__gamma": {
         "distribution": "log_uniform_values",
@@ -271,6 +299,12 @@ xgb_config_default = {
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True
     },
+    "model__n_estimators": {
+        "value": 10_000,
+    },
+    "early_stopping_rounds": {
+        "value": 20
+    },
 }
 
 xgb_config_regression = dict(xgb_config, **{
@@ -304,6 +338,18 @@ hgbt_config = {
     "model_type": {
         "value": "sklearn"
     },
+    "model__max_iter": {
+        "value": 4_000
+    },
+    "model__early_stopping": {
+        "value": True
+    },
+    "model__validation_fraction": {
+        "value": 0.2
+    },
+    "model__n_iter_no_change": {
+        "value": 30
+    },
     # Parameter space taken from Hyperopt-sklearn except when mentioned
     "model__learning_rate": {
         'distribution': "log_normal",
@@ -315,8 +361,8 @@ hgbt_config = {
         'mu': 31,
         "sigma": 5
     },
-    "model__max_depth": {  # Added None compared to hyperopt
-        "values": [None, 2, 3, 4],
+    "max_depth_temp": {  # Added None compared to hyperopt
+        "values": ["None", 2, 3, 4],
         "probabilities": [0.1, 0.1, 0.7, 0.1]
     },
     "model__min_samples_leaf": {  # Not exactly like Hyperopt
@@ -336,6 +382,18 @@ hgbt_config_default = {
     },
     "transformed_target": {
         "values": [False]
+    },
+    "model__max_iter": {
+        "value": 4_000
+    },
+    "model__early_stopping": {
+        "value": True
+    },
+    "model__validation_fraction": {
+        "value": 0.2
+    },
+    "model__n_iter_no_change": {
+        "value": 30
     },
 }
 
@@ -363,6 +421,106 @@ hgbt_config_classif = dict(hgbt_config, **{
 hgbt_config_classif_default = dict(hgbt_config_default, **{
     "model_name": {
         "value": "hgbt_c"
+    },
+})
+
+############################
+############################
+# Stacking
+############################
+stacking_config = {
+    "model_type": {
+        "value": "sklearn"
+    },
+    "model__base_estimator_keyword": {
+        "value": "tab_pfn"
+    },
+    "model__final_estimator_keyword": {
+        "values": ["rf_c", "gbt_c"]
+    },
+    "model_name": {
+        "value": "stacking"
+    },
+}
+
+stacking_config_default = {
+    "model_type": {
+        "value": "sklearn"
+    },
+    "model__base_estimator_keyword": {
+        "value": "tab_pfn"
+    },
+    "model__final_estimator_keyword": {
+        "values": ["rf_c", "gbt_c"]
+    },
+    "model_name": {
+        "value": "stacking"
+    },
+}
+
+stacking_config_regression = dict(stacking_config)
+
+stacking_config_regression_default = dict(stacking_config)
+
+stacking_config_classif = dict(stacking_config)
+
+stacking_config_classif_default = dict(stacking_config_default)
+
+########################
+#TabPFN
+########################
+
+tab_pfn_config = {
+    "model_type": {
+        "value": "sklearn"
+    },
+    "transform__0__type": {
+        "value": "quantile",
+    },
+    "transform__0__apply_on": {
+        "value": "numerical",
+    },
+    "model__device": {
+        "value": "cuda",
+    }
+}
+
+tab_pfn_config_default = {
+    "model_type": {
+        "value": "sklearn"
+    },
+    "transform__0__type": {
+        "value": "quantile",
+    },
+    "transform__0__apply_on": {
+        "value": "numerical",
+    },
+    "model__device": {
+        "value": "cuda",
+    }
+}
+
+tab_pfn_config_regression = dict(tab_pfn_config, **{
+    "model_name": {
+        "value": "tab_pfn"
+    },
+})
+
+tab_pfn_config_regression_default = dict(tab_pfn_config_default, **{
+    "model_name": {
+        "value": "tab_pfn"
+    },
+})
+
+tab_pfn_config_classif = dict(tab_pfn_config, **{
+    "model_name": {
+        "value": "tab_pfn"
+    },
+})
+
+tab_pfn_config_classif_default = dict(tab_pfn_config_default, **{
+    "model_name": {
+        "value": "tab_pfn"
     },
 })
 
@@ -835,7 +993,8 @@ saint_config = {
         "value": "numerical",
     },
     "transformed_target": {
-        "values": [False, True]
+        #"values": [False, True]
+        "values": [False]
     },
 }
 
@@ -977,5 +1136,17 @@ config_dic = {
                     "default": saint_config_classif_default},
         "regression": {"random": saint_config_regression,
                             "default": saint_config_regression_default},
-    }
+    },
+    "tab_pfn": {
+        "classif": {"random": tab_pfn_config_classif,
+                    "default": tab_pfn_config_classif_default},
+        "regression": {"random": tab_pfn_config_regression, #NOT IMPLEMENTED
+                            "default": tab_pfn_config_regression_default},
+    },
+    "stacking": {
+        "classif": {"random": stacking_config_classif,
+                    "default": stacking_config_classif_default},
+        "regression": {"random": stacking_config_regression,
+                            "default": stacking_config_regression_default},
+    },
 }
