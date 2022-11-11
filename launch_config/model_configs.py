@@ -425,6 +425,46 @@ hgbt_config_classif_default = dict(hgbt_config_default, **{
 })
 
 ############################
+# Logistic Regression
+############################
+log_reg_config = {
+    "model_type": {
+        "value": "sklearn"
+    },
+    "model_name": {
+        "value": "log_reg"
+    },
+    "model__penalty": {
+        "values": ["l1", "l2"],
+        "probabilities": [0.5, 0.5]
+    },
+    "model__C": {
+        "distribution": "log_uniform_values",
+        "min": 1E-4,
+        "max": 1E4,
+    },
+    "model__solver": {
+        "values": ["liblinear", "saga"],
+        "probabilities": [0.5, 0.5]
+    },
+    "model__max_iter": {
+        "value": 2000
+    },
+}
+
+log_reg_config_default = {
+    "model_type": {
+        "value": "sklearn"
+    },
+    "model_name": {
+        "value": "log_reg"
+    },
+    "model__penalty": {
+        "values": ["l2"],
+    }
+}
+
+
 ############################
 # Stacking
 ############################
@@ -432,11 +472,11 @@ stacking_config = {
     "model_type": {
         "value": "sklearn"
     },
-    "model__base_estimator_keyword": {
-        "value": "tab_pfn"
+    "model__base_estimator_keyword_list": {
+        "values": [["rf_c", "gbt_c"]]#[["tab_pfn"]]
     },
     "model__final_estimator_keyword": {
-        "values": ["rf_c", "gbt_c"]
+        "values": ["log_reg"]
     },
     "model_name": {
         "value": "stacking"
@@ -447,11 +487,11 @@ stacking_config_default = {
     "model_type": {
         "value": "sklearn"
     },
-    "model__base_estimator_keyword": {
-        "value": "tab_pfn"
+    "model__base_estimator_keyword_list": {
+        "values": [["rf_c", "gbt_c"]] #[["tab_pfn"]]#
     },
     "model__final_estimator_keyword": {
-        "values": ["rf_c", "gbt_c"]
+        "values": ["log_reg"]
     },
     "model_name": {
         "value": "stacking"
@@ -1112,6 +1152,12 @@ config_dic = {
                     "default": hgbt_config_classif_default},
         "regression": {"random": hgbt_config_regression,
                             "default": hgbt_config_regression_default},
+    },
+    "log_reg": {
+        "classif": {"random": log_reg_config,
+                    "default": log_reg_config_default},
+        "regression": {"random": log_reg_config,
+                          "default": log_reg_config_default},
     },
     "ft_transformer": {
         "classif": {"random": ft_transformer_config_classif,

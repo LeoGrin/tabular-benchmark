@@ -2,19 +2,19 @@ from utils import create_sweep
 import pandas as pd
 
 # We use one project per benchmark to avoid WandB getting super slow
-WANDB_PROJECT_NAMES = ["tabpfn2"] * 10
+WANDB_PROJECT_NAMES = ["tabpfn3"] * 10
 
 
 data_transform_config = {
     "data__method_name": {
-        "value": "real_data"
+        "value": "openml",
     },
-    #"data__impute_nans": {
-    #    "value": True
-    #},
-    #"data__balance":{
-    #    "value": True
-    #},
+    "data__impute_nans": {
+        "value": True
+    },
+    "data__balance":{
+        "value": True
+    },
     "max_train_samples": {
         "values": [300, 1000]
     },
@@ -24,80 +24,80 @@ data_transform_config = {
 }
 
 benchmarks = [
-#{"task": "classif",
-#                     "dataset_size": "small",
-#                     "categorical": True,
-#                     "regression": False,
-#                     "datasets": [11,
-#                                                  14,
-#                                                  15,
-#                                                  16,
-#                                                  18,
-#                                                  22,
-#                                                  23,
-#                                                  29,
-#                                                  31,
-#                                                  37,
-#                                                  50,
-#                                                  54,
-#                                                  188,
-#                                                  458,
-#                                                  469,
-#                                                  1049,
-#                                                  1050,
-#                                                  1063,
-#                                                  1068,
-#                                                  1510,
-#                                                  1494,
-#                                                  1480,
-#                                                  1462,
-#                                                  1464,
-#                                                  6332,
-#                                                  23381,
-#                                                  40966,
-#                                                  40982,
-#                                                  40994,
-#                                                  40975]}]
-
 {"task": "classif",
- "dataset_size": "medium",
- "categorical": False,
- "datasets": ["electricity",
-              "covertype",
-              "pol",
-              "house_16H",
-              "kdd_ipums_la_97-small",
-              "MagicTelescope",
-              "bank-marketing",
-              "phoneme",
-              "MiniBooNE",
-              "Higgs",
-              "eye_movements",
-              "jannis",
-              "credit",
-              "california",
-              "wine"]
- },
+                    "dataset_size": "medium",
+                    "categorical": True,
+                    "regression": False,
+                    "datasets": [11,
+                                                 14,
+                                                 15,
+                                                 16,
+                                                 18,
+                                                 22,
+                                                 23,
+                                                 29,
+                                                 31,
+                                                 37,
+                                                 50,
+                                                 54,
+                                                 188,
+                                                 458,
+                                                 469,
+                                                 1049,
+                                                 1050,
+                                                 1063,
+                                                 1068,
+                                                 1510,
+                                                 1494,
+                                                 1480,
+                                                 1462,
+                                                 1464,
+                                                 6332,
+                                                 23381,
+                                                 40966,
+                                                 40982,
+                                                 40994,
+                                                 40975]}]
 
-{"task": "classif",
- "dataset_size": "medium",
- "categorical": True,
- "datasets": ["electricity",
-              "eye_movements",
-              "KDDCup09_upselling",
-              "covertype",
-              "rl",
-              "road-safety",
-              "compass"]
- }
-]
+# {"task": "classif",
+#  "dataset_size": "medium",
+#  "categorical": False,
+#  "datasets": ["electricity",
+#               "covertype",
+#               "pol",
+#               "house_16H",
+#               "kdd_ipums_la_97-small",
+#               "MagicTelescope",
+#               "bank-marketing",
+#               "phoneme",
+#               "MiniBooNE",
+#               "Higgs",
+#               "eye_movements",
+#               "jannis",
+#               "credit",
+#               "california",
+#               "wine"]
+#  },
+#
+# {"task": "classif",
+#  "dataset_size": "medium",
+#  "categorical": True,
+#  "datasets": ["electricity",
+#               "eye_movements",
+#               "KDDCup09_upselling",
+#               "covertype",
+#               "rl",
+#               "road-safety",
+#               "compass"]
+#  }
+# ]
 
 #models = ["saint"]#["gbt", "rf", "xgb", "hgbt"]#,
           #"ft_transformer", "resnet", "mlp", "saint"]
 
 
 if __name__ == "__main__":
-    models = ["stacking"]
+    models = ["rf", "gbt"]
     sweep_ids = []
     names = []
     projects = []
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     for n in range(1):
         for model_name in models:
             for i, benchmark in enumerate(benchmarks):
-                for default in [True]: #TODO
+                for default in [True, False]: #TODO
                     #if benchmark["task"] == "classif" and not benchmark["categorical"]:
                     #    continue
                     name = f"{model_name}_{benchmark['task']}_{benchmark['dataset_size']}"
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects,
                        "n_datasets": n_datasets})
-    df.to_csv("launch_config/sweeps/stacking_tabpfn.csv", index=False)
+    df.to_csv("launch_config/sweeps/trees_cc18.csv", index=False)
     print("Check the sweeps id saved at sweeps/benchmark_sweeps.csv")
 
 

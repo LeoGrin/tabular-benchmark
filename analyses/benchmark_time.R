@@ -30,9 +30,9 @@ benchmark_numerical <- read_csv("analyses/results/random_search_benchmark_numeri
 df <- benchmark_numerical %>% 
   filter(benchmark == "numerical_classif_medium")
 
-plot_aggregated_results_time(df, y_inf=0.6)
+plot_aggregated_results_time(df, y_inf=0.6,  text_size=9, theme_size=27)
 
-ggsave("analyses/plots/benchmark_time_numerical_classif.pdf", width=7, height=6, bg="white")
+ggsave("analyses/plots/benchmark_time_numerical_classif.pdf", width=14, height=7.3, bg="white")
 
 
 
@@ -67,7 +67,7 @@ df <- benchmark_numerical %>%
 
 plot_aggregated_results_time(df, score="R2 score", quantile=0.5, truncate_scores = T, y_inf=0.6)
 
-ggsave("analyses/plots/benchmark_time_numerical_regression.pdf", width=7, height=6, bg="white")
+ggsave("analyses/plots/benchmark_time_numerical_regression.pdf", width=14, height=7.3, bg="white")
 
 
 #######################
@@ -96,7 +96,7 @@ df <- benchmark_categorical %>%
 plot_aggregated_results_time(df, score="R2 score", quantile=0.4, truncate_scores = T, y_inf=0.5)
 
 
-ggsave("analyses/plots/benchmark_time_categorical_regression.pdf", width=7, height=6, bg="white")
+ggsave("analyses/plots/benchmark_time_categorical_regression.pdf", width=14, height=7.3, bg="white")
 
 
 #######################
@@ -123,7 +123,7 @@ ggsave("analyses/plots/benchmark_time_categorical_regression.pdf", width=7, heig
 df <- benchmark_categorical %>% 
   filter(benchmark == "categorical_classif_medium")
 
-plot_aggregated_results_time(df, y_inf=0.4)
+plot_aggregated_results_time(df, y_inf=0.4, text_size=9, theme_size=27)
 
-ggsave("analyses/plots/benchmark_time_categorical_classif.pdf", width=7, height=6, bg="white")
+ggsave("analyses/plots/benchmark_time_categorical_classif.pdf", width=14, height=7.3, bg="white")
 

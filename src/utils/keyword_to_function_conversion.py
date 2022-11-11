@@ -7,6 +7,7 @@ from skorch_models import create_resnet_skorch, create_ft_transformer_skorch, cr
 from skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch
 from TabSurvey.models.saint import SAINT
 from tabpfn.scripts.transformer_prediction_interface import TabPFNClassifier
+from sklearn.linear_model import LogisticRegression
 
 
 convert_keyword_to_function = {
@@ -17,6 +18,7 @@ convert_keyword_to_function = {
     "ft_transformer_regressor": create_ft_transformer_regressor_skorch,
     "rtdl_resnet": create_resnet_skorch,
     "rtdl_resnet_regressor": create_resnet_regressor_skorch,
+    "log_reg": LogisticRegression,
     "rf_c": RandomForestClassifier,
     "rf_r": RandomForestRegressor,
     "gbt_c": GradientBoostingClassifier,
@@ -44,9 +46,11 @@ convert_keyword_to_function = {
 # Prevent circular imports
 #TODO: Find a better way to do this
 from sklearn.ensemble import StackingClassifier
-def create_stacking_classifier(base_estimator_keyword, final_estimator_keyword):
-    base_estimator = convert_keyword_to_function[base_estimator_keyword]
-    final_estimator = convert_keyword_to_function[final_estimator_keyword]
-    return StackingClassifier(estimators=[(base_estimator_keyword, base_estimator())], final_estimator=final_estimator())
+def create_stacking_classifier(base_estimator_keyword_list, final_estimator_keyword):
+    base_estimators = []
+    for base_estimator_keyword in base_estimator_keyword_list:
+        base_estimators.append((base_estimator_keyword, convert_keyword_to_function[base_estimator_keyword]()))
+    final_estimator = convert_keyword_to_function[final_estimator_keyword]()
+    return StackingClassifier(base_estimators, final_estimator)
 
 convert_keyword_to_function["stacking"] = create_stacking_classifier
