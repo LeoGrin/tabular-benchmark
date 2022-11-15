@@ -151,7 +151,7 @@ res_datasets %>%
   theme_minimal(base_size=20) +
   theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
 
-ggsave("analyses/plots/remove_features_datasets.jpg", width=15, height=9)
+ggsave("analyses/plots/remove_features_datasets.pdf", width=15, height=9)
 
 
 
@@ -198,7 +198,7 @@ res_datasets_ %>%
   #theme(legend.position="bottom", legend.title=element_blank(), legend.text = element_text(size=22))
   
 
-ggsave("analyses/plots/removed_features_2.jpg", width=7, height=6)
+ggsave("analyses/plots/removed_features_2.pdf", width=16, height=9)
 
   
 
