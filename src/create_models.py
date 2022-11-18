@@ -1,4 +1,4 @@
-from utils.keyword_to_function_conversion import convert_keyword_to_function
+from configs.all_model_configs import model_keyword_dic
 import numpy as np
 
 
@@ -8,7 +8,7 @@ class AttrDict(dict):
         self.__dict__ = self
 
 def create_model(config, categorical_indicator, num_features=None, id=None, cat_dims=None):
-    model_function = convert_keyword_to_function[config["model_name"]]
+    model_function = model_keyword_dic[config["model_name"]]
     model_config = {}
     for key in config.keys():
         if key.startswith("model__"):

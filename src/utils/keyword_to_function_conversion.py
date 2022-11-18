@@ -17,16 +17,3 @@ convert_keyword_to_function = {
     "remove_high_frequency_from_train": remove_high_frequency_from_train,
     "no_transform": None
 }
-
-
-# Prevent circular imports
-#TODO: Find a better way to do this
-from sklearn.ensemble import StackingClassifier
-def create_stacking_classifier(base_estimator_keyword_list, final_estimator_keyword):
-    base_estimators = []
-    for base_estimator_keyword in base_estimator_keyword_list:
-        base_estimators.append((base_estimator_keyword, convert_keyword_to_function[base_estimator_keyword]()))
-    final_estimator = convert_keyword_to_function[final_estimator_keyword]()
-    return StackingClassifier(base_estimators, final_estimator)
-
-convert_keyword_to_function["stacking"] = create_stacking_classifier

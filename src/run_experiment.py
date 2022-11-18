@@ -10,18 +10,6 @@ import torch
 
 #os.environ["WANDB_MODE"] = "offline"
 
-
-# def modify_config(config):
-#     # To overcome wandb limitations on distribution specifications
-#     # To match Hyperopt-sklearn
-#     dic = {}
-#     for key in config.keys():
-#         dic[key] = config[key]
-#     if config["model_name"] == "xgb_c" or config["model_name"] == "xgb_r":
-#         dic["model__learning_rate"] = config["model__learning_rate"] - 0.0001
-#         dic["model__gamma"] = config["model__gamma"] - 0.0001
-#         dic["model__reg_alpha"] = config["model__reg_alpha"] - 0.0001
-#     return dic
 def train_model_on_config(config=None):
     print("GPU?")
     print(torch.cuda.device_count())
@@ -71,7 +59,6 @@ def train_model_on_config(config=None):
                 #    config["model__wandb_run"] = run
                 rng = np.random.RandomState(i)
                 print(rng.randn(1))
-                # TODO: separate numeric and categorical features
                 t = time.time()
                 x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator = generate_dataset(config, rng)
                 data_generation_time = time.time() - t
@@ -138,8 +125,6 @@ def train_model_on_config(config=None):
                                   commit=False)
 
                 times.append(end_time - start_time)
-                # wandb.log({"train_score": train_score})
-                # wandb.log({"test_score": test_score})
                 train_scores.append(train_score)
                 val_scores.append(val_score)
                 test_scores.append(test_score)

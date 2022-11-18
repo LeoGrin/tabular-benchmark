@@ -5,6 +5,7 @@ import pandas as pd
 import sys
 sys.path.append(".")
 from configs.wandb_config import wandb_id
+from configs.all_model_configs import total_config
 
 
 
@@ -126,7 +127,7 @@ benchmarks = [{"task": "regression",
 if __name__ == "__main__":
     # Create a csv file with all the WandB sweeps
     #TODO make an argparse
-    models = ["xgb", "gbt", "hgbt", "xgb", "saint", "ft_transformer", "resnet", "mlp"]
+    models = list(total_config.keys())
     benchmark_names = ["numerical_classif", "numerical_regression", "categorical_classif", "categorical_regression"]
     output_filename = "all_benchmarks_medium"
     sweep_ids = []

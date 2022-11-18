@@ -35,4 +35,6 @@ models/
 __pycache__/
 config/
 analyses/save_benchmarks.R
+src/check_difficulty_resnet_2.py
+src/check_difficulty_resnet.py
 
