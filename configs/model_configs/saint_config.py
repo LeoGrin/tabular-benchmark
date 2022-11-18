@@ -1,5 +1,5 @@
 
-saint_config = {
+config_random  = {
     "model__args__lr": {
         "distribution": "log_uniform_values",
         "min": 1e-5,
@@ -62,7 +62,7 @@ saint_config = {
     },
 }
 
-saint_config_default = {
+config_default = {
         "model__args__lr": {
             "value": float(3e-5),
         },
@@ -123,28 +123,28 @@ saint_config_default = {
 
 }
 
-saint_config_regression = dict(saint_config,
+config_regression = dict(config_random ,
                                **{
                                    "model__args__objective": {
                                        "value": "regression",
                                    },
                                })
 
-saint_config_regression_default = dict(saint_config_default,
+config_regression_default = dict(config_default,
                                **{
                                    "model__args__objective": {
                                        "value": "regression",
                                    },
                                })
 
-saint_config_classif = dict(saint_config,
+config_classif = dict(config_random ,
                             **{
                                 "model__args__objective": {
                                     "value": "binary",
                                 },
                             })
 
-saint_config_classif_default = dict(saint_config_default,
+config_classif_default = dict(config_default,
                             **{
                                 "model__args__objective": {
                                     "value": "binary",

@@ -11,7 +11,7 @@ total_config = {}
 model_keyword_dic = {}
 
 ## ADD YOU MODEL HERE ##
-# from configs.model_configs.your_file import * #replace template.py by your parameters
+# from configs.model_configs.your_file import config_classif, config_regression, config_classif_default, config_regression_default #replace template.py by your parameters
 # keyword = "your_model"
 # total_config[keyword] = {
 #         "classif": {"random": config_classif,
@@ -26,7 +26,7 @@ model_keyword_dic = {}
 #############################
 
 
-from configs.model_configs.gpt_config import *
+from configs.model_configs.gpt_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "gpt"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -34,11 +34,11 @@ total_config[keyword] = {
         "regression": {"random": config_regression,
                             "default": config_regression_default},
 }
-model_keyword_dic[config_regression["model_name"]] = GradientBoostingRegressor
-model_keyword_dic[config_classif["model_name"]] = GradientBoostingClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = GradientBoostingRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = GradientBoostingClassifier
 
 
-from configs.model_configs.rf_config import *
+from configs.model_configs.rf_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "rf"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -47,10 +47,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = RandomForestRegressor
-model_keyword_dic[config_classif["model_name"]] = RandomForestClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = RandomForestRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = RandomForestClassifier
 
-from configs.model_configs.hgbt_config import *
+from configs.model_configs.hgbt_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "hgbt"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -59,10 +59,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = HistGradientBoostingRegressor
-model_keyword_dic[config_classif["model_name"]] = HistGradientBoostingClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = HistGradientBoostingRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = HistGradientBoostingClassifier
 
-from configs.model_configs.xgb_config import *
+from configs.model_configs.xgb_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "xgb"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -71,10 +71,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = XGBRegressor
-model_keyword_dic[config_classif["model_name"]] = XGBClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = XGBRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = XGBClassifier
 
-from configs.model_configs.xgb_config import *
+from configs.model_configs.xgb_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "xgb"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -83,10 +83,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = XGBRegressor
-model_keyword_dic[config_classif["model_name"]] = XGBClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = XGBRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = XGBClassifier
 
-from configs.model_configs.mlp_config import *
+from configs.model_configs.mlp_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "mlp"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -95,10 +95,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = create_rtdl_mlp_regressor_skorch
-model_keyword_dic[config_classif["model_name"]] = create_rtdl_mlp_skorch
+model_keyword_dic[config_regression["model_name"]["value"]] = create_rtdl_mlp_regressor_skorch
+model_keyword_dic[config_classif["model_name"]["value"]] = create_rtdl_mlp_skorch
 
-from configs.model_configs.resnet_config import *
+from configs.model_configs.resnet_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "resnet"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -107,10 +107,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = create_resnet_regressor_skorch
-model_keyword_dic[config_classif["model_name"]] = create_resnet_skorch
+model_keyword_dic[config_regression["model_name"]["value"]] = create_resnet_regressor_skorch
+model_keyword_dic[config_classif["model_name"]["value"]] = create_resnet_skorch
 
-from configs.model_configs.ft_transformer_config import *
+from configs.model_configs.ft_transformer_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "ft_transformer"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -119,10 +119,10 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = create_ft_transformer_regressor_skorch
-model_keyword_dic[config_classif["model_name"]] = create_ft_transformer_skorch
+model_keyword_dic[config_regression["model_name"]["value"]] = create_ft_transformer_regressor_skorch
+model_keyword_dic[config_classif["model_name"]["value"]] = create_ft_transformer_skorch
 
-from configs.model_configs.saint_config import *
+from configs.model_configs.saint_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "saint"
 total_config[keyword] = {
         "classif": {"random": config_classif,
@@ -131,7 +131,7 @@ total_config[keyword] = {
                             "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]] = SAINT
-model_keyword_dic[config_classif["model_name"]] = SAINT
+model_keyword_dic[config_regression["model_name"]["value"]] = SAINT
+model_keyword_dic[config_classif["model_name"]["value"]] = SAINT
 
 

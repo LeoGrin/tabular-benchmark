@@ -1,6 +1,6 @@
 from configs.model_configs.skorch_config import skorch_config, skorch_config_default
 
-mlp_config = {
+config_random  = {
     "model__module__n_layers": {
         "distribution": "q_uniform",
         "min": 1,
@@ -29,7 +29,7 @@ mlp_config = {
     },
 }
 
-mlp_config_default = {
+config_default = {
     "model__lr_scheduler": {
         "values": [True]
     },
@@ -50,7 +50,7 @@ mlp_config_default = {
     },
 }
 
-mlp_config_regression = dict(mlp_config,
+config_regression = dict(config_random ,
                              **skorch_config,
                              **{
                                  "model_name": {
@@ -58,7 +58,7 @@ mlp_config_regression = dict(mlp_config,
                                  },
                              })
 
-mlp_config_regression_default = dict(mlp_config_default,
+config_regression_default = dict(config_default,
                              **skorch_config_default,
                              **{
                                  "model_name": {
@@ -66,7 +66,7 @@ mlp_config_regression_default = dict(mlp_config_default,
                                  },
                              })
 
-mlp_config_classif = dict(mlp_config,
+config_classif = dict(config_random ,
                           **skorch_config,
                           **{
                               "model_name": {
@@ -74,7 +74,7 @@ mlp_config_classif = dict(mlp_config,
                               },
                           })
 
-mlp_config_classif_default = dict(mlp_config_default,
+config_classif_default = dict(config_default,
                           **skorch_config_default,
                           **{
                               "model_name": {

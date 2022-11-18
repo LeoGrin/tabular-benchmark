@@ -1,6 +1,6 @@
 import numpy as np
 
-hgbt_config = {
+config_random = {
     "model_type": {
         "value": "sklearn"
     },
@@ -42,7 +42,7 @@ hgbt_config = {
     },
 }
 
-hgbt_config_default = {
+config_default = {
     "model_type": {
         "value": "sklearn"
     },
@@ -63,7 +63,7 @@ hgbt_config_default = {
     },
 }
 
-hgbt_config_regression = dict(hgbt_config, **{
+config_regression = dict(config_random, **{
     "model_name": {
         "value": "hgbt_r"
     },
@@ -72,19 +72,19 @@ hgbt_config_regression = dict(hgbt_config, **{
     },
 })
 
-hgbt_config_regression_default = dict(hgbt_config_default, **{
+config_regression_default = dict(config_default, **{
     "model_name": {
         "value": "hgbt_r"
     },
 })
 
-hgbt_config_classif = dict(hgbt_config, **{
+config_classif = dict(config_random, **{
     "model_name": {
         "value": "hgbt_c"
     },
 })
 
-hgbt_config_classif_default = dict(hgbt_config_default, **{
+config_classif_default = dict(config_default, **{
     "model_name": {
         "value": "hgbt_c"
     },

@@ -1,6 +1,6 @@
 from configs.model_configs.skorch_config import skorch_config, skorch_config_default
 
-resnet_config = {
+config_random  = {
     "model__module__activation": {
         "value": "reglu"
     },
@@ -51,7 +51,7 @@ resnet_config = {
         "values": [True, False]
     },
 }
-resnet_config_default = {
+config_default = {
     "model__lr_scheduler": {
         "values": [True]
     },
@@ -87,7 +87,7 @@ resnet_config_default = {
     },
 }
 
-resnet_config_regression = dict(resnet_config,
+config_regression = dict(config_random ,
                                 **skorch_config,
                                 **{
                                     "model_name": {
@@ -95,7 +95,7 @@ resnet_config_regression = dict(resnet_config,
                                     },
                                 })
 
-resnet_config_regression_default = dict(resnet_config_default,
+config_regression_default = dict(config_default,
                                 **skorch_config_default,
                                 **{
                                     "model_name": {
@@ -103,7 +103,7 @@ resnet_config_regression_default = dict(resnet_config_default,
                                     },
                                 })
 
-resnet_config_classif = dict(resnet_config,
+config_classif = dict(config_random ,
                              **skorch_config,
                              **{
                                  "model_name": {
@@ -111,7 +111,7 @@ resnet_config_classif = dict(resnet_config,
                                  },
                              })
 
-resnet_config_classif_default = dict(resnet_config_default,
+config_classif_default = dict(config_default,
                              **skorch_config_default,
                              **{
                                  "model_name": {

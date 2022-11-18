@@ -1,6 +1,6 @@
 import numpy as np
 
-xgb_config = {"model_type": {
+config_random = {"model_type": {
     "value": "sklearn"
 },
     # Parameter space taken from Hyperopt-sklearn except when mentioned
@@ -70,7 +70,7 @@ xgb_config = {"model_type": {
 }
 
 
-xgb_config_default = {
+config_default = {
     "model_type": {
         "value": "sklearn"
     },
@@ -88,25 +88,25 @@ xgb_config_default = {
     },
 }
 
-xgb_config_regression = dict(xgb_config, **{
+config_regression = dict(config_random, **{
     "model_name": {
         "value": "xgb_r"
     },
 })
 
-xgb_config_regression_default = dict(xgb_config_default, **{
+config_regression_default = dict(config_default, **{
     "model_name": {
         "value": "xgb_r"
     },
 })
 
-xgb_config_classif = dict(xgb_config, **{
+config_classif = dict(config_random, **{
     "model_name": {
         "value": "xgb_c"
     },
 })
 
-xgb_config_classif_default= dict(xgb_config_default, **{
+config_classif_default= dict(config_default, **{
     "model_name": {
         "value": "xgb_c"
     },

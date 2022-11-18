@@ -106,7 +106,7 @@ def import_open_ml_data(keyword=None, remove_nans=None, impute_nans=None, catego
         return X, y, categorical_indicator
 
     return X, y, None
-def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num_samples=None, regression=False, categorical=False, dim=[],
+def import_real_data(keyword=None, balanced=True, path_to_dir="data", max_num_samples=None, regression=False, categorical=False, dim=[],
                      rng=None):
     if not categorical:
         if regression:

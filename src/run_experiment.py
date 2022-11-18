@@ -215,7 +215,10 @@ if __name__ == """__main__""":
     #  'max_test_samples': 50000}
 
     # config = {"model_type": "sklearn",
-    #           "model_name": "rf_c",
+    #           "model_name": "gbt_c",
+    #           "regression": False,
+    #           "data__regression": False,
+    #           "data__categorical": False,
     #           "model__n_estimators": 100,
     #           "data__method_name": "real_data",
     #           "data__keyword": "california",
@@ -237,7 +240,11 @@ if __name__ == """__main__""":
 
     # config = {"model_type": "skorch",
     #           "model_name": "rtdl_resnet",
+    #           "regression": False,
+    #           "data__regression": False,
+    #           "data__categorical": False,
     #           "n_iter": 1,
+    #           "max_train_samples": 1000,
     #           "model__device": "cpu",
     #           "model__optimizer": "adam",
     #           "model__lr_scheduler": "adam",

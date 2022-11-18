@@ -1,3 +1,5 @@
+import sys
+sys.path.append(".")
 from configs.all_model_configs import model_keyword_dic
 import numpy as np
 

@@ -1,6 +1,6 @@
 from configs.model_configs.skorch_config import skorch_config, skorch_config_default
 
-ft_transformer_config = {
+config_random = {
     "model__module__activation": {
         "value": "reglu"
     },
@@ -67,7 +67,7 @@ ft_transformer_config = {
     },
 }
 
-ft_transformer_config_default = {
+config_default = {
     "model__lr_scheduler": {
         "value": False
     },
@@ -118,7 +118,7 @@ ft_transformer_config_default = {
     },
 }
 
-ft_transformer_config_regression = dict(ft_transformer_config,
+config_regression = dict(config_random,
                                         **skorch_config,
                                         **{
                                             "model_name": {
@@ -126,7 +126,7 @@ ft_transformer_config_regression = dict(ft_transformer_config,
                                             },
                                         })
 
-ft_transformer_config_regression_default = dict(ft_transformer_config_default,
+config_regression_default = dict(config_default,
                                         **skorch_config_default,
                                         **{
                                             "model_name": {
@@ -134,7 +134,7 @@ ft_transformer_config_regression_default = dict(ft_transformer_config_default,
                                             },
                                         })
 
-ft_transformer_config_classif = dict(ft_transformer_config,
+config_classif = dict(config_random,
                                      **skorch_config,
                                      **{
                                          "model_name": {
@@ -142,7 +142,7 @@ ft_transformer_config_classif = dict(ft_transformer_config,
                                          },
                                      })
 
-ft_transformer_config_classif_default = dict(ft_transformer_config_default,
+config_classif_default = dict(config_default,
                                      **skorch_config_default,
                                      **{
                                          "model_name": {
