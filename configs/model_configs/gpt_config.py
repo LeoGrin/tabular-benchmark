@@ -73,10 +73,10 @@ config_default = {
         "value": True
     },
     "model__n_estimators": {
-        "value": 4_000
+        "value": 1_000
     },
     "model__n_iter_no_change": {
-        "value": 30
+        "value": 20
     },
     "model__validation_fraction": {
         "value": 0.2

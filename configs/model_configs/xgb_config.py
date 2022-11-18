@@ -13,14 +13,14 @@ xgb_config = {"model_type": {
         'max': 0.7,
     },
     "model__n_estimators": {
-        "value": 40_000,
+        "value": 1_000,
         #"distribution": "q_uniform",
         #"min": 100,
         #"max": 6000,
         #"q": 200
     },
     "early_stopping_rounds": {
-        "value": 100
+        "value": 20
     },
     "model__gamma": {
         "distribution": "log_uniform_values",
@@ -81,7 +81,7 @@ xgb_config_default = {
         "value": True
     },
     "model__n_estimators": {
-        "value": 10_000,
+        "value": 1_000,
     },
     "early_stopping_rounds": {
         "value": 20

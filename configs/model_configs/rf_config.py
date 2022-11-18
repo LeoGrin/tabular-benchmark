@@ -1,6 +1,6 @@
 import numpy as np
 
-rf_config = {
+config_random = {
     "model_type": {
         "value": "sklearn"
     },
@@ -44,7 +44,7 @@ rf_config = {
     },
 }
 
-rf_config_default = {
+config_default = {
     "model_type": {
         "value": "sklearn"
     },
@@ -59,7 +59,7 @@ rf_config_default = {
     },
 }
 
-rf_config_regression = dict(rf_config, **{
+config_regression = dict(config_random, **{
     "model_name": {
         "value": "rf_r"
     },
@@ -68,14 +68,14 @@ rf_config_regression = dict(rf_config, **{
     },
 })
 
-rf_config_regression_default = dict(rf_config_default, **{
+config_regression_default = dict(config_default, **{
     "model_name": {
         "value": "rf_r"
     },
 
 })
 
-rf_config_classif = dict(rf_config, **{
+config_classif = dict(config_random, **{
     "model_name": {
         "value": "rf_c"
     },
@@ -84,7 +84,7 @@ rf_config_classif = dict(rf_config, **{
     },
 })
 
-rf_config_classif_default = dict(rf_config_default, **{
+config_classif_default = dict(config_default, **{
     "model_name": {
         "value": "rf_c"
     },
