@@ -8,10 +8,10 @@ WANDB_ID = "leogrin"#INSERT WANDB ENTITY
 api = wandb.Api()
 
 
-sweep_id_filename = "launch_config/sweeps/resnet_several_random.csv"
+sweep_id_filename = "launch_benchmarks/sweeps/resnet_several_random.csv"
 #weep_id_filename = "sweeps/benchmark_sweeps.csv"
 
-output_filename = "launch_config/results/resnet_several_random.csv"
+output_filename = "launch_benchmarks/results/resnet_several_random.csv"
 #output_filename = "results/benchmark_results.csv"
 
 df = pd.read_csv(sweep_id_filename)

@@ -18,6 +18,7 @@ def create_model(config, categorical_indicator, num_features=None, id=None, cat_
         return model_function(**model_config, id=id)
     elif config["model_type"] == "sklearn":
         if config["model_name"].startswith("hgbt"):
+            # Use native support for categorical variables
             model_config["categorical_features"] = categorical_indicator
         return model_function(**model_config)
     elif config["model_type"] == "tab_survey":

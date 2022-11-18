@@ -1,4 +1,4 @@
-from launch_config.model_configs import config_dic
+from launch_benchmarks.model_configs import config_dic
 from run_experiment import train_model_on_config
 import os
 os.environ["WANDB_MODE"]="offline"

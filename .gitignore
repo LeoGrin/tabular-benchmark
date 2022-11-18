@@ -26,8 +26,8 @@ analyses/utils/
 wandb/
 output/
 skorch_cp/
-launch_config/sweeps/*
-launch_config/results/*
+launch_benchmarks/sweeps/*
+launch_benchmarks/results/*
 models/
 __pycache__/
 config/

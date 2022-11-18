@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects,
                        "n_datasets": n_datasets})
-    df.to_csv("launch_config/sweeps/trees_cc18.csv", index=False)
+    df.to_csv("launch_benchmarks/sweeps/trees_cc18.csv", index=False)
     print("Check the sweeps id saved at sweeps/benchmark_sweeps.csv")
 
 
