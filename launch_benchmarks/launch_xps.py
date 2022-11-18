@@ -1,9 +1,7 @@
 from utils import create_sweep
 import pandas as pd
-
-# We use one project per xp to avoid WandB getting super slow
-WANDB_PROJECT_NAMES = ["thesis-5", "thesis-5", "thesis-5", "thesis-5"]
-
+from configs.wandb_config import wandb_id
+import wandb
 
 data_transform_config = {
     "data__method_name": {
@@ -117,6 +115,8 @@ if __name__ == "__main__":
     names = []
     projects = []
     for i, xp in enumerate(xps):
+        project_name =  xp["name"]
+        wandb.init(project = project_name, entity=wandb_id)
         for model_name in models:
             for default in [True, False]:
                 name = f"{model_name}_{xp['name']}"
@@ -137,19 +137,20 @@ if __name__ == "__main__":
                              dataset_size = "medium",
                              datasets = datasets,
                              default=default,
-                             project=WANDB_PROJECT_NAMES[i],
+                             project=project_name,
                              name=name,
                             remove_tranforms_from_model_config=True) #overwrite transforms in model config
                 sweep_ids.append(sweep_id)
                 names.append(name)
-                projects.append(WANDB_PROJECT_NAMES[i])
+                projects.append(project_name)
                 print(f"Created sweep {name}")
                 print(f"Sweep id: {sweep_id}")
-                print(f"Project: {WANDB_PROJECT_NAMES[i]}")
+                print(f"Project: {project_name}")
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names,
                        "project": projects})
     df.to_csv("launch_benchmarks/sweeps/xps_sweeps.csv", index=False)
     print("Check the sweeps id saved at sweeps/xps_sweeps.csv")
-
+    print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "
+          "after making a few changes")
 

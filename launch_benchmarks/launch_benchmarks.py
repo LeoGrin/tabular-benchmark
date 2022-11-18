@@ -1,8 +1,11 @@
+import wandb
+
 from utils import create_sweep
 import pandas as pd
+import sys
+sys.path.append(".")
+from configs.wandb_config import wandb_id
 
-# We use one project per benchmark to avoid WandB getting super slow
-WANDB_PROJECT_NAMES = ["xgb_new"] * 10
 
 
 data_transform_config = {
@@ -120,33 +123,30 @@ benchmarks = [{"task": "regression",
                  }
 ]
 
-#models = ["saint"]#["gbt", "rf", "xgb", "hgbt"]#,
-          #"ft_transformer", "resnet", "mlp", "saint"]
-
-
 if __name__ == "__main__":
-    models = ["xgb", "gbt", "hgbt"]
+    # Create a csv file with all the WandB sweeps
+    #TODO make an argparse
+    models = ["xgb", "gbt", "hgbt", "xgb", "saint", "ft_transformer", "resnet", "mlp"]
+    benchmark_names = ["numerical_classif", "numerical_regression", "categorical_classif", "categorical_regression"]
+    output_filename = "all_benchmarks_medium"
     sweep_ids = []
     names = []
     projects = []
-    #benchmarks_bonus = [benchmark for benchmark in benchmarks if benchmark["task"] == "regression"]
-    #benchmarks_medium = [benchmark for benchmark in benchmarks_bonus if benchmark["dataset_size"] == "medium"]
-    #datasets = ["wine_quality", "year", "cpu_act", "Bike_Sharing_Demand", "pol"]
     benchmarks = [benchmark for benchmark in benchmarks]
 
     for n in range(1):
         for model_name in models:
+            project_name = model_name
+            wandb.init(entity=wandb_id, project=project_name) # Create a new project on your WandB account
             for i, benchmark in enumerate(benchmarks):
-                for default in [True]:
-                    #if benchmark["task"] == "classif" and not benchmark["categorical"]:
-                    #    continue
+                for default in [False, True]:
                     name = f"{model_name}_{benchmark['task']}_{benchmark['dataset_size']}"
                     if benchmark['categorical']:
                         name += "_categorical"
                     else:
                         name += "_numerical"
                     if default:
-                        name += "_default"
+                        name += "_default" # do not change
                     name += "_{}".format(n)
                     sweep_id = create_sweep(data_transform_config,
                                  model_name=model_name,
@@ -155,17 +155,19 @@ if __name__ == "__main__":
                                  dataset_size = benchmark["dataset_size"],
                                  datasets = benchmark["datasets"],
                                  default=default,
-                                 project=WANDB_PROJECT_NAMES[i],
+                                 project=project_name,
                                  name=name)
                     sweep_ids.append(sweep_id)
                     names.append(name)
-                    projects.append(WANDB_PROJECT_NAMES[i])
+                    projects.append(project_name)
                     print(f"Created sweep {name}")
                     print(f"Sweep id: {sweep_id}")
-                    print(f"In project {WANDB_PROJECT_NAMES[i]}")
+                    print(f"In project {project_name}")
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects})
-    df.to_csv("launch_benchmarks/sweeps/boosting_10K_default.csv", index=False)
-    print("Check the sweeps id saved at sweeps/benchmark_sweeps.csv")
+    df.to_csv(f"launch_benchmarks/sweeps/{output_filename}.csv", index=False)
+    print("Check the sweeps id saved at launch_benchmarks/sweeps/{}.csv".format(output_filename))
+    print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "
+          "after making a few changes")
 
 
