@@ -18,6 +18,7 @@ def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, con
         y_hat_val = model.predict(x_val)
     y_hat_test = model.predict(x_test)
 
+
     if "regression" in config.keys() and config["regression"]:
         if return_r2:
             print(np.any(np.isnan(y_hat_train)))
