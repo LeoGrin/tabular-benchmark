@@ -114,6 +114,7 @@ if __name__ == "__main__":
     sweep_ids = []
     names = []
     projects = []
+    use_gpu_list = []
     for i, xp in enumerate(xps):
         project_name =  xp["name"]
         wandb.init(project = project_name, entity=wandb_id)
@@ -130,7 +131,7 @@ if __name__ == "__main__":
                         data_transform_config["transform__1__type"] = {
                             "value": "quantile"
                         }
-                sweep_id = create_sweep(data_transform_config,
+                sweep_id, use_gpu = create_sweep(data_transform_config,
                              model_name=model_name,
                              regression=False,
                              categorical=False,
@@ -143,12 +144,15 @@ if __name__ == "__main__":
                 sweep_ids.append(sweep_id)
                 names.append(name)
                 projects.append(project_name)
+                use_gpu_list.append(use_gpu)
                 print(f"Created sweep {name}")
                 print(f"Sweep id: {sweep_id}")
                 print(f"Project: {project_name}")
+                print(f"Use GPU: {use_gpu}")
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names,
-                       "project": projects})
+                       "project": projects,
+                       "use_gpu": use_gpu_list})
     df.to_csv("launch_benchmarks/sweeps/xps_sweeps.csv", index=False)
     print("Check the sweeps id saved at sweeps/xps_sweeps.csv")
     print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "

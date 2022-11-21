@@ -60,6 +60,9 @@ config_random = {"model_type": {
     "one_hot_encoder": { # Use one-hot encoding for categorical variables when needed
         "value": True
     },
+    "use_gpu": {
+        "value": False
+    }
 }
 
 config_default = {

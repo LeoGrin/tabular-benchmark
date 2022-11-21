@@ -120,6 +120,9 @@ config_default = {
     "transformed_target": {
         "values": [False]
     },
+    "use_gpu": {
+        "value": True
+    }
 
 }
 

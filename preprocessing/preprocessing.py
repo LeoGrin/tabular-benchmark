@@ -1,7 +1,9 @@
 from sklearn.preprocessing import LabelEncoder
 from preprocessing.utils import *
 
-def preprocessing(X, y, categorical_indicator, config, transformation=None):
+def preprocessing(X, y, categorical_indicator, categorical, regression, transformation=None):
+    num_categorical_columns = sum(categorical_indicator)
+    original_n_samples, original_n_features = X.shape
     le = LabelEncoder()
     y = le.fit_transform(y)
     binary_variables_mask = X.nunique() == 2
@@ -20,14 +22,19 @@ def preprocessing(X, y, categorical_indicator, config, transformation=None):
             if not categorical_indicator[i]:
                 n_pseudo_categorical += 1
                 cols_to_delete.append(i)
+    if not categorical:
+        for i in range(X.shape[1]):
+            if categorical_indicator[i]:
+                cols_to_delete.append(i)
     print("low card to delete")
     print(X.columns[cols_to_delete])
     print("{} low cardinality numerical removed".format(n_pseudo_categorical))
     X = X.drop(X.columns[cols_to_delete], axis=1)
     categorical_indicator = [categorical_indicator[i] for i in range(len(categorical_indicator)) if
-                             not i in cols_to_delete]
+                             not i in cols_to_delete] # update categorical indicator
+    print("Remaining categorical")
+    print(categorical_indicator)
     X, y, categorical_indicator, num_high_cardinality = remove_high_cardinality(X, y, categorical_indicator, 20)
-    print("categorical columns")
     print([X.columns[i] for i in range(X.shape[1]) if categorical_indicator[i]])
     X, y, num_columns_missing, num_rows_missing, missing_cols_mask = remove_missing_values(X, y, 0.2)
     categorical_indicator = [categorical_indicator[i] for i in range(len(categorical_indicator)) if
@@ -35,12 +42,16 @@ def preprocessing(X, y, categorical_indicator, config, transformation=None):
     for i in range(X.shape[1]):
         if categorical_indicator[i]:
             X.iloc[:, i] = LabelEncoder().fit_transform(X.iloc[:, i])
-    # if X.shape[0] > 3000 and X.shape[1] > 3:
-    X, y = balance(X, y)
+    if not regression:
+        X, y = balance(X, y)
+        assert len(X) == len(y)
+        assert len(np.unique(y)) == 2
 
     if transformation is not None:
+        assert regression
         y = transform_target(y, transformation)
     else:
         print("NO TRANSFORMATION")
 
-    return X, y
+    return X, y, categorical_indicator, num_high_cardinality, num_columns_missing, num_rows_missing, num_categorical_columns, \
+              n_pseudo_categorical, original_n_samples, original_n_features

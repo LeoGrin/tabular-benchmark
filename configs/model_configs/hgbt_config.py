@@ -40,6 +40,9 @@ config_random = {
     "transformed_target": {
         "values": [False, True]
     },
+    "use_gpu": {
+        "value": False
+    }
 }
 
 config_default = {

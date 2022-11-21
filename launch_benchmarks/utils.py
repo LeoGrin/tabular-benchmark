@@ -61,4 +61,8 @@ def create_sweep(data_transform_config, model_name, regression, default, project
 
     sweep_id = wandb.sweep(sweep_config, project=project)
 
-    return sweep_id
+    if "use_gpu" not in data_transform_config.keys():
+        use_gpu = False
+    else:
+        use_gpu = data_transform_config["use_gpu"]["value"]
+    return sweep_id, use_gpu

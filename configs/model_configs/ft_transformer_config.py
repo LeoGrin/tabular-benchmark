@@ -65,6 +65,9 @@ config_random = {
     "model__lr_scheduler": {
         "values": [True, False]
     },
+    "use_gpu": {
+        "value": True
+    }
 }
 
 config_default = {
@@ -116,6 +119,9 @@ config_default = {
     "d_token": {
         "value": 192
     },
+    "use_gpu": {
+        "value": True
+    }
 }
 
 config_regression = dict(config_random,

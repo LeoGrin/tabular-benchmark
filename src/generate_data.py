@@ -7,6 +7,9 @@ from sklearn.preprocessing import LabelEncoder, QuantileTransformer
 import openml
 import pickle
 
+openml.config.cache_directory = "/storage/store/work/lgrinszt"
+
+
 def balance_data(x, y):
     rng = np.random.RandomState(0)
     print("Balancing")

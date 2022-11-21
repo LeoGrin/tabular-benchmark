@@ -57,6 +57,9 @@ config_default = {
     "model__n_estimators": {
         "value": 250,
     },
+    "use_gpu": {
+        "value": False
+    }
 }
 
 config_regression = dict(config_random, **{

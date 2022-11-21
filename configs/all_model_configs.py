@@ -1,10 +1,13 @@
+import sys
+sys.path.append(".")
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, \
     GradientBoostingClassifier, GradientBoostingRegressor, \
     HistGradientBoostingRegressor, HistGradientBoostingClassifier
 from xgboost import XGBClassifier, XGBRegressor
-from skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch
-from skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch
-from TabSurvey.models.saint import SAINT
+from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch
+from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch
+from models.TabSurvey.models.saint import SAINT
+
 
 
 total_config = {}
@@ -27,7 +30,7 @@ model_keyword_dic = {}
 
 
 from configs.model_configs.gpt_config import config_classif, config_regression, config_classif_default, config_regression_default
-keyword = "gpt"
+keyword = "gbt"
 total_config[keyword] = {
         "classif": {"random": config_classif,
                     "default": config_classif_default},

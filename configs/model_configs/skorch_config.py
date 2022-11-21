@@ -36,6 +36,9 @@ skorch_config = {
     "transformed_target": {
         "values": [False, True]
     },
+    "use_gpu": {
+        "value": True
+    }
 }
 
 skorch_config_default = skorch_config.copy()

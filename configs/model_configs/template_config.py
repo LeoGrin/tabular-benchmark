@@ -34,6 +34,9 @@ config_random = {
     "transformed_target": { # do you want the target to be gaussienized before fit and degaussienized before prediction
         "values": [False, True]
     },
+    "use_gpu": {
+        "value": False
+    }
 }
 
 config_default = {
@@ -44,6 +47,9 @@ config_default = {
     "transformed_target": {
         "value": False
     },
+    "use_gpu": {
+        "value": False
+    }
 
 }
 

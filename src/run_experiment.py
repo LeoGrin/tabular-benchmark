@@ -10,6 +10,8 @@ import torch
 
 #os.environ["WANDB_MODE"] = "offline"
 
+
+
 def train_model_on_config(config=None):
     print("GPU?")
     print(torch.cuda.device_count())

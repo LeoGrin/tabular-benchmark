@@ -27,6 +27,9 @@ config_random  = {
     "model__lr_scheduler": {
         "values": [True, False]
     },
+    "use_gpu": {
+        "value": True
+    }
 }
 
 config_default = {
@@ -48,6 +51,9 @@ config_default = {
     "model__module__d_embedding": {
         "value": 128
     },
+    "use_gpu": {
+        "value": True
+    }
 }
 
 config_regression = dict(config_random ,

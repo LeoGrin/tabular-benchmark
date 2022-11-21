@@ -133,6 +133,7 @@ if __name__ == "__main__":
     sweep_ids = []
     names = []
     projects = []
+    use_gpu_list = []
     benchmarks = [benchmark for benchmark in benchmarks]
 
     for n in range(1):
@@ -149,7 +150,7 @@ if __name__ == "__main__":
                     if default:
                         name += "_default" # do not change
                     name += "_{}".format(n)
-                    sweep_id = create_sweep(data_transform_config,
+                    sweep_id, use_gpu = create_sweep(data_transform_config,
                                  model_name=model_name,
                                  regression=benchmark["task"] == "regression",
                                  categorical=benchmark["categorical"],
@@ -161,11 +162,13 @@ if __name__ == "__main__":
                     sweep_ids.append(sweep_id)
                     names.append(name)
                     projects.append(project_name)
+                    use_gpu_list.append(use_gpu)
                     print(f"Created sweep {name}")
                     print(f"Sweep id: {sweep_id}")
                     print(f"In project {project_name}")
+                    print(f"Use GPU: {use_gpu}")
 
-    df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects})
+    df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects, "use_gpu": use_gpu_list})
     df.to_csv(f"launch_benchmarks/sweeps/{output_filename}.csv", index=False)
     print("Check the sweeps id saved at launch_benchmarks/sweeps/{}.csv".format(output_filename))
     print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "

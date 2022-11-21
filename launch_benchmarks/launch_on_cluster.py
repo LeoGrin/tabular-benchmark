@@ -77,23 +77,33 @@ args = parser.parse_args()
 df = pd.read_csv(args.filename)
 
 #TODO YOU SHOULD ADAPT THIS COMMAND TO YOUR SITUATION
-OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
--l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
-AND not cluster='grimani' AND not cluster='gruss'" -q production"""
-
 print(f"Launching {len(df)} sweeps")
 for i, row in df.iterrows():
-    sweep = api.sweep(f"leogrin/{row['project']}/{row['sweep_id']}")
+    use_gpu = args.gpu or row["use_gpu"]
+    if use_gpu:
+        OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
+        -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
+        AND not cluster='grimani' AND not cluster='gruss'" -q production"""
+        SLURM_COMMAND = """sbatch --gres=gpu:1 --time=23:00:30 --partition=parietal,normal
+        --wrap="conda activate tabular_benchmark;wandb agent {}/{}/{}" """
+    else:
+        OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
+        -l walltime=23:00:30 -p "not cluster='graphite' 
+        AND not cluster='grimani' AND not cluster='gruss'" -q production"""
+        SLURM_COMMAND = """sbatch --time=23:00:30 --partition=parietal,normal --exclude=marg009
+        --wrap="conda activate tabular_benchmark;wandb agent {}/{}/{}" """
+
+
+
+    sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
     print(sweep)
     for _ in range(args.n_runs):
         if not args.oar:
-            if not args.gpu:
-                #TODO YOU SHOULD CHANGE THE FILE launch_agent.sh
-                os.system("sbatch --export=project={},id={} launch_agent.sh".format(row["project"], row["sweep_id"]))
+            if not use_gpu:
+                os.system(SLURM_COMMAND.format(wandb_id, row["project"], row["sweep_id"]))
             else:
-                #TODO YOU SHOULD CHANGE THE FILE launch_agent_gpu.sh
                 os.system(
-                    "sbatch --export=project={},id={} launch_agent_gpu.sh".format(row["project"], row["sweep_id"]))
+                    SLURM_COMMAND.format(wandb_id, row["project"], row["sweep_id"]))
         else:
             os.system(
                 OAR_COMMAND.format(wandb_id, row["project"], row["sweep_id"])
@@ -114,7 +124,7 @@ if args.monitor:
         api = wandb.Api()
         for i, row in df.iterrows():
             if not (row["sweep_id"] in saved_sweeps):
-                sweep = api.sweep(f"leogrin/{row['project']}/{row['sweep_id']}")
+                sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
                 runs = sweep.runs
                 n = len(runs)
                 print(f"{n} runs for sweep {row['sweep_id']}")
@@ -130,7 +140,7 @@ if args.monitor:
                     "name"]) and not args.default and sweep.state == "RUNNING" and n > args.max_runs * row[
                     "n_datasets"]:
                     print("Stopping sweep")
-                    os.system("wandb sweep --stop leogrin/{}/{}".format(row['project'], row['sweep_id']))
+                    os.system("wandb sweep --stop {}/{}/{}".format(wandb_id, row['project'], row['sweep_id']))
                     # Download the results
                     sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
                     print("Downloading results")
