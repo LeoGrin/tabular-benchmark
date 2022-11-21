@@ -67,6 +67,10 @@ parser.add_argument('--monitor', action='store_true')
 parser.add_argument('--oar', action='store_true')
 # Whether to use GPU
 parser.add_argument('--gpu', action='store_true')
+# Whether to only launch the sweeps running on CPU
+parser.add_argument('--cpu_only', action='store_true')
+# Whether to only launch the sweeps running on GPU
+parser.add_argument('--gpu_only', action='store_true')
 # Whether it's only default hyperparameters
 parser.add_argument('--default', action='store_true')
 # Time between two checks
@@ -82,6 +86,12 @@ df = pd.read_csv(args.filename)
 print(f"Launching {len(df)} sweeps")
 for i, row in df.iterrows():
     use_gpu = args.gpu or row["use_gpu"]
+    if args.cpu_only and use_gpu:
+        print("Skipping sweep as it's GPU and we only want CPU")
+        continue
+    if args.gpu_only and not use_gpu:
+        print("Skipping sweep as it's CPU and we only want GPU")
+        continue
     if use_gpu:
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
         -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
