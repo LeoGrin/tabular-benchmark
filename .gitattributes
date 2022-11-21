@@ -1,18 +1,5 @@
 analyses/results/random_search_benchmark_categorical.csv filter=lfs diff=lfs merge=lfs -text
 analyses/results/random_search_benchmark_numerical.csv filter=lfs diff=lfs merge=lfs -text
 analyses/results/random_search_xps.csv filter=lfs diff=lfs merge=lfs -text
-<<<<<<< HEAD
-analyses/results/tests_add_features.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/tests_hf.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/bo_nn.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/bo_nn_2.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/bo_trees.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/bo_trees_2.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/random_search_benchmark_numerical_old.csv filter=lfs diff=lfs merge=lfs -text
 analyses/results/random_search_benchmark_categorical_old.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/tests_remove_features.csv filter=lfs diff=lfs merge=lfs -text
-analyses/results/tests_rotations.csv filter=lfs diff=lfs merge=lfs -text
-=======
-/analyses/results/random_search_benchmark_categorical_old.csv filter=lfs diff=lfs merge=lfs -text
-/analyses/results/random_search_benchmark_numerical_old.csv filter=lfs diff=lfs merge=lfs -text
->>>>>>> 3ea416e5e20aa254dab1771ad5587f37bc88d4d6
+analyses/results/random_search_benchmark_numerical_old.csv filter=lfs diff=lfs merge=lfs -text

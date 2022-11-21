@@ -4,8 +4,8 @@ from utils import create_sweep
 import pandas as pd
 import sys
 sys.path.append(".")
-from configs.wandb_config import wandb_id
-from configs.all_model_configs import total_config
+from configs import wandb_id
+from configs import total_config
 
 
 

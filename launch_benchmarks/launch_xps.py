@@ -1,6 +1,6 @@
 from utils import create_sweep
 import pandas as pd
-from configs.wandb_config import wandb_id
+from configs import wandb_id
 import wandb
 
 data_transform_config = {

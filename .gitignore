@@ -35,6 +35,12 @@ src/models/
 __pycache__/
 config/
 analyses/save_benchmarks.R
+analyses/results/*
+!analyses/results/random_search_benchmark_categorical.csv
+!analyses/results/random_search_benchmark_numerical.csv
+!analyses/results/random_search_benchmark_numerical_old.csv
+!analyses/results/random_search_benchmark_categorical_old.csv
+!analyses/results/random_search_xps.csv
 src/check_difficulty_resnet_2.py
 src/check_difficulty_resnet.py
 src/utils/__pycache__/

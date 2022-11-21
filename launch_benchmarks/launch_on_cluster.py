@@ -3,7 +3,7 @@ import pandas as pd
 import wandb
 import argparse
 import time
-from configs.wandb_config import wandb_id
+from configs import wandb_id
 
 
 def download_sweep(sweep, output_filename, row):
