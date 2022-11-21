@@ -45,4 +45,5 @@ src/check_difficulty_resnet_2.py
 src/check_difficulty_resnet.py
 src/utils/__pycache__/
 openml_cache/
+trash
 
