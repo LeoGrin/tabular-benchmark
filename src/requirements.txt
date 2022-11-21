@@ -8,12 +8,11 @@ numpy
 openml==0.12.2
 pandas==1.2.4
 pytorch_lightning==1.4.9
-rotation_forest==1.0
 scikit_learn==1.0.2
 setuptools==52.0.0
 skorch==0.10.0
 torch==1.10.1
 tqdm==4.62.3
-wandb
+wandb==0.13.5
 pytomlpp
 category_encoders

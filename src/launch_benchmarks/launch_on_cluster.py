@@ -4,7 +4,7 @@ import wandb
 import argparse
 import time
 import sys
-sys.path.append("src")
+sys.path.append(".")
 from configs.wandb_config import wandb_id
 
 
@@ -86,14 +86,14 @@ for i, row in df.iterrows():
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
         -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
         AND not cluster='grimani' AND not cluster='gruss'" -q production"""
-        SLURM_COMMAND = """sbatch --gres=gpu:1 --time=23:00:30 --partition=parietal,normal
-        --wrap="conda activate tabular_benchmark;wandb agent {}/{}/{}" """
+        #TODO modify launch_agent_gpu.sh
+        SLURM_COMMAND = "sbatch --export=wandb_id={},project={},sweep_id={} launch_benchmarks/launch_agent_gpu.sh"
     else:
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
         -l walltime=23:00:30 -p "not cluster='graphite' 
         AND not cluster='grimani' AND not cluster='gruss'" -q production"""
-        SLURM_COMMAND = """sbatch --time=23:00:30 --partition=parietal,normal --exclude=marg009
-        --wrap="conda activate tabular_benchmark;wandb agent {}/{}/{}" """
+        #TODO modify launch_agent.sh
+        SLURM_COMMAND = "sbatch --export=wandb_id={},project={},sweep_id={} launch_benchmarks/launch_agent.sh"
 
 
 

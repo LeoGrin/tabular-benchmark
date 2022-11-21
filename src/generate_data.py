@@ -3,12 +3,9 @@ import numpy as np
 import numpy.random
 import pandas as pd
 from sklearn.datasets import make_spd_matrix, make_sparse_spd_matrix
-from sklearn.preprocessing import LabelEncoder, QuantileTransformer
+from sklearn.preprocessing import LabelEncoder
 import openml
 import pickle
-
-openml.config.cache_directory = "/storage/store/work/lgrinszt"
-
 
 def balance_data(x, y):
     rng = np.random.RandomState(0)
@@ -109,7 +106,7 @@ def import_open_ml_data(keyword=None, remove_nans=None, impute_nans=None, catego
         return X, y, categorical_indicator
 
     return X, y, None
-def import_real_data(keyword=None, balanced=True, path_to_dir="data", max_num_samples=None, regression=False, categorical=False, dim=[],
+def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num_samples=None, regression=False, categorical=False, dim=[],
                      rng=None):
     if not categorical:
         if regression:

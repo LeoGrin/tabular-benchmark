@@ -141,12 +141,6 @@ def train_model_on_config(config=None):
             else:
                 processor = platform.processor()
 
-            if config["model_name"].startswith("gbt"):
-                print("-" * 20)
-                print("n estimators")
-                print(model.n_estimators_)
-                wandb.log({"n_estimators_": model.n_estimators_})
-
             if n_iter > 1:
                 wandb.log({"train_scores": train_scores,
                            "val_scores": val_scores,

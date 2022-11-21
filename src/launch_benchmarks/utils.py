@@ -1,12 +1,14 @@
 import wandb
-from model_configs import config_dic
+import sys
+sys.path.append(".")
+from configs.all_model_configs import total_config
 
 
 def create_sweep(data_transform_config, model_name, regression, default, project, name,
                  dataset_size, categorical, datasets, remove_tranforms_from_model_config=False,
                  max_val_samples=None, max_test_samples=None):
     # Use the appropriate model config
-    model_config = config_dic[model_name]["regression" if regression else "classif"]["default" if default else "random"]
+    model_config = total_config[model_name]["regression" if regression else "classif"]["default" if default else "random"]
     print(model_config)
     if remove_tranforms_from_model_config:  # prevent conflicts with data_transform_config
         model_config = model_config.copy()
@@ -61,8 +63,8 @@ def create_sweep(data_transform_config, model_name, regression, default, project
 
     sweep_id = wandb.sweep(sweep_config, project=project)
 
-    if "use_gpu" not in data_transform_config.keys():
+    if "use_gpu" not in model_config.keys():
         use_gpu = False
     else:
-        use_gpu = data_transform_config["use_gpu"]["value"]
+        use_gpu = model_config["use_gpu"]["value"]
     return sweep_id, use_gpu

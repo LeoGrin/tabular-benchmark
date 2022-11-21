@@ -3,7 +3,7 @@ import wandb
 from utils import create_sweep
 import pandas as pd
 import sys
-sys.path.append("src")
+sys.path.append(".")
 from configs.wandb_config import wandb_id
 from configs.all_model_configs import total_config
 
@@ -134,11 +134,12 @@ if __name__ == "__main__":
     names = []
     projects = []
     use_gpu_list = []
-    benchmarks = [benchmark for benchmark in benchmarks]
+    n_datasets_list = []
+    benchmarks = [benchmark for benchmark in benchmarks if benchmark["dataset_size"] == "medium"]
 
     for n in range(1):
         for model_name in models:
-            project_name = model_name
+            project_name = model_name + "_benchmark"
             wandb.init(entity=wandb_id, project=project_name) # Create a new project on your WandB account
             for i, benchmark in enumerate(benchmarks):
                 for default in [False, True]:
@@ -159,16 +160,20 @@ if __name__ == "__main__":
                                  default=default,
                                  project=project_name,
                                  name=name)
+                    n_datasets = len(benchmark["datasets"])
                     sweep_ids.append(sweep_id)
                     names.append(name)
                     projects.append(project_name)
                     use_gpu_list.append(use_gpu)
+                    n_datasets_list.append(n_datasets)
                     print(f"Created sweep {name}")
                     print(f"Sweep id: {sweep_id}")
                     print(f"In project {project_name}")
                     print(f"Use GPU: {use_gpu}")
+                    print(f"Num datasets: {n_datasets}")
 
-    df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects, "use_gpu": use_gpu_list})
+    df = pd.DataFrame({"sweep_id": sweep_ids, "name": names, "project":projects, "use_gpu": use_gpu_list,
+                       "n_datasets": n_datasets_list})
     df.to_csv(f"launch_benchmarks/sweeps/{output_filename}.csv", index=False)
     print("Check the sweeps id saved at launch_benchmarks/sweeps/{}.csv".format(output_filename))
     print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "
