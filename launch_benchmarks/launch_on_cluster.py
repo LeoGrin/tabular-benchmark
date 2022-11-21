@@ -3,7 +3,9 @@ import pandas as pd
 import wandb
 import argparse
 import time
-from configs import wandb_id
+import sys
+sys.path.append("src")
+from configs.wandb_config import wandb_id
 
 
 def download_sweep(sweep, output_filename, row):
@@ -55,7 +57,7 @@ parser = argparse.ArgumentParser(description='Launch runs on wandb')
 parser.add_argument('--filename', type=str)
 # Number of parallel runs per sweep
 parser.add_argument('--n_runs', type=int, default=10)
-# Maximum number of runs per sweep
+# Maximum number of runs per dataset
 parser.add_argument('--max_runs', type=int, default=1000)
 # Name of the file to save the results
 parser.add_argument('--output_filename', type=str, default="results.csv")
@@ -98,6 +100,7 @@ for i, row in df.iterrows():
     sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
     print(sweep)
     for _ in range(args.n_runs):
+        print("Launching run")
         if not args.oar:
             if not use_gpu:
                 os.system(SLURM_COMMAND.format(wandb_id, row["project"], row["sweep_id"]))

@@ -1,5 +1,5 @@
 import sys
-sys.path.append(".")
+sys.path.append("src")
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, \
     GradientBoostingClassifier, GradientBoostingRegressor, \
     HistGradientBoostingRegressor, HistGradientBoostingClassifier

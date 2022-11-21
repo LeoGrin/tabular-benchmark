@@ -3,9 +3,9 @@ import wandb
 from utils import create_sweep
 import pandas as pd
 import sys
-sys.path.append(".")
-from configs import wandb_id
-from configs import total_config
+sys.path.append("src")
+from configs.wandb_config import wandb_id
+from configs.all_model_configs import total_config
 
 
 

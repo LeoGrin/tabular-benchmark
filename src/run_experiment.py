@@ -1,5 +1,7 @@
 import os
 os.environ["PROJECT_DIR"] = "test"
+import sys
+sys.path.append("src")
 from generate_dataset_pipeline import generate_dataset
 import traceback  # Needed for pulling out your full stackframe info
 from train import *
