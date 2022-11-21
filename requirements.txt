@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 asposestorage==1.0.2
+=======
+>>>>>>> 3ea416e5e20aa254dab1771ad5587f37bc88d4d6
 captum==0.5.0
 catboost==1.0.6
 category_encoders==2.4.0
@@ -9,6 +12,10 @@ matplotlib==3.4.2
 numba==0.55.1
 numpy==1.20.3
 nvidia_ml_py3==7.352.0
+<<<<<<< HEAD
+=======
+openml==0.12.2
+>>>>>>> 3ea416e5e20aa254dab1771ad5587f37bc88d4d6
 optuna==2.10.0
 pandas==1.2.4
 plotly==5.10.0
@@ -23,5 +30,10 @@ skorch==0.10.0
 tensorflow==2.9.1
 torch==1.10.1
 tqdm==4.62.3
+<<<<<<< HEAD
 xgboost==1.4.2
+=======
+wandb==0.12.11
+xgboost==1.5.2
+>>>>>>> 3ea416e5e20aa254dab1771ad5587f37bc88d4d6
 zero==0.9.1
