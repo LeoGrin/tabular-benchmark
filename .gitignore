@@ -35,8 +35,6 @@ __pycache__/
 config/
 analyses/save_benchmarks.R
 analyses/results/*
-src/launch_benchmarks/results/
-
 !analyses/results/random_search_benchmark_categorical.csv
 !analyses/results/random_search_benchmark_numerical.csv
 !analyses/results/random_search_benchmark_numerical_old.csv
