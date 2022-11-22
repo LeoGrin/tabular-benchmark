@@ -23,6 +23,6 @@ shap==0.39.0
 skorch==0.10.0
 torch==1.10.1
 tqdm==4.62.3
-wandb==0.12.11
+wandb==0.13.5
 xgboost==1.5.2
 zero==0.9.1

@@ -6,26 +6,30 @@ Accompanying repository for the paper *Why do tree-based models still outperform
 
 # Replicating the paper's results
 
+## Installation
+
+Create a new environment using python 3.8, then install the requirements:
+
+`pip install -r requirements.txt`
+
 ## Downloading the datasets
 
 To download these datasets, simply run `python data/download_data.py`.
-You can also find these datasets on [Hugging Face Hub](https://huggingface.co/datasets/inria-soda/tabular-benchmark).
 
 ## Training the models
 
 You can re-run the training using WandB sweeps.
 
 1. Copy / clone this repo on the different machines / clusters you want to use.
-2. Login to WandB and create new projects.
-3. Enter your projects name in `launch_config/launch_benchmarks.py` (or `launch_config/launch_xps.py`)
-4. run `python launch_config/launch_benchmarks.py`
-5. Run the generated sweeps using `wandb agent <USERNAME/PROJECTNAME/SWEEPID>` on the machine of your choice. 
-More infos
-[in the WandB doc](https://docs.wandb.ai/guides/sweeps/quickstart#4.-launch-agent-s)
-6. After you've stopped the runs, download the results: `python launch_config/download_data.py`, after entering your wandb
-login in `launch_config/download_data.py`.
-
-We're planning to release a version allowing to use Benchopt instead of WandB to make it easier to run.
+2. Login to WandB and add your wandb id to `src/configs/wandb_config.py`
+3. Move into `src`
+4. run `python launch_config/launch_benchmarks.py`. This will create a csv with the wandb sweep to run. 
+5. (Long?) You can run each sweep by running `wandb agent <USERNAME/PROJECTNAME/SWEEPID>` in `src`. More infos
+[in the WandB doc](https://docs.wandb.ai/guides/sweeps/quickstart#4.-launch-agent-s).
+6. If your using a cluster, run `launch_benchmarks/launch_on_cluster.py --filename NAME_OF_THE_CSV_FILE --output_filename FILENAME --n_runs NUMBER_OF_PARALLEL_RUNS_PER_SWEEP --max_runs MAX_NUMBER_OF_RUN_PER_DATASET --monitor`. 
+You'll need to adapt the 
+script to your cluster (see the TODO comments in the script). This will automatically launch the sweeps on the cluster
+and download the results when they are done.
 
 ## Replicating the analyses / figures
 
@@ -55,6 +59,8 @@ for task_id in benchmark_suite.tasks:  # iterate over all tasks
     )
 ```
 
+You can also find these datasets on [Hugging Face Hub](https://huggingface.co/datasets/inria-soda/tabular-benchmark).
+
 ## Using our results
 
 If you want to compare you own algorithms with the models used in 
@@ -68,10 +74,8 @@ To benchmark your own algorithm using our code, you'll need:
 
 - a model which uses the sklearn's API, i.e having fit and predict methods.
 We recommend using [Skorch](https://skorch.readthedocs.io/en/stable/net.html) use sklearn's API with a Pytorch model.
-- to add your model hyperparameters search space to `launch_config/model_config`.
-- to add your model name in `launch_config/launch_benchmarks` and `utils/keyword_to_function_conversion.py`
+- to add your model hyperparameters search space to the template config `src/configs/model_configs/template.py`.
 - to run the benchmarks as explained in **Training the models**.
 
-We're planning to release a version allowing to use Benchopt instead of WandB to make it easier to run.
 
 
