@@ -75,7 +75,7 @@ To benchmark your own algorithm using our code, you'll need:
 - a model which uses the sklearn's API, i.e having fit and predict methods.
 We recommend using [Skorch](https://skorch.readthedocs.io/en/stable/net.html) use sklearn's API with a Pytorch model.
 - to add your model hyperparameters search space to the template config `src/configs/model_configs/template.py`.
-- to run the benchmarks as explained in **Training the models**.
+- to run the benchmarks as explained in **Replicating the paper's results**.
 
 
 
