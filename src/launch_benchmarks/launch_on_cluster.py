@@ -176,6 +176,8 @@ if args.monitor:
         print("Check done")
         print("Waiting...")
         time.sleep(args.time)
+
+    print("All sweeps are finished !")
     # Concatenate the results
     df = pd.concat([pd.read_csv(f) for f in temp_filename_list])
     # Print number of runs without mean_test_score
@@ -184,7 +186,8 @@ if args.monitor:
     print("Number of runs per model without mean_test_score (crashed):")
     print(df[df["mean_test_score"].isna()].groupby("model_name").size())
     df.to_csv(args.output_filename)
-
+    print("Results saved in {}".format(args.output_filename))
+    print("Cleaning temporary files...")
     # Delete the temporary files
     for f in temp_filename_list:
         os.remove(f)
