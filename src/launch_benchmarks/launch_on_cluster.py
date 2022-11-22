@@ -6,7 +6,7 @@ import time
 import sys
 sys.path.append(".")
 from configs.wandb_config import wandb_id
-
+import time
 
 def download_sweep(sweep, output_filename, row):
     MAX_RUNS_PER_SWEEP = 20_000
@@ -75,6 +75,8 @@ parser.add_argument('--gpu_only', action='store_true')
 parser.add_argument('--default', action='store_true')
 # Time between two checks
 parser.add_argument('--time', type=int, default=200)
+# Max time
+#parser.add_argument('--max_time', type=int, default=3000, help="Time after which a run is considered crashed")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -147,16 +149,10 @@ if args.monitor:
                     # Check that all runs are finished
                     all_finished = True
                     for run in runs:
-                        summary = run.summary
-                        if "mean_train_score" not in summary:
+                        if run.state == "running":
+                            print(f"Run {run.name} is still running")
                             all_finished = False
-                            print("Run not finished")
                             break
-                        else:
-                            if summary["mean_train_score"] is None:
-                                all_finished = False
-                                print("Run not finished")
-                                break
                     if all_finished:
                         print("All runs are finished")
                         print("Saving results")
@@ -180,6 +176,11 @@ if args.monitor:
         time.sleep(args.time)
     # Concatenate the results
     df = pd.concat([pd.read_csv(f) for f in temp_filename_list])
+    # Print number of runs without mean_test_score
+    print("Number of runs without mean_test_score (crashed): {}".format(len(df[df["mean_test_score"].isna()])))
+    # Print nan mean_test_score per model
+    print("Number of runs per model without mean_test_score (crashed):")
+    print(df[df["mean_test_score"].isna()].groupby("model").count()["mean_test_score"])
     df.to_csv(args.output_filename)
 
     # Delete the temporary files

@@ -256,6 +256,8 @@ for index, row in df.iterrows():
                                 else:
                                     y_train = y_train.reshape(-1)
                                     y_test = y_test.reshape(-1)
+                                    print("Number of classes: ", len(np.unique(y_train)))
+                                    print("Number of classes max: ", np.max(y_train))
                                 # Give the true number of categories to the model
                                 categories = []
                                 for i in range(len(categorical_indicator)):

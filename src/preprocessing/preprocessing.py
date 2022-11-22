@@ -43,8 +43,10 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
                              not missing_cols_mask[i]]
     if not regression:
         X, y = balance(X, y)
+        y = le.fit_transform(y)
         assert len(X) == len(y)
         assert len(np.unique(y)) == 2
+        assert np.max(y) == 1
     for i in range(X.shape[1]):
         if categorical_indicator[i]:
             X.iloc[:, i] = LabelEncoder().fit_transform(X.iloc[:, i])
