@@ -144,11 +144,27 @@ if args.monitor:
                 print(sweep.state)
                 # Run command line
                 if sweep.state == "FINISHED":
-                    print("Downloading results")
-                    sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
-                    download_sweep(sweep, sweep_output_filename, row)
-                    temp_filename_list.append(sweep_output_filename)
-                    saved_sweeps.append(row["sweep_id"])
+                    print('Checking that all the runs are finished')
+                    # Check that all runs are finished
+                    all_finished = True
+                    for run in runs:
+                        summary = run.summary
+                        if "mean_train_score" not in summary:
+                            all_finished = False
+                            print("Run not finished")
+                            break
+                        else:
+                            if summary["mean_train_score"] is None:
+                                all_finished = False
+                                print("Run not finished")
+                                break
+                    if all_finished:
+                        print("All runs are finished")
+                        print("Saving results")
+                        sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
+                        download_sweep(sweep, sweep_output_filename, row)
+                        temp_filename_list.append(sweep_output_filename)
+                        saved_sweeps.append(row["sweep_id"])
                 if not ("default" in row[
                     "name"]) and not args.default and sweep.state == "RUNNING" and n > args.max_runs * row[
                     "n_datasets"]:
