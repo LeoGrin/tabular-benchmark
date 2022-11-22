@@ -31,11 +31,10 @@ parser = argparse.ArgumentParser(description='Train a model on a dataset')
 parser.add_argument('--device', type=str, default="cuda", help='Device to use')
 parser.add_argument('--file', type=str, default="filename", help='Csv with all datasets')
 parser.add_argument('--out_file', type=str, default="filename", help='filename to save')
-# true if argument is present, false otherwise
 parser.add_argument('--regression', action='store_true', help='True if regression, false otherwise')
 parser.add_argument('--categorical', action='store_true')
-parser.add_argument('--all', action='store_true')
-#pass a list of models to try
+parser.add_argument('--all', action='store_true', help="Whether to check all datasets or only those already "
+                                                       "deemed too easy with a HGBT")
 parser.add_argument('--remove_model', nargs='+', help='List of models not to try')
 # Parse the arguments
 args = parser.parse_args()
