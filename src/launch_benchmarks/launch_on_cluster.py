@@ -180,7 +180,7 @@ if args.monitor:
     print("Number of runs without mean_test_score (crashed): {}".format(len(df[df["mean_test_score"].isna()])))
     # Print nan mean_test_score per model
     print("Number of runs per model without mean_test_score (crashed):")
-    print(df[df["mean_test_score"].isna()].groupby("model_name").count()["mean_test_score"])
+    print(df[df["mean_test_score"].isna()].groupby("model_name").count())
     df.to_csv(args.output_filename)
 
     # Delete the temporary files
