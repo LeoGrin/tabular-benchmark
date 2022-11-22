@@ -74,8 +74,7 @@ parser.add_argument('--gpu_only', action='store_true')
 # Whether it's only default hyperparameters
 parser.add_argument('--default', action='store_true')
 # Time between two checks
-parser.add_argument('--time', type=int, default=200) # for default hyperparameters, you want a big enough number
-                                                     # due to some WandB quirk
+parser.add_argument('--time', type=int, default=200)
 
 # Parse the arguments
 args = parser.parse_args()
