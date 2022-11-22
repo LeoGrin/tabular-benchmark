@@ -13,6 +13,7 @@ openml==0.12.2
 optuna==2.10.0
 pandas==1.2.4
 plotly==5.10.0
+protobuf==3.20.*
 pynvml==11.4.1
 pytomlpp==1.0.10
 PyYAML==6.0

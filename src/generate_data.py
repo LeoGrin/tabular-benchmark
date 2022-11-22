@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random
 import pandas as pd
-import sys
-sys.path.append(".")
 from sklearn.datasets import make_spd_matrix, make_sparse_spd_matrix
 from sklearn.preprocessing import LabelEncoder
 import openml
