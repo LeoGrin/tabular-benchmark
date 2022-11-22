@@ -99,6 +99,14 @@ for i, row in df.iterrows():
     if args.gpu_only and not use_gpu:
         print("Skipping sweep as it's CPU and we only want GPU")
         continue
+    try:
+        sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
+        if sweep.state == "FINISHED":
+            print(f"Sweep {row['sweep_id']} already finished, skipping")
+            continue
+    except:
+        # If the sweep doesn't exist, we launch it
+        pass
     if use_gpu:
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
         -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
@@ -148,7 +156,10 @@ if args.monitor:
                 print(f"{n} runs for sweep {row['sweep_id']}")
                 print(sweep.state)
                 # Run command line
+                # Already stopped sweeps or sweeps with default hyperparameters
                 if sweep.state == "FINISHED":
+                    # WandB says that a sweep is finished when there are no more runs to launch
+                    # but doesn't wait for the runs to finish
                     print('Checking that all the runs are finished')
                     # Check that all runs are finished
                     all_finished = True
@@ -172,12 +183,14 @@ if args.monitor:
                     n_finished_runs_per_dataset = {}
                     for run in runs:
                         if run.state == "finished":
-                            dataset = run.config["dataset"]
-                            print(dataset)
-                            if dataset in n_finished_runs_per_dataset:
-                                n_finished_runs_per_dataset[dataset] += 1
-                            else:
-                                n_finished_runs_per_dataset[dataset] = 1
+                            # Check that there is a mean_test_score value logged
+                            if "mean_test_score" in run.summary and not np.isnan(run.summary["mean_test_score"]):
+                                if "data__keyword" in run.config.keys():
+                                    dataset = run.config["data__keyword"]
+                                    if dataset in n_finished_runs_per_dataset:
+                                        n_finished_runs_per_dataset[dataset] += 1
+                                    else:
+                                        n_finished_runs_per_dataset[dataset] = 1
                     print(n_finished_runs_per_dataset)
                     if np.all([n_finished_runs_per_dataset[dataset] >= args.max_runs for dataset in
                                n_finished_runs_per_dataset]) and len(n_finished_runs_per_dataset) == row["n_datasets"]:
@@ -189,6 +202,8 @@ if args.monitor:
                         download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
                         temp_filename_list.append(sweep_output_filename)
                         saved_sweeps.append(row["sweep_id"])
+                    else:
+                        print("Not enough runs for each dataset")
         print("Check done")
         print("Waiting...")
         time.sleep(args.time)
