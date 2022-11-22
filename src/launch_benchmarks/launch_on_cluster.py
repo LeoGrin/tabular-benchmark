@@ -8,8 +8,8 @@ sys.path.append(".")
 from configs.wandb_config import wandb_id
 import time
 
-def download_sweep(sweep, output_filename, row):
-    MAX_RUNS_PER_SWEEP = 20_000
+def download_sweep(sweep, output_filename, row, max_run_per_sweep=20000):
+    MAX_RUNS_PER_SWEEP = max_run_per_sweep
     runs_df = pd.DataFrame()
 
     print("sweep: {}".format(sweep))
@@ -75,6 +75,8 @@ parser.add_argument('--gpu_only', action='store_true')
 parser.add_argument('--default', action='store_true')
 # Time between two checks
 parser.add_argument('--time', type=int, default=200)
+# Max number of runs per sweep (to speed up the download)
+parser.add_argument('--max_run_per_sweep', type=int, default=20000)
 # Max time
 #parser.add_argument('--max_time', type=int, default=3000, help="Time after which a run is considered crashed")
 
@@ -157,7 +159,7 @@ if args.monitor:
                         print("All runs are finished")
                         print("Saving results")
                         sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
-                        download_sweep(sweep, sweep_output_filename, row)
+                        download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
                         temp_filename_list.append(sweep_output_filename)
                         saved_sweeps.append(row["sweep_id"])
                 if not ("default" in row[
@@ -168,7 +170,7 @@ if args.monitor:
                     # Download the results
                     sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
                     print("Downloading results")
-                    download_sweep(sweep, sweep_output_filename, row)
+                    download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
                     temp_filename_list.append(sweep_output_filename)
                     saved_sweeps.append(row["sweep_id"])
         print("Check done")
@@ -180,7 +182,7 @@ if args.monitor:
     print("Number of runs without mean_test_score (crashed): {}".format(len(df[df["mean_test_score"].isna()])))
     # Print nan mean_test_score per model
     print("Number of runs per model without mean_test_score (crashed):")
-    print(df[df["mean_test_score"].isna()].groupby("model_name").count())
+    print(df[df["mean_test_score"].isna()].groupby("model_name").size())
     df.to_csv(args.output_filename)
 
     # Delete the temporary files
