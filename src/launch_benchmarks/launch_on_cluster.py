@@ -1,12 +1,16 @@
 import os
+
+import numpy as np
 import pandas as pd
 import wandb
 import argparse
 import time
 import sys
+
 sys.path.append(".")
 from configs.wandb_config import wandb_id
 import time
+
 
 def download_sweep(sweep, output_filename, row, max_run_per_sweep=20000):
     MAX_RUNS_PER_SWEEP = max_run_per_sweep
@@ -49,7 +53,7 @@ api = wandb.Api()
 print(f"wandb version: {wandb.__version__}")
 
 # If you run this file with --monitor, it will launch the sweeps, then handles the killing
-#of the finished sweeps and the download of their results
+# of the finished sweeps and the download of their results
 
 # Create an argument parser
 parser = argparse.ArgumentParser(description='Launch runs on wandb')
@@ -78,14 +82,14 @@ parser.add_argument('--time', type=int, default=200)
 # Max number of runs per sweep (to speed up the download)
 parser.add_argument('--max_run_per_sweep', type=int, default=20000)
 # Max time
-#parser.add_argument('--max_time', type=int, default=3000, help="Time after which a run is considered crashed")
+# parser.add_argument('--max_time', type=int, default=3000, help="Time after which a run is considered crashed")
 
 # Parse the arguments
 args = parser.parse_args()
 
 df = pd.read_csv(args.filename)
 
-#TODO YOU SHOULD ADAPT THIS COMMAND TO YOUR SITUATION
+# TODO YOU SHOULD ADAPT THIS COMMAND TO YOUR SITUATION
 print(f"Launching {len(df)} sweeps")
 for i, row in df.iterrows():
     use_gpu = args.gpu or row["use_gpu"]
@@ -99,16 +103,14 @@ for i, row in df.iterrows():
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
         -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
         AND not cluster='grimani' AND not cluster='gruss'" -q production"""
-        #TODO modify launch_agent_gpu.sh
+        # TODO modify launch_agent_gpu.sh
         SLURM_COMMAND = "sbatch --export=wandb_id={},project={},sweep_id={} launch_benchmarks/launch_agent_gpu.sh"
     else:
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
         -l walltime=23:00:30 -p "not cluster='graphite' 
         AND not cluster='grimani' AND not cluster='gruss'" -q production"""
-        #TODO modify launch_agent.sh
+        # TODO modify launch_agent.sh
         SLURM_COMMAND = "sbatch --export=wandb_id={},project={},sweep_id={} launch_benchmarks/launch_agent.sh"
-
-
 
     sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
     print(sweep)
@@ -123,7 +125,7 @@ for i, row in df.iterrows():
         else:
             os.system(
                 OAR_COMMAND.format(wandb_id, row["project"], row["sweep_id"])
-                )
+            )
 
 if args.monitor:
 
@@ -156,7 +158,7 @@ if args.monitor:
                             all_finished = False
                             break
                     if all_finished:
-                        print("All runs are finished")
+                        print("All runs are finished (or crashed)")
                         print("Saving results")
                         sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
                         download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
@@ -165,14 +167,28 @@ if args.monitor:
                 if not ("default" in row[
                     "name"]) and not args.default and sweep.state == "RUNNING" and n > args.max_runs * row[
                     "n_datasets"]:
-                    print("Stopping sweep")
-                    os.system("wandb sweep --stop {}/{}/{}".format(wandb_id, row['project'], row['sweep_id']))
-                    # Download the results
-                    sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
-                    print("Downloading results")
-                    download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
-                    temp_filename_list.append(sweep_output_filename)
-                    saved_sweeps.append(row["sweep_id"])
+                    print("Sweep seems to be done, checking that there are enough runs for each dataset")
+                    # Check that there are enough runs for each dataset
+                    n_finished_runs_per_dataset = {}
+                    for run in runs:
+                        if run.state == "finished":
+                            dataset = run.config["dataset"]
+                            print(dataset)
+                            if dataset in n_finished_runs_per_dataset:
+                                n_finished_runs_per_dataset[dataset] += 1
+                            else:
+                                n_finished_runs_per_dataset[dataset] = 1
+                    print(n_finished_runs_per_dataset)
+                    if np.all([n_finished_runs_per_dataset[dataset] >= args.max_runs for dataset in
+                               n_finished_runs_per_dataset]) and len(n_finished_runs_per_dataset) == row["n_datasets"]:
+                        print("Stopping sweep")
+                        os.system("wandb sweep --stop {}/{}/{}".format(wandb_id, row['project'], row['sweep_id']))
+                        # Download the results
+                        sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
+                        print("Downloading results")
+                        download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
+                        temp_filename_list.append(sweep_output_filename)
+                        saved_sweeps.append(row["sweep_id"])
         print("Check done")
         print("Waiting...")
         time.sleep(args.time)
