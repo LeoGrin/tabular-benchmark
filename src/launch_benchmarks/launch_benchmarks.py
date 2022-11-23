@@ -6,6 +6,7 @@ import sys
 sys.path.append(".")
 from configs.wandb_config import wandb_id
 from configs.all_model_configs import total_config
+import argparse
 
 
 
@@ -21,6 +22,7 @@ data_transform_config = {
 benchmarks = [{"task": "regression",
                    "dataset_size": "medium",
                    "categorical": False,
+                    "name": "numerical_regression",
                    "datasets":  ["cpu_act",
                      "pol",
                      "elevators",
@@ -45,6 +47,7 @@ benchmarks = [{"task": "regression",
                 {"task": "regression",
                     "dataset_size": "large",
                     "categorical": False,
+                    "name": "numerical_regression_large",
                     "datasets": ["diamonds",
                                   "nyc-taxi-green-dec-2016",
                                  "year"]},
@@ -52,6 +55,7 @@ benchmarks = [{"task": "regression",
                 {"task": "classif",
                     "dataset_size": "medium",
                     "categorical": False,
+                    "name": "numerical_classification",
                     "datasets": ["electricity",
                                  "covertype",
                                  "pol",
@@ -72,6 +76,7 @@ benchmarks = [{"task": "regression",
                 {"task": "classif",
                     "dataset_size": "large",
                     "categorical": False,
+                    "name": "numerical_classification_large",
                     "datasets": ["covertype",
                                  "MiniBooNE",
                                  "Higgs",
@@ -81,6 +86,7 @@ benchmarks = [{"task": "regression",
                 {"task": "regression",
                     "dataset_size": "medium",
                     "categorical": True,
+                    "name": "categorical_regression",
                  "datasets": ["yprop_4_1",
                              "analcatdata_supreme",
                              "visualizing_soil",
@@ -98,6 +104,7 @@ benchmarks = [{"task": "regression",
                 {"task": "regression",
                  "dataset_size": "large",
                  "categorical": True,
+                    "name": "categorical_regression_large",
                  "datasets": ["black_friday",
                      "nyc-taxi-green-dec-2016",
                      "diamonds",
@@ -107,6 +114,7 @@ benchmarks = [{"task": "regression",
                 {"task": "classif",
                     "dataset_size": "medium",
                     "categorical": True,
+                    "name": "categorical_classification",
                     "datasets": ["electricity",
                                  "eye_movements",
                                   "KDDCup09_upselling",
@@ -119,6 +127,7 @@ benchmarks = [{"task": "regression",
                 {"task": "classif",
                     "dataset_size": "large",
                     "categorical": True,
+                    "name": "categorical_classification_large",
                     "datasets": ["covertype",
                                  "road-safety"]
                  }
@@ -126,16 +135,35 @@ benchmarks = [{"task": "regression",
 
 if __name__ == "__main__":
     # Create a csv file with all the WandB sweeps
-    #TODO make an argparse
-    models = list(total_config.keys())
-    benchmark_names = ["numerical_classif", "numerical_regression", "categorical_classif", "categorical_regression"]
-    output_filename = "all_benchmarks_medium"
+    #Make an argparse
+    parser = argparse.ArgumentParser()
+    # List of benchmarks as argument
+    parser.add_argument("--benchmarks", nargs="+", type=str, default=["numerical_classification", "numerical_regression", "categorical_classification", "categorical_regression"])
+    # List of models as argument
+    parser.add_argument("--models", nargs="+", type=str, default=[])
+    # output file name
+    parser.add_argument("--output_file", type=str, default="all_benchmark_medium.csv")
+    # Datasets
+    parser.add_argument("--datasets", nargs="+", type=str, default=[])
+
+
+    args = parser.parse_args()
+
+    if len(args.models) == 0:
+        models = list(total_config.keys())
+    else:
+        models = args.models
+    print(models)
+    print(args.benchmarks)
+    benchmark_names = args.benchmarks#["numerical_classif", "numerical_regression", "categorical_classif", "categorical_regression"]
+    output_filename = args.output_file
     sweep_ids = []
     names = []
     projects = []
     use_gpu_list = []
     n_datasets_list = []
-    benchmarks = [benchmark for benchmark in benchmarks if benchmark["dataset_size"] == "medium"]
+    benchmarks = [benchmark for benchmark in benchmarks if benchmark["name"] in benchmark_names]
+    print(benchmarks)
 
     for n in range(1):
         for model_name in models:
@@ -151,16 +179,17 @@ if __name__ == "__main__":
                     if default:
                         name += "_default" # do not change
                     name += "_{}".format(n)
+                    datasets_to_use = benchmark["datasets"] if len(args.datasets) == 0 else args.datasets
                     sweep_id, use_gpu = create_sweep(data_transform_config,
                                  model_name=model_name,
                                  regression=benchmark["task"] == "regression",
                                  categorical=benchmark["categorical"],
                                  dataset_size = benchmark["dataset_size"],
-                                 datasets = benchmark["datasets"],
+                                 datasets = datasets_to_use,
                                  default=default,
                                  project=project_name,
                                  name=name)
-                    n_datasets = len(benchmark["datasets"])
+                    n_datasets = len(datasets_to_use)
                     sweep_ids.append(sweep_id)
                     names.append(name)
                     projects.append(project_name)

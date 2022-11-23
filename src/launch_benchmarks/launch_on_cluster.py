@@ -122,7 +122,11 @@ for i, row in df.iterrows():
 
     sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
     print(sweep)
-    for _ in range(args.n_runs):
+    if ("default" in row["name"]):
+        n_runs_to_launch = row["n_datasets"]
+    else:
+        n_runs_to_launch = args.n_runs
+    for _ in range(n_runs_to_launch):
         print("Launching run")
         if not args.oar:
             if not use_gpu:
