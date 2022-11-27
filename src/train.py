@@ -29,15 +29,26 @@ def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, con
         train_score = np.sum((y_hat_train == y_train)) / len(y_train)
 
     if "model__use_checkpoints" in config.keys() and config["model__use_checkpoints"]:
-        if not config["regression"]:
-            print("Using checkpoint")
-            model.load_params(r"skorch_cp/params_{}.pt".format(model_id))
-        else:
-            #TransformedTargetRegressor
-            if config["transformed_target"]:
-                model.regressor_.load_params(r"skorch_cp/params_{}.pt".format(model_id))
-            else:
+        # check that r"skorch_cp/params_{}.pt".format(model_id) exists
+        if os.path.exists(r"skorch_cp/params_{}.pt".format(model_id)):
+            if not config["regression"]:
+                print("Using checkpoint")
                 model.load_params(r"skorch_cp/params_{}.pt".format(model_id))
+            else:
+                #TransformedTargetRegressor
+                if config["transformed_target"]:
+                    model.regressor_.load_params(r"skorch_cp/params_{}.pt".format(model_id))
+                else:
+                    model.load_params(r"skorch_cp/params_{}.pt".format(model_id))
+        else:
+            print("Checkpoint does not exist")
+            print("Outputting NaN")
+            return np.nan, np.nan, np.nan
+
+    y_hat_train = model.predict(x_train)
+    if x_val is not None:
+        y_hat_val = model.predict(x_val)
+    y_hat_test = model.predict(x_test)
 
     if x_val is not None:
         if "regression" in config.keys() and config["regression"]:
@@ -57,6 +68,7 @@ def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, con
             test_score = np.sqrt(np.mean((y_hat_test.reshape(-1) - y_test.reshape(-1)) ** 2))
     else:
         test_score = np.sum((y_hat_test == y_test)) / len(y_test)
+        print(f"Train score checkpoint: {np.sum((y_hat_train == y_train)) / len(y_train)}")
 
     if "model__use_checkpoints" in config.keys() and config["model__use_checkpoints"] and not return_r2:
         try:

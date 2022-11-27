@@ -26,8 +26,9 @@ analyses/utils/
 wandb/
 output/
 skorch_cp/
+launch_config/
 src/launch_benchmarks/sweeps/*
-trash/results/*
+launch_config/results/*
 src/launch_benchmarks/launch_bo.py
 src/launch_benchmarks/launch_benchmark_small.py
 src/launch_benchmarks/model_configs.py
@@ -44,4 +45,5 @@ src/check_difficulty_resnet.py
 src/utils/__pycache__/
 openml_cache/
 trash
+src/launch_benchmarks/launch_benchmark_missing.py
 

@@ -3,7 +3,6 @@ import os
 os.environ["PROJECT_DIR"] = "test"
 import openml
 
-print("ho")
 import sys
 
 sys.path.append(".")
@@ -22,14 +21,13 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression
 
-openml.datasets.functions._get_dataset_parquet = lambda x: None #to bypass current OpenML issues #TODO remove
-
 # Create an argument parser
 parser = argparse.ArgumentParser(description='Train a model on a dataset')
 
 # Add the arguments
 parser.add_argument('--device', type=str, default="cuda", help='Device to use')
 parser.add_argument('--file', type=str, default="filename", help='Csv with all datasets')
+parser.add_argument('--datasets', nargs='+', type=int, default=[], help='Datasets to use')
 parser.add_argument('--out_file', type=str, default="filename", help='filename to save')
 parser.add_argument('--regression', action='store_true', help='True if regression, false otherwise')
 parser.add_argument('--categorical', action='store_true')
@@ -39,7 +37,6 @@ parser.add_argument('--remove_model', nargs='+', help='List of models not to try
 # Parse the arguments
 args = parser.parse_args()
 
-df = pd.read_csv("../data/aggregates/{}.csv".format(args.file))
 
 device = 'cuda:{}'.format(args.device) if torch.cuda.is_available() and not args.device == "cpu" else 'cpu'
 print(device)
@@ -63,7 +60,7 @@ resnet_config = {"model_type": "skorch",
                  "model__lr": 1e-3,
                  "model__optimizer__weight_decay": 1e-7,
                  "model__module__d_embedding": 128,
-                 "model__verbose": 100,
+                 "model__verbose": 0,
                  "model__device": device}
 
 if args.regression:
@@ -82,7 +79,22 @@ if args.categorical:
 else:
     resnet_config["data__categorical"] = False
 
+#TODO make a proper function
+if len(args.datasets) == 0:
+    df = pd.read_csv("../data/aggregates/{}.csv".format(args.file))
+else:
+    # Create a dataframe with columns dataset_name dataset_id and Remove and too_easy and Redundant
+    df = pd.DataFrame(columns=["dataset_name", "dataset_id", "Remove"])
+    df["dataset_id"] = args.datasets
+    df["dataset_name"] = "default"
+    df["Remove"] = 0
+    df["too_easy"] = 1
+    df["Redundant"] = 0
+
+
 res_df = pd.DataFrame()
+
+
 
 for index, row in df.iterrows():
     try:
@@ -111,6 +123,26 @@ for index, row in df.iterrows():
                     num_categorical_columns, n_pseudo_categorical, original_n_samples, original_n_features = \
                         preprocessing(X, y, categorical_indicator, categorical=args.categorical,
                                       regression=args.regression, transformation=transformation)
+                    if X.shape[1] > 2000:
+                        res_dic = {
+                            "dataset_id": dataset_id,
+                            "dataset_name": dataset.name,
+                            "original_n_samples": original_n_samples,
+                            "original_n_features": original_n_features,
+                            "num_categorical_columns": num_categorical_columns,
+                            "num_pseudo_categorical_columns": n_pseudo_categorical,
+                            "num_columns_missing": num_columns_missing,
+                            "num_rows_missing": num_rows_missing,
+                            "too_easy": pd.NA,
+                            "score_resnet": pd.NA,
+                            "score_linear": pd.NA,
+                            "score_hgbt": pd.NA,
+                            "score_tree": pd.NA,
+                            "heterogeneous": pd.NA,
+                            "n_samples": X.shape[0]}
+                        res_df = res_df.append(res_dic, ignore_index=True)
+                        res_df.to_csv("{}.csv".format(args.out_file))
+                        continue
                     train_prop = 0.7
                     train_prop = min(15000 / X.shape[0], train_prop)
                     numeric_transformer = StandardScaler()
@@ -135,6 +167,12 @@ for index, row in df.iterrows():
                     score_linear_list = []
                     score_hgbt_list = []
                     score_tree_list = []
+                    if args.regression:
+                        # same for r2
+                        resnet_r2_list = []
+                        linear_r2_list = []
+                        hgbt_r2_list = []
+                        tree_r2_list = []
                     if int((1 - train_prop) * X.shape[0]) > 10000:
                         n_iters = 1
                     elif int((1 - train_prop) * X.shape[0]) > 5000:
@@ -227,15 +265,22 @@ for index, row in df.iterrows():
                                 if not "linear" in args.remove_model:
                                     score_linear = -mean_squared_error(y_test, linear_model.predict(X_test_one_hot),
                                                                        squared=False)
+                                    r2_linear = r2_score(y_test, linear_model.predict(X_test_one_hot))
                                 print("Linear model score: ", score_linear)
+                                print("Linear model r2: ", r2_linear)
                                 if not "hgbt" in args.remove_model:
                                     score_hgbt = -mean_squared_error(y_test, hgbt.predict(
                                         X_test_no_one_hot), squared=False)
+                                    r2_hgbt = r2_score(y_test, hgbt.predict(X_test_no_one_hot))
                                     print("HGBT score: ", score_hgbt)
+                                    print("HGBT r2: ", r2_hgbt)
+
                                 if not "tree" in args.remove_model:
                                     score_tree = -mean_squared_error(y_test, tree.predict(
                                         X_test_one_hot), squared=False)
+                                    r2_tree = r2_score(y_test, tree.predict(X_test_one_hot))
                                     print("Tree score: ", score_tree)
+                                    print("Tree r2: ", r2_tree)
                             else:
                                 if not "linear" in args.remove_model:
                                     score_linear = linear_model.score(X_test_one_hot, y_test)  # accuracy
@@ -271,8 +316,20 @@ for index, row in df.iterrows():
                                                                                       y_test, resnet_config, model_id,
                                                                                       return_r2=False)
                                 if args.regression:
-                                    score_resnet = -score_resnet  # we want high = good so we take -RMSE
+                                    _, _, r2_resnet = evaluate_model(model, X_train_no_one_hot, y_train, None,
+                                                                        None, X_test_no_one_hot,
+                                                                        y_test, resnet_config, model_id,
+                                                                        return_r2=True)
+                                    print("Resnet r2: ", r2_resnet)
+                                print("Resnet score: ", score_resnet)
+                                print("Resnet train score: ", train_score)
+                                print("Resnet val score: ", val_score)
 
+                                if args.regression:
+                                    score_resnet = -score_resnet  # we want high = good so we take -RMSE
+                            else:
+                                score_resnet = np.nan
+                                r2_resnet = np.nan
                             score_resnet_list.append(score_resnet)
                             score_linear_list.append(score_linear)
                             score_hgbt_list.append(score_hgbt)
@@ -281,20 +338,37 @@ for index, row in df.iterrows():
                             print("linear score: ", score_linear)
                             print("hgbt score: ", score_hgbt)
                             print("tree score: ", score_tree)
+                            if args.regression:
+                                resnet_r2_list.append(r2_resnet)
+                                linear_r2_list.append(r2_linear)
+                                hgbt_r2_list.append(r2_hgbt)
+                                tree_r2_list.append(r2_tree)
                         print("Linear score: {}".format(score_linear_list))
                         print("Resnet score: {}".format(score_resnet_list))
                         print("HGBT score: {}".format(score_hgbt_list))
                         print("Tree score: {}".format(score_tree_list))
                         if args.regression:
+                            print("Linear r2: {}".format(linear_r2_list))
+                            print("Resnet r2: {}".format(resnet_r2_list))
+                            print("HGBT r2: {}".format(hgbt_r2_list))
+                            print("Tree r2: {}".format(tree_r2_list))
                             score_linear = np.nanmedian(score_linear_list)
                             score_resnet = np.nanmedian(score_resnet_list)
                             score_hgbt = np.nanmedian(score_hgbt_list)
                             score_tree = np.nanmedian(score_tree_list)
+                            r2_linear = np.nanmedian(linear_r2_list)
+                            r2_resnet = np.nanmedian(resnet_r2_list)
+                            r2_hgbt = np.nanmedian(hgbt_r2_list)
+                            r2_tree = np.nanmedian(tree_r2_list)
                         else:
                             score_linear = np.mean(score_linear_list)
                             score_resnet = np.mean(score_resnet_list)
                             score_hgbt = np.mean(score_hgbt_list)
                             score_tree = np.mean(score_tree_list)
+                            r2_linear = np.nan
+                            r2_resnet = np.nan
+                            r2_hgbt = np.nan
+                            r2_tree = np.nan
                         if args.regression:
                             if (score_resnet - score_linear) < -0.05 * score_resnet:
                                 too_easy = True
@@ -320,6 +394,10 @@ for index, row in df.iterrows():
                             "score_linear": score_linear,
                             "score_hgbt": score_hgbt,
                             "score_tree": score_tree,
+                            "r2_resnet": r2_resnet,
+                            "r2_linear": r2_linear,
+                            "r2_hgbt": r2_hgbt,
+                            "r2_tree": r2_tree,
                             "heterogeneous": pd.NA,
                             "n_samples": X.shape[0],
                             "too_small": False}

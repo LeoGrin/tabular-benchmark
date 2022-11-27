@@ -93,6 +93,8 @@ df = pd.read_csv(args.filename)
 print(f"Launching {len(df)} sweeps")
 for i, row in df.iterrows():
     use_gpu = args.gpu or row["use_gpu"]
+    if use_gpu:
+        print("Using GPU")
     if args.cpu_only and use_gpu:
         print("Skipping sweep as it's GPU and we only want CPU")
         continue
@@ -108,9 +110,7 @@ for i, row in df.iterrows():
         # If the sweep doesn't exist, we launch it
         pass
     if use_gpu:
-        OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" 
-        -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' 
-        AND not cluster='grimani' AND not cluster='gruss'" -q production"""
+        OAR_COMMAND = """oarsub  -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' AND not cluster='grimani' AND not cluster='gruss'" -q production "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" """
         # TODO modify launch_agent_gpu.sh
         SLURM_COMMAND = "sbatch --export=wandb_id={},project={},sweep_id={} launch_benchmarks/launch_agent_gpu.sh"
     else:
@@ -123,21 +123,19 @@ for i, row in df.iterrows():
     sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
     print(sweep)
     if ("default" in row["name"]):
-        n_runs_to_launch = row["n_datasets"]
+        n_runs_to_launch = np.min([args.n_runs, row["n_datasets"]])
     else:
         n_runs_to_launch = args.n_runs
     for _ in range(n_runs_to_launch):
         print("Launching run")
         if not args.oar:
-            if not use_gpu:
-                os.system(SLURM_COMMAND.format(wandb_id, row["project"], row["sweep_id"]))
-            else:
-                os.system(
-                    SLURM_COMMAND.format(wandb_id, row["project"], row["sweep_id"]))
+            command = SLURM_COMMAND.format(wandb_id, row["project"], row["sweep_id"])
         else:
-            os.system(
-                OAR_COMMAND.format(wandb_id, row["project"], row["sweep_id"])
-            )
+            command = OAR_COMMAND.format(wandb_id, row["project"], row["sweep_id"])
+        print(command)
+        os.system(
+            command
+        )
 
 if args.monitor:
 

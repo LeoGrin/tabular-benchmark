@@ -60,6 +60,9 @@ config_random  = {
         #"values": [False, True]
         "values": [False]
     },
+    "use_gpu": {
+        "value": True
+    }
 }
 
 config_default = {
