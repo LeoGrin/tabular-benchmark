@@ -426,8 +426,12 @@ if __name__ == """__main__""":
         df = pd.read_csv("../data/aggregates/{}.csv".format(args.file))
         df_filtered = df[(df["Remove"] != 1) &
                          (df["Redundant"] != 1) &
+                            (df["too_small"] != 1) &
+                            (df["too_many_features"] != 1) &
                          (~pd.isnull(df["dataset_id"])) &
                          ~np.isin(df["dataset_id"], res_df["dataset_id"])]
+        if "not_enough_categorical" in df.columns:
+            df_filtered = df_filtered[df_filtered["not_enough_categorical"] != 1]
         # Filter if too_easy == 1 or if args.all
         df_filtered = df_filtered[(df_filtered["too_easy"] == 1) | (df_filtered["too_easy"]) | (df_filtered["too_easy"] == "TRUE") | args.all]
         # filter for dataset names which do not contain the words image, cifar, mnist,
