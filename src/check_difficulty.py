@@ -433,7 +433,7 @@ if __name__ == """__main__""":
         if "not_enough_categorical" in df.columns:
             df_filtered = df_filtered[df_filtered["not_enough_categorical"] != 1]
         # Filter if too_easy == 1 or if args.all
-        df_filtered = df_filtered[(df_filtered["too_easy"] == 1) | (df_filtered["too_easy"]) | (df_filtered["too_easy"] == "TRUE") | args.all]
+        df_filtered = df_filtered[(df_filtered["too_easy"] == 1) | (df_filtered["too_easy"] == "TRUE") | args.all]
         # filter for dataset names which do not contain the words image, cifar, mnist,
         df_filtered = df_filtered[~df_filtered["dataset_name"].str.contains("image", case=False)]
         prefix_to_skip = ["BNG", "RandomRBF", "GTSRB", "CovPokElec", "PCam"]
