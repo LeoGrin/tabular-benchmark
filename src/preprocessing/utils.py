@@ -61,7 +61,6 @@ def balance(x, y):
     indices = [(y == i) for i in np.unique(y)]
     sorted_classes = np.argsort(
         list(map(sum, indices)))  # in case there are more than 2 classes, we take the two most numerous
-
     n_samples_min_class = sum(indices[sorted_classes[-2]])
     print("n_samples_min_class", n_samples_min_class)
     indices_max_class = rng.choice(np.where(indices[sorted_classes[-1]])[0], n_samples_min_class, replace=False)
@@ -186,7 +185,7 @@ def check_if_task_too_easy(X, y, categorical_indicator, regression=False, standa
             return False, score_hbgt, score_linear
 
 
-def remove_unwanted_columns(X, dataset_id):
+def find_unwanted_columns(X, dataset_id):
     if int(dataset_id) == 40753:
         unwanted_columns = ["stop_id"]
     elif int(dataset_id) == 42571:
@@ -210,8 +209,8 @@ def remove_unwanted_columns(X, dataset_id):
         print(X.columns)
         print(unwanted_columns)
         return X, 0
-    print("Removed {} unwanted_columns".format(len(unwanted_columns)))
-    return X, len(unwanted_columns)
+    print("{} unwanted_columns".format(len(unwanted_columns)))
+    return unwanted_columns
 
 def specify_categorical(X, dataset_id):
     res = []
@@ -247,6 +246,6 @@ def transform_target(y, keyword):
         return np.sign(y) * np.log(1 + np.abs(y))
     elif keyword == "none":
         return y
-    elif pd.isnull(y):
+    elif pd.isnull(keyword):
         return y
 

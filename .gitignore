@@ -46,4 +46,5 @@ src/utils/__pycache__/
 openml_cache/
 trash
 src/launch_benchmarks/launch_benchmark_missing.py
-
+src/*.csv
+src/check_difficulty_old.py
