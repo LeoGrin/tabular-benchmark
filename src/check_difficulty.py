@@ -278,7 +278,7 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
 
 def check_difficulty_openml(dataset_id, categorical, regression, transformation):
     try:
-        dataset = openml.datasets.get_dataset(dataset_id, download_data=True)
+        dataset = openml.datasets.get_dataset(dataset_id, download_data=False)
         print("Downloading data")
         print(dataset.name)
         X, y, categorical_indicator, attribute_names = dataset.get_data(
