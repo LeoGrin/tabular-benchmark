@@ -204,14 +204,20 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression, resne
                 if categorical_indicator[i]:
                     categories.append(int(np.max(X.iloc[:, i]) + 1))
             resnet_config["model__categories"] = categories
+            resnet_config["dataset_id"] = dataset_id
             model, model_id = train_model(iter, X_train_no_one_hot, y_train,
                                           categorical_indicator if len(categorical_indicator) > 0 else None,
                                           resnet_config)
-            train_score, val_score, score_resnet = evaluate_model(model, X_train_no_one_hot, y_train, None,
-                                                                  None, X_test_no_one_hot,
-                                                                  y_test, resnet_config, model_id,
-                                                                  return_r2=False, delete_checkpoint=False)
-            if regression:
+            if not regression:
+                train_score, val_score, score_resnet = evaluate_model(model, X_train_no_one_hot, y_train, None,
+                                                                      None, X_test_no_one_hot,
+                                                                      y_test, resnet_config, model_id,
+                                                                      return_r2=False, delete_checkpoint=True)
+            else:
+                train_score, val_score, score_resnet = evaluate_model(model, X_train_no_one_hot, y_train, None,
+                                                                      None, X_test_no_one_hot,
+                                                                      y_test, resnet_config, model_id,
+                                                                      return_r2=False, delete_checkpoint=False)
                 _, _, r2_resnet = evaluate_model(model, X_train_no_one_hot, y_train, None,
                                                  None, X_test_no_one_hot,
                                                  y_test, resnet_config, model_id,
