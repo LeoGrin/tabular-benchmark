@@ -11,7 +11,7 @@ from sklearn.compose import TransformedTargetRegressor
 
 
 def remove_high_cardinality(X, y, categorical_mask, threshold=20):
-    high_cardinality_mask = X.nunique() > threshold
+    high_cardinality_mask = np.array(X.nunique() > threshold)
     print("high cardinality columns: {}".format(X.columns[high_cardinality_mask * categorical_mask]))
     n_high_cardinality = sum(categorical_mask * high_cardinality_mask)
     X = X.drop(X.columns[categorical_mask * high_cardinality_mask], axis=1)
@@ -58,6 +58,9 @@ def balance(x, y):
     rng = np.random.RandomState(0)
     print("Balancing")
     print(x.shape)
+    if len(np.unique(y)) == 1:
+        # return empty arrays
+        return np.array([]), np.array([])
     indices = [(y == i) for i in np.unique(y)]
     sorted_classes = np.argsort(
         list(map(sum, indices)))  # in case there are more than 2 classes, we take the two most numerous

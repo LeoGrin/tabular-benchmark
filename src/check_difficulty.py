@@ -21,7 +21,9 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression
 
-def check_difficulty(X, y, categorical_indicator, categorical, regression):
+openml.config.cache_directory = os.path.expanduser('.')
+
+def check_difficulty(X, y, categorical_indicator, categorical, regression, resnet_config, remove_model=[]):
     train_prop = 0.7
     train_prop = min(10000 / X.shape[0], train_prop)
     numeric_transformer = StandardScaler()
@@ -65,7 +67,7 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
                                                             random_state=np.random.RandomState(iter))
         X_train, X_test, y_train, y_test = np.array(X_train), np.array(X_test), np.array(
             y_train), np.array(y_test)
-        if resnet_config["regression"] == True:
+        if regression:
             y_train, y_test = y_train.reshape(-1, 1), y_test.reshape(-1, 1)
             y_train, y_test = y_train.astype(np.float32), y_test.astype(np.float32)
         if X_test.shape[0] > 30000:  # for speed
@@ -117,33 +119,33 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
             np.float32), X_test_no_one_hot.astype(np.float32)
 
         if regression:
-            if not "linear" in args.remove_model:
+            if not "linear" in remove_model:
                 linear_model = TransformedTargetRegressor(regressor=LinearRegression(),
                                                           transformer=QuantileTransformer(
                                                               output_distribution="normal",
                                                               random_state=np.random.RandomState(iter)))
-            if not "hgbt" in args.remove_model:
+            if not "hgbt" in remove_model:
                 hgbt = HistGradientBoostingRegressor(categorical_features=categorical_indicator,
                                                      random_state=np.random.RandomState(iter))
-            if not "tree" in args.remove_model:
+            if not "tree" in remove_model:
                 tree = DecisionTreeRegressor(random_state=np.random.RandomState(iter))
         else:
-            if not "linear" in args.remove_model:
+            if not "linear" in remove_model:
                 linear_model = LogisticRegression(random_state=np.random.RandomState(iter))
-            if not "hgbt" in args.remove_model:
+            if not "hgbt" in remove_model:
                 hgbt = HistGradientBoostingClassifier(categorical_features=categorical_indicator,
                                                       random_state=np.random.RandomState(iter))
-            if not "tree" in args.remove_model:
+            if not "tree" in remove_model:
                 tree = DecisionTreeClassifier(random_state=np.random.RandomState(iter))
 
-        if not "linear" in args.remove_model:
+        if not "linear" in remove_model:
             linear_model.fit(X_train_one_hot, y_train)
-        if not "hgbt" in args.remove_model:
+        if not "hgbt" in remove_model:
             hgbt.fit(X_train_no_one_hot, y_train)
-        if not "tree" in args.remove_model:
+        if not "tree" in remove_model:
             tree.fit(X_train_one_hot, y_train)
         if regression:
-            if not "linear" in args.remove_model:
+            if not "linear" in remove_model:
                 score_linear = -mean_squared_error(y_test, linear_model.predict(X_test_one_hot),
                                                    squared=False)
                 r2_linear = r2_score(y_test, linear_model.predict(X_test_one_hot))
@@ -151,7 +153,7 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
                 print("Linear model r2: ", r2_linear)
             else:
                 score_linear, r2_linear = np.nan, np.nan
-            if not "hgbt" in args.remove_model:
+            if not "hgbt" in remove_model:
                 score_hgbt = -mean_squared_error(y_test, hgbt.predict(
                     X_test_no_one_hot), squared=False)
                 r2_hgbt = r2_score(y_test, hgbt.predict(X_test_no_one_hot))
@@ -160,7 +162,7 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
             else:
                 score_hgbt, r2_hgbt = np.nan, np.nan
 
-            if not "tree" in args.remove_model:
+            if not "tree" in remove_model:
                 score_tree = -mean_squared_error(y_test, tree.predict(
                     X_test_one_hot), squared=False)
                 r2_tree = r2_score(y_test, tree.predict(X_test_one_hot))
@@ -169,24 +171,24 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
             else:
                 score_tree, r2_tree = np.nan, np.nan
         else:
-            if not "linear" in args.remove_model:
+            if not "linear" in remove_model:
                 score_linear = linear_model.score(X_test_one_hot, y_test)  # accuracy
                 print("Linear model score: ", score_linear)
             else:
                 score_linear = np.nan
-            if not "hgbt" in args.remove_model:
+            if not "hgbt" in remove_model:
                 score_hgbt = hgbt.fit(X_train_no_one_hot, y_train).score(X_test_no_one_hot, y_test)
                 print("HGBT score: ", score_hgbt)
             else:
                 score_hgbt = np.nan
-            if not "tree" in args.remove_model:
+            if not "tree" in remove_model:
                 score_tree = tree.fit(X_train_one_hot, y_train).score(X_test_one_hot, y_test)
                 print("Tree score: ", score_tree)
             else:
                 score_tree = np.nan
 
-        if not "resnet" in args.remove_model:
-            if resnet_config["regression"] == True:
+        if not "resnet" in remove_model:
+            if regression:
                 y_train = y_train.reshape(-1, 1)
                 y_test = y_test.reshape(-1, 1)
                 y_train, y_test = y_train.astype(np.float32), y_test.astype(
@@ -276,7 +278,8 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression):
 
     return score_dic
 
-def check_difficulty_openml(dataset_id, categorical, regression, transformation):
+
+def check_difficulty_openml(dataset_id, categorical, regression, transformation, resnet_config, remove_model):
     try:
         dataset = openml.datasets.get_dataset(dataset_id, download_data=False)
         print("Downloading data")
@@ -284,7 +287,6 @@ def check_difficulty_openml(dataset_id, categorical, regression, transformation)
         X, y, categorical_indicator, attribute_names = dataset.get_data(
             dataset_format="dataframe", target=dataset.default_target_attribute
         )
-        # Print number of nans per class
         X, y, categorical_indicator, num_high_cardinality, num_columns_missing, num_rows_missing, \
         num_categorical_columns, n_pseudo_categorical, original_n_samples, original_n_features = \
             preprocessing(X, y, categorical_indicator, categorical=categorical,
@@ -310,7 +312,6 @@ def check_difficulty_openml(dataset_id, categorical, regression, transformation)
             "too_many_features": pd.NA,
             "not_enough_categorical": pd.NA}
 
-
         if X.shape[1] > 2000 or X.shape[0] <= 3000 or X.shape[1] <= 3:
             if X.shape[1] > 2000:
                 res_dic["too_many_features"] = True
@@ -319,7 +320,8 @@ def check_difficulty_openml(dataset_id, categorical, regression, transformation)
         elif categorical and num_categorical_columns < 1:
             res_dic["not_enough_categorical"] = True
         else:
-            score_dic = check_difficulty(X, y, categorical_indicator, categorical, regression)
+            score_dic = check_difficulty(X, y, categorical_indicator, categorical, regression,
+                                         resnet_config=resnet_config, remove_model=remove_model)
             for key in score_dic.keys():
                 res_dic[key] = score_dic[key]
     except:
@@ -351,6 +353,7 @@ def check_difficulty_openml(dataset_id, categorical, regression, transformation)
             "not_enough_categorical": pd.NA}
 
     return res_dic
+
 
 if __name__ == """__main__""":
 
@@ -426,8 +429,8 @@ if __name__ == """__main__""":
         df = pd.read_csv("../data/aggregates/{}.csv".format(args.file))
         df_filtered = df[(df["Remove"] != 1) &
                          (df["Redundant"] != 1) &
-                            (df["too_small"] != 1) &
-                            (df["too_many_features"] != 1) &
+                         (df["too_small"] != 1) &
+                         (df["too_many_features"] != 1) &
                          (~pd.isnull(df["dataset_id"])) &
                          ~np.isin(df["dataset_id"], res_df["dataset_id"])]
         if "not_enough_categorical" in df.columns:
@@ -439,7 +442,7 @@ if __name__ == """__main__""":
         prefix_to_skip = ["BNG", "RandomRBF", "GTSRB", "CovPokElec", "PCam"]
         df_filtered = df_filtered[~df_filtered["dataset_name"].str.startswith(tuple(prefix_to_skip))]
         dataset_id_list = df_filtered["dataset_id"].tolist()
-        if "Transformation"in df.columns:
+        if "Transformation" in df.columns:
             transformation_list = df_filtered["Transformation"].tolist()
         else:
             transformation_list = [None for _ in range(len(dataset_id_list))]
@@ -458,8 +461,8 @@ if __name__ == """__main__""":
         res_dic = check_difficulty_openml(int(dataset_id),
                                           transformation=transformation,
                                           categorical=args.categorical,
-                                          regression=args.regression)
+                                          regression=args.regression,
+                                          resnet_config=resnet_config,
+                                          remove_model=args.remove_model, )
         res_df = res_df.append(res_dic, ignore_index=True)
         res_df.to_csv("{}.csv".format(args.out_file), index=False)
-
-

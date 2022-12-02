@@ -8,7 +8,8 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
     le = LabelEncoder()
     if not regression:
         y = le.fit_transform(y)
-    binary_variables_mask = X.nunique() == 2
+    binary_variables_mask = np.array(X.nunique() == 2)
+    print(categorical_indicator)
     for i in range(X.shape[1]):
         if binary_variables_mask[i]:
             categorical_indicator[i] = True
@@ -26,7 +27,7 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
     num_categorical_columns = sum(categorical_indicator)
     print("Number of categorical columns: {}".format(num_categorical_columns))
 
-    pseudo_categorical_mask = X.nunique() < 10
+    pseudo_categorical_mask = np.array(X.nunique() < 10)
     n_pseudo_categorical = 0
     cols_to_delete = []
     for i in range(X.shape[1]):
@@ -71,7 +72,7 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
             if categorical_indicator[i]:
                 X.iloc[:, i] = LabelEncoder().fit_transform(X.iloc[:, i])
 
-        if transformation is not None:
+        if transformation is not None and transformation != "none":
             assert regression
             y = transform_target(y, transformation)
         else:
