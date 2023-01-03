@@ -8,6 +8,7 @@ convert_keyword_to_function = {
     "periodic_triangle": periodic_triangle,
     "real_data": import_real_data,
     "openml": import_open_ml_data,
+    "openml_no_transform": import_openml_data_no_transform,
     "gaussienize": gaussienize,
     "select_features_rf": select_features_rf,
     "remove_features_rf": remove_features_rf,

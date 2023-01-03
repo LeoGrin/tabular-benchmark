@@ -32,6 +32,7 @@ launch_config/results/*
 src/launch_benchmarks/launch_bo.py
 src/launch_benchmarks/launch_benchmark_small.py
 src/launch_benchmarks/model_configs.py
+src/upload_cleaned_datasets.py
 __pycache__/
 config/
 analyses/save_benchmarks.R

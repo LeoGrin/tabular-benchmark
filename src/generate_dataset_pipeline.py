@@ -60,7 +60,7 @@ def transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng, 
 
 def data_to_train_test(x, y, config, rng=None):
     n_rows = x.shape[0]
-    if "data__keyword" in config.keys() and config["data__keyword"] == "year":
+    if "data__keyword" in config.keys() and config["data__keyword"] == "year": #TODO move this to a less hidden place
         if config["max_train_samples"] < 463715:
             indices_train = rng.choice(list(range(463715)), config["max_train_samples"],
                                              replace=False)

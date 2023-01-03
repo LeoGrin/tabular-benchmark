@@ -7,12 +7,13 @@ sys.path.append(".")
 from configs.wandb_config import wandb_id
 from configs.all_model_configs import total_config
 import argparse
+import openml 
 
 
 
 data_transform_config = {
     "data__method_name": {
-        "value": "real_data"
+        "value": "openml_no_transform"
     },
     "n_iter": {
         "value": "auto",
@@ -23,26 +24,8 @@ benchmarks = [{"task": "regression",
                    "dataset_size": "medium",
                    "categorical": False,
                     "name": "numerical_regression",
-                   "datasets":  ["cpu_act",
-                     "pol",
-                     "elevators",
-                     #"isolet",
-                     "wine_quality",
-                      "Ailerons",
-                      "houses",
-                      "house_16H",
-                      "diamonds",
-                      "Brazilian_houses",
-                      "Bike_Sharing_Demand",
-                      "nyc-taxi-green-dec-2016",
-                      "house_sales",
-                      "sulfur",
-                      "medical_charges",
-                      "MiamiHousing2016",
-                      "superconduct",
-                      "california",
-                      "year",
-                      "fifa"]},
+                   "suite_id": 329,
+                   "exclude": []},
 
                 {"task": "regression",
                     "dataset_size": "large",
@@ -145,6 +128,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_file", type=str, default="all_benchmark_medium.csv")
     # Datasets
     parser.add_argument("--datasets", nargs="+", type=str, default=[])
+    # Exclude datasets
+    parser.add_argument("--exclude", nargs="+", type=str, default=[])
 
 
     args = parser.parse_args()
@@ -155,7 +140,7 @@ if __name__ == "__main__":
         models = args.models
     print(models)
     print(args.benchmarks)
-    benchmark_names = args.benchmarks#["numerical_classif", "numerical_regression", "categorical_classif", "categorical_regression"]
+    benchmark_names = args.benchmarks
     output_filename = args.output_file
     sweep_ids = []
     names = []
@@ -179,13 +164,20 @@ if __name__ == "__main__":
                     if default:
                         name += "_default" # do not change
                     name += "_{}".format(n)
-                    datasets_to_use = benchmark["datasets"] if len(args.datasets) == 0 else args.datasets
+                    suite_id = benchmark["suite_id"]
+                    # Get task_ids from openml suite
+                    if len(args.datasets) == 0:
+                        task_ids = openml.study.get_suite(suite_id).tasks
+                        datasets_to_use = [id for id in task_ids if id not in args.exclude]
+                    else:
+                        datasets_to_use = args.datasets
+                        assert len(args.exclude) == 0
                     sweep_id, use_gpu = create_sweep(data_transform_config,
                                  model_name=model_name,
                                  regression=benchmark["task"] == "regression",
                                  categorical=benchmark["categorical"],
                                  dataset_size = benchmark["dataset_size"],
-                                 datasets = datasets_to_use,
+                                 datasets = task_ids,
                                  default=default,
                                  project=project_name,
                                  name=name)

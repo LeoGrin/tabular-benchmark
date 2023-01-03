@@ -7,7 +7,7 @@ import wandb
 
 data_transform_config = {
     "data__method_name": {
-        "value": "real_data"
+        "value": "openml_no_transform"
     },
     "n_iter": {
         "value": "auto",

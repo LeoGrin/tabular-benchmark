@@ -131,6 +131,24 @@ def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num
 
     return np.array(X), np.array(y), categorical_indicator
 
+def import_openml_data_no_transform(task_id, regression=False, categorical=False):
+    task = openml.tasks.get_task(task_id)
+    dataset = task.get_dataset()
+    X, y, categorical_indicator, attribute_names = dataset.get_data(
+        dataset_format='array',
+        target=dataset.default_target_attribute
+    )
+    if not categorical:
+        assert not categorical_indicator.any(), "There are categorical features in the dataset"
+        categorical_indicator = None #easier to deal with
+        if not regression:
+            y = y.astype(np.int64)
+    else:
+        categorical_indicator = np.array(categorical_indicator).astype(np.bool)
+        if not regression:
+            y = y.astype(np.int64)
+    return X, y, categorical_indicator
+
 
 def generate_synthetic_data(num_samples,
                             num_dimensions,
