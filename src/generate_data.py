@@ -131,8 +131,9 @@ def import_real_data(keyword=None, balanced=True, path_to_dir="../data", max_num
 
     return np.array(X), np.array(y), categorical_indicator
 
-def import_openml_data_no_transform(task_id, regression=False, categorical=False):
-    task = openml.tasks.get_task(task_id)
+def import_openml_data_no_transform(keyword, regression=False, categorical=False):
+    # keyword should be the openml task id
+    task = openml.tasks.get_task(keyword)
     dataset = task.get_dataset()
     X, y, categorical_indicator, attribute_names = dataset.get_data(
         dataset_format='array',

@@ -24,7 +24,7 @@ benchmarks = [{"task": "regression",
                    "dataset_size": "medium",
                    "categorical": False,
                     "name": "numerical_regression",
-                   "suite_id": 329,
+                   "suite_id": None,
                    "exclude": []},
 
                 {"task": "regression",
@@ -39,21 +39,8 @@ benchmarks = [{"task": "regression",
                     "dataset_size": "medium",
                     "categorical": False,
                     "name": "numerical_classification",
-                    "datasets": ["electricity",
-                                 "covertype",
-                                 "pol",
-                                 "house_16H",
-                                 "kdd_ipums_la_97-small",
-                                 "MagicTelescope",
-                                 "bank-marketing",
-                                 "phoneme",
-                                 "MiniBooNE",
-                                 "Higgs",
-                                 "eye_movements",
-                                 "jannis",
-                                 "credit",
-                                 "california",
-                                 "wine"]
+                    "suite_id": 329,
+                    "exlude": []
                  },
 
                 {"task": "classif",
@@ -130,6 +117,8 @@ if __name__ == "__main__":
     parser.add_argument("--datasets", nargs="+", type=str, default=[])
     # Exclude datasets
     parser.add_argument("--exclude", nargs="+", type=str, default=[])
+    # Suffix for project name
+    parser.add_argument("--suffix", type=str, default="")
 
 
     args = parser.parse_args()
@@ -152,7 +141,7 @@ if __name__ == "__main__":
 
     for n in range(1):
         for model_name in models:
-            project_name = model_name + "_benchmark"
+            project_name = model_name + "_benchmark" + args.suffix 
             wandb.init(entity=wandb_id, project=project_name) # Create a new project on your WandB account
             for i, benchmark in enumerate(benchmarks):
                 for default in [False, True]:
