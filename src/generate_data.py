@@ -140,7 +140,7 @@ def import_openml_data_no_transform(keyword, regression=False, categorical=False
         target=dataset.default_target_attribute
     )
     if not categorical:
-        assert not categorical_indicator.any(), "There are categorical features in the dataset"
+        assert categorical_indicator is None or not np.array(categorical_indicator).astype(bool).any(), "There are categorical features in the dataset"
         categorical_indicator = None #easier to deal with
         if not regression:
             y = y.astype(np.int64)
