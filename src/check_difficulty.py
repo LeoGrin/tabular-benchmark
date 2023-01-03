@@ -204,7 +204,7 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression, resne
                 if categorical_indicator[i]:
                     categories.append(int(np.max(X.iloc[:, i]) + 1))
             resnet_config["model__categories"] = categories
-            resnet_config["dataset_id"] = dataset_id
+            #resnet_config["dataset_id"] = dataset_id
             model, model_id = train_model(iter, X_train_no_one_hot, y_train,
                                           categorical_indicator if len(categorical_indicator) > 0 else None,
                                           resnet_config)
@@ -293,10 +293,35 @@ def check_difficulty_openml(dataset_id, categorical, regression, transformation,
         X, y, categorical_indicator, attribute_names = dataset.get_data(
             dataset_format="dataframe", target=dataset.default_target_attribute
         )
+        if y is None:
+            print("No target attribute")
+            res_dic = {
+            "dataset_id": dataset_id,
+            "dataset_name": dataset.name,
+            "original_n_samples": X.shape[0],
+            "original_n_features": X.shape[1],
+            "num_categorical_columns": pd.NA,
+            "num_pseudo_categorical_columns": pd.NA,
+            "num_high_cardinality": pd.NA,
+            "num_columns_missing": pd.NA,
+            "num_rows_missing": pd.NA,
+            "score_resnet": pd.NA,
+            "score_linear": pd.NA,
+            "score_hgbt": pd.NA,
+            "score_tree": pd.NA,
+            "heterogeneous": pd.NA,
+            "n_samples": pd.NA,
+            "n_features": pd.NA,
+            "too_small": pd.NA,
+            "too_many_features": pd.NA,
+            "not_enough_categorical": pd.NA,
+            "no_target_attribute": True}
+            return res_dic
         X, y, categorical_indicator, num_high_cardinality, num_columns_missing, num_rows_missing, \
         num_categorical_columns, n_pseudo_categorical, original_n_samples, original_n_features = \
             preprocessing(X, y, categorical_indicator, categorical=categorical,
-                          regression=regression, transformation=transformation)
+                          regression=regression, transformation=transformation,
+                          dataset_id=dataset_id)
         res_dic = {
             "dataset_id": dataset_id,
             "dataset_name": dataset.name,
@@ -432,16 +457,15 @@ if __name__ == """__main__""":
         res_df = pd.DataFrame(columns=["dataset_id"])
 
     if len(args.datasets) == 0:
-        df = pd.read_csv("../data/aggregates/{}.csv".format(args.file))
-        df_filtered = df[(df["Remove"] != 1) &
-                         (df["Redundant"] != 1) &
-                         (df["too_small"] != 1) &
-                         (df["too_many_features"] != 1) &
-                         (~pd.isnull(df["dataset_id"])) &
+        df = pd.read_csv("../data/aggregates/{}.csv".format(args.file), sep=",")
+        key_to_filter = ["Remove", "Redundant"]#, "too_small", "too_many_features, "not_enough_categorical"]
+        for key in key_to_filter:
+            if key in df.columns:
+                df = df[df[key] != 1]
+        df_filtered = df[(~pd.isnull(df["dataset_id"])) &
                          ~np.isin(df["dataset_id"], res_df["dataset_id"])]
-        if "not_enough_categorical" in df.columns:
-            df_filtered = df_filtered[df_filtered["not_enough_categorical"] != 1]
         # Filter if too_easy == 1 or if args.all
+        print(df_filtered)
         df_filtered = df_filtered[(df_filtered["too_easy"] == 1) | (df_filtered["too_easy"] == "TRUE") | args.all]
         # filter for dataset names which do not contain the words image, cifar, mnist,
         df_filtered = df_filtered[~df_filtered["dataset_name"].str.contains("image", case=False)]
