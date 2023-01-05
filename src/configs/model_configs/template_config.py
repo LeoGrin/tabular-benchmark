@@ -20,7 +20,7 @@ config_random = {
         'sigma': float(np.log(10.0)),
     },
     "data__parameter": { # pass parameters to the data constructor
-        "values": [1, 2, 3]
+        "values": [1, 2, 3, "None"] # None doesn't work with wandb, "None" is converted to None
     },
     "transform__0__method_name": { # Optional: name of the first transform method to apply to X,y
         "value": "gaussienize"

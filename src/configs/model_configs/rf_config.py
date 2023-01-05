@@ -12,11 +12,11 @@ config_random = {
         # "max": 3000.5,
         # "q": 1
     },
-    "model__max_features": {  # like Hyperopt ?
-        "values": ["sqrt", "sqrt", "log2", None, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    "max_features_temp": {  # like Hyperopt ?
+        "values": ["sqrt", "sqrt", "log2", "None", 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     },
-    "model__max_depth": {  # Not exactly like Hyperopt
-        "values": [None, 2, 3, 4],
+    "max_depth_temp": {  # Not exactly like Hyperopt
+        "values": ["None", 2, 3, 4],
         "probabilities": [0.7, 0.1, 0.1, 0.1]
     },
     "model__min_samples_split": {

@@ -12,6 +12,14 @@ import torch
 
 #os.environ["WANDB_MODE"] = "offline"
 
+def modify_config(config):
+    if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
+        config["model__module__d_token"] = (config["d_token"] // config["model__module__n_heads"]) * config["model__module__n_heads"]
+    for key in config.keys():
+        if key.endswith("_temp"):
+            new_key = "model__" + key[:-5]
+            print("Replacing", key, "with", new_key)
+            config[new_key] = config[key]
 
 
 def train_model_on_config(config=None):
@@ -32,10 +40,7 @@ def train_model_on_config(config=None):
         config = wandb.config
         print(config)
         # Modify the config in certain cases
-        if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
-            config["model__module__d_token"] = (config["d_token"] // config["model__module__n_heads"]) * config[
-                "model__module__n_heads"]
-        # config = modify_config(config)
+        config = modify_config(config)
 
         # print(config)
         try:
