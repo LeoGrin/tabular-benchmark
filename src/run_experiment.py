@@ -59,6 +59,12 @@ def train_model_on_config(config=None):
             else:
                 n_iter = config["n_iter"]
             for i in range(n_iter):
+                if config["model_type"] == "skorch" or config["model_type"] == "tab_survey":
+                    model_id = hash(
+                        ".".join(list(config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
+                elif config["model_type"] == "sklearn":
+                    model_id = 0 # not used
+                config["model_id"] = model_id
                 # if config["log_training"]: #FIXME
                 #    config["model__wandb_run"] = run
                 rng = np.random.RandomState(i)
@@ -83,7 +89,7 @@ def train_model_on_config(config=None):
 
                 start_time = time.time()
                 print(y_train.shape)
-                model, model_id = train_model(i, x_train, y_train, categorical_indicator, config)
+                model = train_model(i, x_train, y_train, categorical_indicator, config)
                 if config["regression"]:
                     try:
                         r2_train, r2_val, r2_test = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
@@ -194,10 +200,13 @@ def train_model_on_config(config=None):
                 except:
                     print("could not remove params file")
             if config["model_type"] == "tab_survey":
-                try:
-                    os.remove(r"output/saint/{}/tmp/m_{}_best.pt".format(config["data__keyword"], model_id))
-                except:
-                    print("could not remove params file")
+                print("Removing checkpoint files")
+                print("Removing ")
+                print(r"output/saint/{}/tmp/m_{}_best.pt".format(config["data__keyword"], model_id))
+                #try:
+                os.remove(r"output/saint/{}/tmp/m_{}_best.pt".format(config["data__keyword"], model_id))
+                #except:
+                #print("could not remove params file")
             return -1
     return 0
 

@@ -146,16 +146,12 @@ def train_model(iter, x_train, y_train, categorical_indicator, config):
     Train the model
     """
     print("Training")
+    id = config["model_id"]
     if config["model_type"] == "skorch":
-        id = hash(
-            ".".join(list(config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
         model_raw = create_model(config, categorical_indicator, id=id)  # TODO rng ??
     elif config["model_type"] == "sklearn":
-        id = None
         model_raw = create_model(config, categorical_indicator)
     elif config["model_type"] == "tab_survey":
-        id = hash(
-            ".".join(list(config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
         model_raw = create_model(config, categorical_indicator, num_features=x_train.shape[1], id=id,
                                  cat_dims=list((x_train[:, categorical_indicator].max(0) + 1).astype(int)))
 
@@ -188,4 +184,4 @@ def train_model(iter, x_train, y_train, categorical_indicator, config):
     else:
         model.fit(x_train, y_train)
 
-    return model, id
+    return model
