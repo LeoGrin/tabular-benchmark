@@ -141,12 +141,11 @@ def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test,
     return train_score, val_score, test_score
 
 
-def train_model(iter, x_train, y_train, categorical_indicator, config):
+def train_model(iter, x_train, y_train, categorical_indicator, config, id):
     """
     Train the model
     """
     print("Training")
-    id = config["model_id"]
     if config["model_type"] == "skorch":
         model_raw = create_model(config, categorical_indicator, id=id)  # TODO rng ??
     elif config["model_type"] == "sklearn":

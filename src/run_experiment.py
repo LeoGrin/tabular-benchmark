@@ -17,8 +17,8 @@ def modify_config(config):
         config["model__module__d_token"] = (config["d_token"] // config["model__module__n_heads"]) * config["model__module__n_heads"]
     for key in config.keys():
         if key.endswith("_temp"):
-            print("Replacing value from key", key, "to", new_key)
             new_key = "model__" + key[:-5]
+            print("Replacing value from key", key, "to", new_key)
             if config[key] == "None":
                 config[new_key] = None
             else:
@@ -74,7 +74,6 @@ def train_model_on_config(config=None):
                         ".".join(list(config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
                 elif config["model_type"] == "sklearn":
                     model_id = 0 # not used
-                config["model_id"] = model_id
                 # if config["log_training"]: #FIXME
                 #    config["model__wandb_run"] = run
                 rng = np.random.RandomState(i)
@@ -99,7 +98,7 @@ def train_model_on_config(config=None):
 
                 start_time = time.time()
                 print(y_train.shape)
-                model = train_model(i, x_train, y_train, categorical_indicator, config)
+                model = train_model(i, x_train, y_train, categorical_indicator, config, model_id)
                 if config["regression"]:
                     try:
                         r2_train, r2_val, r2_test = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
