@@ -20,6 +20,8 @@ def modify_config(config):
             new_key = "model__" + key[:-5]
             print("Replacing", key, "with", new_key)
             config[new_key] = config[key]
+    
+    return config
 
 
 def train_model_on_config(config=None):
