@@ -17,10 +17,12 @@ def modify_config(config):
         config["model__module__d_token"] = (config["d_token"] // config["model__module__n_heads"]) * config["model__module__n_heads"]
     for key in config.keys():
         if key.endswith("_temp"):
+            print("Replacing value from key", key, "to", new_key)
+            new_key = "model__" + key[:-5]
             if config[key] == "None":
-                new_key = "model__" + key[:-5]
-                print("Replacing None value from key", key, "to", new_key)
                 config[new_key] = None
+            else:
+                config[new_key] = config[key]
     
     return config
 
