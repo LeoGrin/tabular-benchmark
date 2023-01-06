@@ -186,7 +186,7 @@ if args.monitor:
                     for run in runs:
                         if run.state == "finished":
                             # Check that there is a mean_test_score value logged
-                            if "mean_test_score" in run.summary and not np.isnan(run.summary["mean_test_score"]):
+                            if "mean_test_score" in run.summary and not pd.isnull(run.summary["mean_test_score"]):
                                 if "data__keyword" in run.config.keys():
                                     dataset = run.config["data__keyword"]
                                     if dataset in n_finished_runs_per_dataset:

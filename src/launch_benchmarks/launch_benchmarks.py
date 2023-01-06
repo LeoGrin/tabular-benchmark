@@ -24,7 +24,7 @@ benchmarks = [{"task": "regression",
                    "dataset_size": "medium",
                    "categorical": False,
                     "name": "numerical_regression",
-                   "suite_id": None,
+                   "suite_id": 331,
                    "exclude": []},
 
                 {"task": "regression",
@@ -166,7 +166,7 @@ if __name__ == "__main__":
                                  regression=benchmark["task"] == "regression",
                                  categorical=benchmark["categorical"],
                                  dataset_size = benchmark["dataset_size"],
-                                 datasets = task_ids,
+                                 datasets = datasets_to_use,
                                  default=default,
                                  project=project_name,
                                  name=name)
