@@ -52,7 +52,7 @@ def save_results_to_file(args, results, train_time=None, test_time=None, best_pa
 
     with open(filename, "a") as text_file:
         text_file.write(str(datetime.datetime.now()) + "\n")
-        text_file.write(args.model_name + " - " + args.dataset + "\n\n")
+        text_file.write(args.model_name + " - " + str(args.dataset) + "\n\n")
 
         for key, value in results.items():
             text_file.write("%s: %.5f\n" % (key, value))
@@ -86,7 +86,7 @@ def save_hyperparameters_to_file(args, params, results, time=None):
 
 def get_output_path(args, filename, file_type, directory=None, extension=None):
     # For example: output/LinearModel/Covertype
-    dir_path = output_dir + args.model_name + "/" + args.dataset
+    dir_path = output_dir + args.model_name + "/" + str(args.dataset)
 
     if directory:
         # For example: .../models
@@ -108,7 +108,7 @@ def get_output_path(args, filename, file_type, directory=None, extension=None):
 
 
 def get_predictions_from_file(args):
-    dir_path = output_dir + args.model_name + "/" + args.dataset + "/predictions"
+    dir_path = output_dir + args.model_name + "/" + str(args.dataset) + "/predictions"
 
     files = os.listdir(dir_path)
     content = []
