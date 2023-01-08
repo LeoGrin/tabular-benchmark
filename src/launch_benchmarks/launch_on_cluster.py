@@ -110,7 +110,7 @@ for i, row in df.iterrows():
         # If the sweep doesn't exist, we launch it
         pass
     if use_gpu:
-        OAR_COMMAND = """oarsub  -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' AND not cluster='grimani' AND not cluster='gruss'" -q production "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}" """
+        OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}"  -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' AND not cluster='grimani' AND not cluster='gruss'" -q production"""
         # TODO modify launch_agent_gpu.sh
         SLURM_COMMAND = "sbatch --export=wandb_id={},project={},sweep_id={} launch_benchmarks/launch_agent_gpu.sh"
     else:
