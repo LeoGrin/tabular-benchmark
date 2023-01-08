@@ -5,9 +5,9 @@ from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
-import utils.keyword_to_function_conversion
 from scipy.stats import multivariate_normal
 from sklearn.covariance import EmpiricalCovariance, MinCovDet
+from configs.all_model_configs import model_keyword_dic
 
 
 def marginal_transformations(x, y, function, vectorized=False, rng=None):
@@ -201,7 +201,7 @@ def remove_features_rf(x_train, x_val, x_test, y_train, y_val, y_test, rng, num_
     assert x_train.shape[1] == x_test.shape[1]
     if isinstance(num_features_to_remove, float):
         num_features_to_remove = int(num_features_to_remove * x_train.shape[1])
-    model = utils.keyword_to_function_conversion.convert_keyword_to_function[model_to_use](random_state=rng)
+    model = model_keyword_dic[model_to_use](random_state=rng)
     model.fit(x_train, y_train)
     if importance_cutoff is not None:
         num_features_to_remove = min(x_train.shape[1] - 1,
