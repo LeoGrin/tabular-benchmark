@@ -4,6 +4,7 @@ import sys
 sys.path.append(".")
 from configs.wandb_config import wandb_id
 import wandb
+import openml
 
 data_transform_config = {
     "data__method_name": {
@@ -57,7 +58,7 @@ xps = [{"name": "random_rotation",
                 "value": "remove_high_frequency_from_train",
             },
             "transform__2__cov_mult": {
-                "values": [0.05]
+                "values": [0., 0.05, 0.1, 0.25]
             },
             "transform__2__covariance_estimation": {
                 "values": ["robust"]
@@ -70,7 +71,7 @@ xps = [{"name": "random_rotation",
                     "value": "add_uninformative_features"
                 },
                 "transform__0__multiplier": {
-                    "values": [1., 1.5, 2],
+                    "values": [0, 1., 1.5, 2],
                 },
             }
      },
@@ -86,7 +87,7 @@ xps = [{"name": "random_rotation",
                     "values": ["rf_c"],
                 },
                 "transform__0__keep_removed_features": {
-                    "value": [True, False]
+                    "value": [False]
                 },
             }
      }
@@ -97,20 +98,14 @@ xps = [{"name": "random_rotation",
 models = ["gbt", "rf",
           "ft_transformer", "resnet"]
 
-datasets = ["electricity",
-             "covertype",
-             "pol",
-             "house_16H",
-             "kdd_ipums_la_97-small",
-             "MagicTelescope",
-             "bank-marketing",
-             "phoneme",
-             "MiniBooNE",
-             "Higgs",
-             "eye_movements",
-             "credit",
-             "california",
-             "wine"]
+config = {"task": "classif",
+"dataset_size": "medium",
+"categorical": False,
+"name": "numerical_classification",
+"suite_id": 329,
+"exlude": []
+}
+
 
 if __name__ == "__main__":
     sweep_ids = []
@@ -118,8 +113,17 @@ if __name__ == "__main__":
     projects = []
     use_gpu_list = []
     n_datasets_list = []
+    n_run_per_dataset_list = []
+    task_ids = openml.study.get_suite(config["suite_id"]).tasks
+    datasets = [id for id in task_ids]
     for i, xp in enumerate(xps):
         project_name =  xp["name"]
+        print(f"Xp name: {project_name}")
+        n_run_per_dataset = 1
+        for key in xp["config"].keys():
+            if "values" in xp["config"][key].keys():
+                n_run_per_dataset *= len(xp["config"][key]["values"])
+        print(f"Number of runs per dataset: {n_run_per_dataset}")
         wandb.init(project = project_name, entity=wandb_id)
         for model_name in models:
             for default in [True, False]:
@@ -134,7 +138,9 @@ if __name__ == "__main__":
                         data_transform_config["transform__1__type"] = {
                             "value": "quantile"
                         }
-                sweep_id, use_gpu = create_sweep(data_transform_config,
+                xp_config = xp["config"]
+                xp_config.update(data_transform_config)
+                sweep_id, use_gpu = create_sweep(xp_config,
                              model_name=model_name,
                              regression=False,
                              categorical=False,
@@ -149,16 +155,19 @@ if __name__ == "__main__":
                 projects.append(project_name)
                 use_gpu_list.append(use_gpu)
                 n_datasets_list.append(len(datasets))
+                n_run_per_dataset_list.append(n_run_per_dataset)
                 print(f"Created sweep {name}")
                 print(f"Sweep id: {sweep_id}")
                 print(f"Project: {project_name}")
                 print(f"Use GPU: {use_gpu}")
                 print(f"Number of datasets: {len(datasets)}")
+                print(f"Number of runs per dataset: {n_run_per_dataset}")
 
     df = pd.DataFrame({"sweep_id": sweep_ids, "name": names,
                        "project": projects,
                        "use_gpu": use_gpu_list,
-                       "n_datasets": n_datasets_list})
+                       "n_datasets": n_datasets_list,
+                       "n_run_per_dataset": n_run_per_dataset_list})
     df.to_csv("launch_benchmarks/sweeps/xps_sweeps.csv", index=False)
     print("Check the sweeps id saved at sweeps/xps_sweeps.csv")
     print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "
