@@ -177,13 +177,13 @@ if args.monitor:
                         download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
                         temp_filename_list.append(sweep_output_filename)
                         saved_sweeps.append(row["sweep_id"])
-                if "n_runs_per_dataset" in row.keys():
-                    n_runs_per_dataset = row["n_runs_per_dataset"]
+                if "n_run_per_dataset" in row.keys():
+                    n_run_per_dataset = row["n_run_per_dataset"]
                 else:
-                    n_runs_per_dataset = 1
+                    n_run_per_dataset = 1
                 if not ("default" in row[
                     "name"]) and not args.default and sweep.state == "RUNNING" and n > args.max_runs * row[
-                    "n_datasets"] * n_runs_per_dataset:
+                    "n_datasets"] * n_run_per_dataset:
                     print("Sweep seems to be done, checking that there are enough runs for each dataset")
                     # Check that there are enough runs for each dataset
                     n_finished_runs_per_dataset = {}
@@ -198,7 +198,7 @@ if args.monitor:
                                     else:
                                         n_finished_runs_per_dataset[dataset] = 1
                     print(n_finished_runs_per_dataset)
-                    if np.all([n_finished_runs_per_dataset[dataset] >= args.max_runs * n_runs_per_dataset for dataset in
+                    if np.all([n_finished_runs_per_dataset[dataset] >= args.max_runs * n_run_per_dataset for dataset in
                                n_finished_runs_per_dataset]) and len(n_finished_runs_per_dataset) == row["n_datasets"]:
                         print("Stopping sweep")
                         os.system("wandb sweep --stop {}/{}/{}".format(wandb_id, row['project'], row['sweep_id']))
