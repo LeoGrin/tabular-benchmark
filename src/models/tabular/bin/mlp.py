@@ -38,7 +38,6 @@ class MLP(nn.Module):
             print(f'{self.category_embeddings.weight.shape=}')
 
         d_layers = [d_layers for _ in range(n_layers)] #CHANGED
-        d_layers.append(d_out)
 
         self.layers = nn.ModuleList(
             [
