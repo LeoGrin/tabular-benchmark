@@ -75,15 +75,9 @@ config_default = {
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True
     },
-    "model__n_estimators": {
-        "value": 1_000
-    },
-    "model__n_iter_no_change": {
-        "value": 20
-    },
-    "model__validation_fraction": {
-        "value": 0.2
-    },
+     "use_gpu": {
+        "value": False
+    }
 }
 
 config_regression = dict(config_random, **{

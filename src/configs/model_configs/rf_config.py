@@ -54,9 +54,6 @@ config_default = {
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True
     },
-    "model__n_estimators": {
-        "value": 250,
-    },
     "use_gpu": {
         "value": False
     }

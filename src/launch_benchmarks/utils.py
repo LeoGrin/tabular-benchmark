@@ -12,7 +12,7 @@ def create_sweep(data_transform_config, model_name, regression, default, project
     print(model_config)
     if remove_tranforms_from_model_config:  # prevent conflicts with data_transform_config
         model_config = model_config.copy()
-        for key in model_config.keys():
+        for key in list(model_config):
             if key.startswith("transform__"):
                 del model_config[key]
 

@@ -18,7 +18,7 @@ def skorch_evaluation(model, x_train, x_val, x_test, y_train, y_val, y_test, con
         y_hat_val = model.predict(x_val)
     y_hat_test = model.predict(x_test)
 
-    # Compute the best train score acheived
+    # Compute the best train score achieved
     if "regression" in config.keys() and config["regression"]:
         if np.any(np.isnan(y_hat_train)):
             train_score = np.nan

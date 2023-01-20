@@ -341,7 +341,3 @@ def remove_high_frequency_from_train(x_train, x_val, x_test, y_train, y_val, y_t
         y_train_new = (y_train_new > 0.5).astype(int)
         print(np.unique(y_train_new, return_counts=True))
     return x_train, x_val, x_test, y_train_new, y_val, y_test
-
-
-if __name__ == """__main__""":
-    print(2)

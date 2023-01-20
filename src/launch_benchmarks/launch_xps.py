@@ -5,6 +5,7 @@ sys.path.append(".")
 from configs.wandb_config import wandb_id
 import wandb
 import openml
+import numpy as np
 
 data_transform_config = {
     "data__method_name": {
@@ -71,7 +72,7 @@ xps = [{"name": "random_rotation",
                     "value": "add_uninformative_features"
                 },
                 "transform__0__multiplier": {
-                    "values": [0, 1., 1.5, 2],
+                    "values": [1., 1.5, 2],
                 },
             }
      },
@@ -81,28 +82,44 @@ xps = [{"name": "random_rotation",
                     "value": "remove_features_rf"
                 },
                 "transform__0__num_features_to_remove": {
-                    "values": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                    "values": [0.2, 0.4, 0.6, 0.8],
                 },
                 "transform__0__model_to_use": {
                     "values": ["rf_c"],
                 },
                 "transform__0__keep_removed_features": {
-                    "value": [False]
+                    "values": [False]
                 },
             }
-     }
+     },
+        {"name": "uninformative_features",
+        "config": {
+            "transform__0__method_name": {
+                "value": "remove_features_rf"
+            },
+            "transform__0__num_features_to_remove": {
+                "values": [0.0, 0.2, 0.4, 0.6, 0.8],
+            },
+            "transform__0__model_to_use": {
+                "values": ["rf_c"],
+            },
+            "transform__0__keep_removed_features": {
+                "values": [False, True]
+            },
+        }
+    },
+
 ]
 
 
 
-models = ["gbt", "rf",
-          "ft_transformer", "resnet"]
+models = ["resnet", "ft_transformer"]
 
 config = {"task": "classif",
 "dataset_size": "medium",
 "categorical": False,
 "name": "numerical_classification",
-"suite_id": 329,
+"suite_id": 337,
 "exlude": []
 }
 
@@ -128,6 +145,8 @@ if __name__ == "__main__":
         for model_name in models:
             for default in [True, False]:
                 name = f"{model_name}_{xp['name']}"
+                random_suffix = np.random.randint(10000)
+                name += f"_{random_suffix}"
                 if default:
                     name += "_default"
                 if model_name in ["ft_transformer", "resnet"]:
@@ -168,8 +187,8 @@ if __name__ == "__main__":
                        "use_gpu": use_gpu_list,
                        "n_datasets": n_datasets_list,
                        "n_run_per_dataset": n_run_per_dataset_list})
-    df.to_csv("launch_benchmarks/sweeps/xps_sweeps.csv", index=False)
-    print("Check the sweeps id saved at sweeps/xps_sweeps.csv")
+    df.to_csv("launch_benchmarks/sweeps/deep_default_xp.csv", index=False)
+    print("Check the sweeps id saved at sweeps/xps_sweeps_remove_features.csv")
     print("You can now run each sweep with wandb agent <USERNAME/PROJECTNAME/SWEEPID>, or use launch_on_cluster.py "
           "after making a few changes")
 

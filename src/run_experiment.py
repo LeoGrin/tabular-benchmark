@@ -68,6 +68,7 @@ def train_model_on_config(config=None):
                     n_iter = 5
             else:
                 n_iter = config["n_iter"]
+                
             for i in range(n_iter):
                 if config["model_type"] == "skorch" or config["model_type"] == "tab_survey":
                     model_id = hash(

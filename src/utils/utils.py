@@ -53,13 +53,10 @@ def merge_dics(dics):
             if key in dic.keys():
                 values.append(dic[key])
             else:
-                print("hehehe")
-                print(key)
                 if isinstance(value_example, numbers.Number): #replace by a placeholder depending on type
                     values.append(np.nan)
                 else:
                     values.append("none")
-        print("values", values)
         values = np.unique(values)
         if len(values) == 1:
             merged_dics[key] = values[0]

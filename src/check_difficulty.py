@@ -198,16 +198,13 @@ def check_difficulty(X, y, categorical_indicator, categorical, regression, resne
                 y_test = y_test.reshape(-1)
                 print("Number of classes: ", len(np.unique(y_train)))
                 print("Number of classes max: ", np.max(y_train))
-            # Give the true number of categories to the model
-            categories = []
-            for i in range(len(categorical_indicator)):
-                if categorical_indicator[i]:
-                    categories.append(int(np.max(X.iloc[:, i]) + 1))
-            resnet_config["model__categories"] = categories
             #resnet_config["dataset_id"] = dataset_id
-            model, model_id = train_model(iter, X_train_no_one_hot, y_train,
+            model_id = hash(
+                ".".join(list(resnet_config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
+            model = train_model(iter, X_train_no_one_hot, y_train,
                                           categorical_indicator if len(categorical_indicator) > 0 else None,
-                                          resnet_config)
+                                          resnet_config, 
+                                          id = model_id)
             if not regression:
                 train_score, val_score, score_resnet = evaluate_model(model, X_train_no_one_hot, y_train, None,
                                                                       None, X_test_no_one_hot,
@@ -457,8 +454,8 @@ if __name__ == """__main__""":
         res_df = pd.DataFrame(columns=["dataset_id"])
 
     if len(args.datasets) == 0:
-        df = pd.read_csv("../data/aggregates/{}.csv".format(args.file), sep=",")
-        key_to_filter = ["Remove", "Redundant"]#, "too_small", "too_many_features, "not_enough_categorical"]
+        df = pd.read_csv("../data/aggregates/{}.csv".format(args.file), sep=";")
+        key_to_filter = [] #TODO#["Remove", "Redundant"]#, "too_small", "too_many_features, "not_enough_categorical"]
         for key in key_to_filter:
             if key in df.columns:
                 df = df[df[key] != 1]

@@ -12,6 +12,10 @@ from sklearn.compose import TransformedTargetRegressor
 
 def remove_high_cardinality(X, y, categorical_mask, threshold=20):
     high_cardinality_mask = np.array(X.nunique() > threshold)
+    #TODO check
+    print("masks")
+    print(high_cardinality_mask)
+    print(categorical_mask)
     print("high cardinality columns: {}".format(X.columns[high_cardinality_mask * categorical_mask]))
     n_high_cardinality = sum(categorical_mask * high_cardinality_mask)
     X = X.drop(X.columns[categorical_mask * high_cardinality_mask], axis=1)
@@ -56,8 +60,6 @@ def remove_missing_values(X, y, threshold=0.7, return_missing_col_mask=True):
 
 def balance(x, y):
     rng = np.random.RandomState(0)
-    print("Balancing")
-    print(x.shape)
     if len(np.unique(y)) == 1:
         # return empty arrays
         return np.array([]), np.array([])
@@ -65,7 +67,6 @@ def balance(x, y):
     sorted_classes = np.argsort(
         list(map(sum, indices)))  # in case there are more than 2 classes, we take the two most numerous
     n_samples_min_class = sum(indices[sorted_classes[-2]])
-    print("n_samples_min_class", n_samples_min_class)
     indices_max_class = rng.choice(np.where(indices[sorted_classes[-1]])[0], n_samples_min_class, replace=False)
     indices_min_class = np.where(indices[sorted_classes[-2]])[0]
     total_indices = np.concatenate((indices_max_class, indices_min_class))
@@ -189,41 +190,34 @@ def check_if_task_too_easy(X, y, categorical_indicator, regression=False, standa
 
 
 def find_unwanted_columns(X, dataset_id):
-    if int(dataset_id) == 40753:
-        unwanted_columns = ["stop_id"]
-    elif int(dataset_id) == 42571:
-        unwanted_columns = ["id"]
+    # check if dataset_id is None
+    if dataset_id is None:
+        return []
+    if int(dataset_id) == 42571:
+        return ["id"]
     elif int(dataset_id) == 42729:
-        unwanted_columns = ["id"]
+        return ["id"]
     elif int(dataset_id) == 42731:
-        unwanted_columns = ["id"]
+        return ["id"]
     elif int(dataset_id) == 42720:
-        unwanted_columns = ["Provider_Id", "Provider_Zip_Code"]
+        return ["Provider_Id", "Provider_Zip_Code"]
     elif int(dataset_id) == 43093:
-        unwanted_columns = ["PARCELNO"]
+        return ["PARCELNO"]
     elif int(dataset_id) == 4541:
-        print("oj")
+        return ["patient_nbr"]
     else:
-        return X, 0
-    try:
-        X = X.drop(unwanted_columns, axis=1)
-    except KeyError:
-        print(dataset_id)
-        print(X.columns)
-        print(unwanted_columns)
-        return X, 0
-    print("{} unwanted_columns".format(len(unwanted_columns)))
-    return unwanted_columns
+        return []
 
 def specify_categorical(X, dataset_id):
     res = []
-    for col in X.columns:
-        if col.lower().endswith("_id") or\
-                col.lower().endswith("-id") or\
-                col.lower().endswith(".id") or \
-                col.lower().endswith("_index") or \
-                col.lower().endswith("-index") or \
-                col.lower().endswith(".index"):
+    for col_ in X.columns:
+        col = str(col_).lower()
+        if col.endswith("_id") or\
+                col.endswith("-id") or\
+                col.endswith(".id") or \
+                col.endswith("_index") or \
+                col.endswith("-index") or \
+                col.endswith(".index"):
             res.append(col)
     if dataset_id == "42803":
         res.extend(["Vehicle_Reference_df_res",

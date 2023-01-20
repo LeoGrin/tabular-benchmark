@@ -74,6 +74,7 @@ def create_resnet_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
         module__regression=True,
         module__categorical_indicator=categorical_indicator,
         callbacks=callbacks,
+        verbose=0,
         **kwargs
     )
 

@@ -7,7 +7,8 @@ sys.path.append(".")
 from configs.wandb_config import wandb_id
 from configs.all_model_configs import total_config
 import argparse
-import openml 
+import openml
+import numpy as np
 
 
 
@@ -24,22 +25,21 @@ benchmarks = [{"task": "regression",
                    "dataset_size": "medium",
                    "categorical": False,
                     "name": "numerical_regression",
-                   "suite_id": 331,
+                   "suite_id": 336,
                    "exclude": []},
 
                 {"task": "regression",
                     "dataset_size": "large",
                     "categorical": False,
                     "name": "numerical_regression_large",
-                    "datasets": ["diamonds",
-                                  "nyc-taxi-green-dec-2016",
-                                 "year"]},
+                    "suite_id": 336,
+                    "exclude": []},
 
                 {"task": "classif",
                     "dataset_size": "medium",
                     "categorical": False,
                     "name": "numerical_classification",
-                    "suite_id": 329,
+                    "suite_id": 337,
                     "exlude": []
                  },
 
@@ -47,59 +47,39 @@ benchmarks = [{"task": "regression",
                     "dataset_size": "large",
                     "categorical": False,
                     "name": "numerical_classification_large",
-                    "datasets": ["covertype",
-                                 "MiniBooNE",
-                                 "Higgs",
-                                 "jannis"],
+                    "suite_id": 337,
+                    "exclude": []
                  },
 
                 {"task": "regression",
                     "dataset_size": "medium",
                     "categorical": True,
                     "name": "categorical_regression",
-                 "datasets": ["yprop_4_1",
-                             "analcatdata_supreme",
-                             "visualizing_soil",
-                             "black_friday",
-                             "nyc-taxi-green-dec-2016",
-                             "diamonds",
-                             "Mercedes_Benz_Greener_Manufacturing",
-                             "Brazilian_houses",
-                             "Bike_Sharing_Demand",
-                             "OnlineNewsPopularity",
-                             "house_sales",
-                             "particulate-matter-ukair-2017",
-                             "SGEMM_GPU_kernel_performance"]},
+                    "suite_id": 335,
+                    "exclude": [],
+                },
 
                 {"task": "regression",
                  "dataset_size": "large",
                  "categorical": True,
                     "name": "categorical_regression_large",
-                 "datasets": ["black_friday",
-                     "nyc-taxi-green-dec-2016",
-                     "diamonds",
-                     "particulate-matter-ukair-2017",
-                     "SGEMM_GPU_kernel_performance"]},
+                    "suite_id": 335,
+                    "exclude": [],},
 
                 {"task": "classif",
                     "dataset_size": "medium",
                     "categorical": True,
                     "name": "categorical_classification",
-                    "datasets": ["electricity",
-                                 "eye_movements",
-                                  "KDDCup09_upselling",
-                                  "covertype",
-                                  "rl",
-                                  "road-safety",
-                                  "compass"]
+                    "suite_id": 334,
+                    "exclude": [],
                  },
 
                 {"task": "classif",
                     "dataset_size": "large",
                     "categorical": True,
                     "name": "categorical_classification_large",
-                    "datasets": ["covertype",
-                                 "road-safety"]
+                    "suite_id": 334,
+                    "exclude": [],
                  }
 ]
 
@@ -119,6 +99,8 @@ if __name__ == "__main__":
     parser.add_argument("--exclude", nargs="+", type=str, default=[])
     # Suffix for project name
     parser.add_argument("--suffix", type=str, default="")
+    # Only default
+    parser.add_argument("--default", action="store_true")
 
 
     args = parser.parse_args()
@@ -138,29 +120,35 @@ if __name__ == "__main__":
     n_datasets_list = []
     benchmarks = [benchmark for benchmark in benchmarks if benchmark["name"] in benchmark_names]
     print(benchmarks)
+    default_list = [False, True] if not args.default else [True]
 
     for n in range(1):
         for model_name in models:
             project_name = model_name + "_benchmark" + args.suffix 
             wandb.init(entity=wandb_id, project=project_name) # Create a new project on your WandB account
             for i, benchmark in enumerate(benchmarks):
-                for default in [False, True]:
+                for default in default_list:
                     name = f"{model_name}_{benchmark['task']}_{benchmark['dataset_size']}"
                     if benchmark['categorical']:
                         name += "_categorical"
                     else:
                         name += "_numerical"
+                    random_suffix = np.random.randint(10000)
+                    name += f"_{random_suffix}"
                     if default:
                         name += "_default" # do not change
                     name += "_{}".format(n)
                     suite_id = benchmark["suite_id"]
                     # Get task_ids from openml suite
+                    datasets = [int(dataset) for dataset in args.datasets]
+                    exclude = [int(dataset) for dataset in args.exclude]
+                    task_ids = openml.study.get_suite(suite_id).tasks
                     if len(args.datasets) == 0:
-                        task_ids = openml.study.get_suite(suite_id).tasks
-                        datasets_to_use = [id for id in task_ids if id not in args.exclude]
+                        datasets_to_use = [id for id in task_ids if id not in exclude]
                     else:
-                        datasets_to_use = args.datasets
+                        datasets_to_use = [dataset for dataset in datasets if dataset in task_ids]
                         assert len(args.exclude) == 0
+                    print("datasets", datasets_to_use)
                     sweep_id, use_gpu = create_sweep(data_transform_config,
                                  model_name=model_name,
                                  regression=benchmark["task"] == "regression",

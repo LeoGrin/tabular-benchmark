@@ -52,18 +52,9 @@ config_default = {
     "transformed_target": {
         "values": [False]
     },
-    "model__max_iter": {
-        "value": 1_000
-    },
-    "model__early_stopping": {
-        "value": True
-    },
-    "model__validation_fraction": {
-        "value": 0.2
-    },
-    "model__n_iter_no_change": {
-        "value": 20
-    },
+    "use_gpu": {
+        "value": False
+    }
 }
 
 config_regression = dict(config_random, **{

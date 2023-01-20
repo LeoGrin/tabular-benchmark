@@ -3,19 +3,28 @@ from preprocessing.utils import *
 import numpy as np
 
 
-def preprocessing(X, y, categorical_indicator, categorical, regression, transformation=None, dataset_id=None):
+def preprocessing(X, y, categorical_indicator, categorical, regression, transformation=None, dataset_id=None, transform_y_back=False):
+    print("dataset_id: ", dataset_id)
     original_n_samples, original_n_features = X.shape
     le = LabelEncoder()
     if not regression:
         y = le.fit_transform(y)
     binary_variables_mask = np.array(X.nunique() == 2)
-    print(categorical_indicator)
     for i in range(X.shape[1]):
         if binary_variables_mask[i]:
             categorical_indicator[i] = True
+    unwanted_columns = find_unwanted_columns(X, dataset_id) #TODO remove this
+    print("unwanted_columns: ", unwanted_columns)
+    specific_categorical = specify_categorical(X, dataset_id)
+    print("specific_categorical: ", specific_categorical)
     for i in range(X.shape[1]):
-        if type(X.iloc[1, i]) == str:
-            categorical_indicator[i] = True
+        for index in range(X.shape[0]):
+            if not pd.isnull(X.iloc[index, i]):
+                if type(X.iloc[index, i]) == str:
+                    categorical_indicator[i] = True
+                break
+        else:
+            print("Column {} is empty".format(X.columns[i]))
 
     if not dataset_id is None:
         # Returns the list of specific categorical variables not indicated as categorical
@@ -23,9 +32,6 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
         for i in range(X.shape[1]):
             if X.columns[i] in specific_categorical:
                 categorical_indicator[i] = True
-
-    num_categorical_columns = sum(categorical_indicator)
-    print("Number of categorical columns: {}".format(num_categorical_columns))
 
     pseudo_categorical_mask = np.array(X.nunique() < 10)
     n_pseudo_categorical = 0
@@ -55,8 +61,8 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
                              not i in cols_to_delete]  # update categorical indicator
 
     X, y, categorical_indicator, num_high_cardinality = remove_high_cardinality(X, y, categorical_indicator, 20)
-    print("Remaining categorical")
-    print([X.columns[i] for i in range(X.shape[1]) if categorical_indicator[i]])
+
+
     X, y, num_columns_missing, num_rows_missing, missing_cols_mask = remove_missing_values(X, y)
     categorical_indicator = [categorical_indicator[i] for i in range(len(categorical_indicator)) if
                              not missing_cols_mask[i]]
@@ -77,6 +83,12 @@ def preprocessing(X, y, categorical_indicator, categorical, regression, transfor
             y = transform_target(y, transformation)
         else:
             print("NO TRANSFORMATION")
+
+    if transform_y_back and not regression:
+        y = le.inverse_transform(y)
+
+    num_categorical_columns = sum(categorical_indicator)
+    print("Number of categorical columns: {}".format(num_categorical_columns))
 
     return X, y, categorical_indicator, num_high_cardinality, num_columns_missing, num_rows_missing, num_categorical_columns, \
            n_pseudo_categorical, original_n_samples, original_n_features

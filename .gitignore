@@ -49,3 +49,6 @@ trash
 src/launch_benchmarks/launch_benchmark_missing.py
 src/*.csv
 src/check_difficulty_old.py
+src/launch_benchmarks/results/*
+src/trash
+src/export_data.py
