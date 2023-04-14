@@ -2,7 +2,7 @@
 
 Accompanying repository for the paper *Why do tree-based models still outperform deep learning on tabular data?*
 
-![alt text](analyses/plots/random_search_classif_numerical.jpg "Benchmark on numerical features")
+![alt text](analyses/plots/random_search_classif_numerical_thumbnail.jpg "Benchmark on numerical features")
 
 # Replicating the paper's results
 
