@@ -12,10 +12,6 @@ Create a new environment using python 3.8, then install the requirements:
 
 `pip install -r requirements.txt`
 
-## Downloading the datasets
-
-To download these datasets, simply run `python data/download_data.py`.
-
 ## Training the models
 
 You can re-run the training using WandB sweeps.
@@ -35,6 +31,11 @@ and download the results when they are done.
 ## Replicating the analyses / figures
 
 All the R code used to generate the analyses and figures in available in the `analyses` folder.
+To dowload the random search results used for the figures, run:
+
+```
+curl -L -o analyses/results/benchmark_total.csv https://figshare.com/ndownloader/files/40081681
+```
 
 
 # Benchmarking your own algorithm
@@ -47,10 +48,10 @@ benchmarks, with the same transformations that are used in the paper.
 ```
 import openml
 #openml.config.apikey = 'FILL_IN_OPENML_API_KEY'  # set the OpenML Api Key
-SUITE_ID = 297 # Regression on numerical features
-#SUITE_ID = 298 # Classification on numerical features
-#SUITE_ID = 299 # Regression on numerical and categorical features
-#SUITE_ID = 304 # Classification on numerical and categorical features
+SUITE_ID = 336 # Regression on numerical features
+#SUITE_ID = 337 # Classification on numerical features
+#SUITE_ID = 335 # Regression on numerical and categorical features
+#SUITE_ID = 334 # Classification on numerical and categorical features
 benchmark_suite = openml.study.get_suite(SUITE_ID)  # obtain the benchmark suite
 for task_id in benchmark_suite.tasks:  # iterate over all tasks
     task = openml.tasks.get_task(task_id)  # download the OpenML task
@@ -66,8 +67,11 @@ You can also find these datasets on [Hugging Face Hub](https://huggingface.co/da
 
 If you want to compare you own algorithms with the models used in 
 this benchmark for a given number of random search iteration,
-you can use the results from our random searches, which we share 
-as two csv files located in the `analyses/results` folder.
+you can use the results from our random searches, by running:
+
+```
+curl -L -o analyses/results/benchmark_total.csv https://figshare.com/ndownloader/files/40081681
+```
 
 ## Using our code
 
