@@ -36,7 +36,6 @@ def marginal_transformations(x, y, function, vectorized=False, rng=None):
 
     return new_x, y
 
-
 def apply_random_rotation(x_train, x_val, x_test, y_train, y_val, y_test, deactivated=False, rng=None):
     if deactivated:
         return x_train, x_val, x_test, y_train, y_val, y_test
