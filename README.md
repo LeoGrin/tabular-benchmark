@@ -19,7 +19,7 @@ You can re-run the training using WandB sweeps.
 1. Copy / clone this repo on the different machines / clusters you want to use.
 2. Login to WandB and add your wandb id to `src/configs/wandb_config.py`
 3. Move into `src`
-4. run `python launch_config/launch_benchmarks.py`. This will create a csv with the wandb sweep to run, and save
+4. run `python launch_benchmarks/launch_benchmarks.py`. This will create a csv with the wandb sweep to run, and save
 it in `src/launch_benchmarks/sweeps/all_benchmarks_medium.csv`.
 5. (Long?) You can run each sweep by running `wandb agent <USERNAME/PROJECTNAME/SWEEPID>` in `src`. More infos
 [in the WandB doc](https://docs.wandb.ai/guides/sweeps/quickstart#4.-launch-agent-s).
