@@ -284,7 +284,7 @@ class Model(nn.Module):
             assert self.one_hot_encoder is not None
             x.append(self.one_hot_encoder(x_cat))
         assert x
-        x = torch.cat(x, dim=1)
+        x = torch.cat(x, dim=1).float()
 
         x = self.linear(x)
         for block in self.blocks0:
