@@ -107,8 +107,21 @@ def generate_dataset(config, rng):
         x = x.astype(np.float32)
         y = generate_target(x, config, rng)
 
+    # # compute the number of categories before splitting the data
+    if categorical_indicator is None:
+        cat_cardinalities = None
+    else:
+        categories = list((x[:, categorical_indicator].max(0) + 1).astype(int))
+        # assert that it's the same that compuring with np.unique
+        cat_cardinalities = []
+        for i in range(x.shape[1]):
+            if categorical_indicator[i]:
+                cat_cardinalities.append(len(np.unique(x[:, i])))
+        assert np.all(np.array(categories) == np.array(cat_cardinalities)), f"categories {categories} != cat_cardinalities {cat_cardinalities}"
+
+
     x_train, x_val, x_test, y_train, y_val, y_test = data_to_train_test(x, y, config, rng=rng)
 
     x_train, x_val, x_test, y_train, y_val, y_test = transform_data(x_train, x_val, x_test, y_train, y_val, y_test, config, rng,
                                                                     categorical_indicator=categorical_indicator)
-    return x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator
+    return x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities

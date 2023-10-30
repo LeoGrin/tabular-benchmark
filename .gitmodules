@@ -7,3 +7,6 @@
 [submodule "TabSurvey"]
 	path = TabSurvey
 	url = https://github.com/kathrinse/TabSurvey.git
+[submodule "src/tabular-dl-tabr"]
+	path = src/tabular-dl-tabr
+	url = https://github.com/yandex-research/tabular-dl-tabr.git

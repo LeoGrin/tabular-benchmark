@@ -42,7 +42,7 @@ def import_openml_data_no_transform(keyword, regression=False, categorical=False
         if not regression:
             y = y.astype(np.int64)
     else:
-        categorical_indicator = np.array(categorical_indicator).astype(np.bool)
+        categorical_indicator = np.array(categorical_indicator).astype(bool)
         if not regression:
             y = y.astype(np.int64)
     return X, y, categorical_indicator

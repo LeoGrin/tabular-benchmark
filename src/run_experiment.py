@@ -10,7 +10,7 @@ import platform
 import time
 import torch
 
-#os.environ["WANDB_MODE"] = "offline"
+os.environ["WANDB_MODE"] = "offline"
 
 def modify_config(config):
     if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
@@ -57,7 +57,7 @@ def train_model_on_config(config=None):
             r2_test_scores = []
             times = []
             if config["n_iter"] == "auto":
-                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator = generate_dataset(config, np.random.RandomState(0))
+                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, np.random.RandomState(0))
                 if x_test.shape[0] > 6000:
                     n_iter = 1
                 elif x_test.shape[0] > 3000:
@@ -80,7 +80,7 @@ def train_model_on_config(config=None):
                 rng = np.random.RandomState(i)
                 print(rng.randn(1))
                 t = time.time()
-                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator = generate_dataset(config, rng)
+                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, rng)
                 data_generation_time = time.time() - t
                 print("Data generation time:", data_generation_time)
                 # print(y_train)
@@ -99,7 +99,7 @@ def train_model_on_config(config=None):
 
                 start_time = time.time()
                 print(y_train.shape)
-                model = train_model(i, x_train, y_train, categorical_indicator, config, model_id)
+                model = train_model(i, x_train, y_train, categorical_indicator, cat_cardinalities, config, model_id)
                 if config["regression"]:
                     try:
                         r2_train, r2_val, r2_test = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
@@ -231,17 +231,31 @@ if __name__ == """__main__""":
     #  'transformed_target': False, 'train_prop': 0.7, 'val_test_prop': 0.3, 'max_val_samples': 50000,
     #  'max_test_samples': 50000}
 
-    # config = {"model_type": "sklearn",
-    #           "model_name": "gbt_c",
-    #           "regression": False,
-    #           "data__regression": False,
-    #           "data__categorical": False,
-    #           "model__n_estimators": 100,
-    #           "data__method_name": "real_data",
-    #           "data__keyword": "california",
-    #           "transform__0__method_name": "add_uninformative_features",
-    #           "n_iter": 1,
-    #           "max_train_samples": 10000}
+    config = {"model_name": "tabr",
+              "regression": False,
+             # "model__verbose": 100,
+              "data__regression": False,
+              "data__categorical": True,
+              "data__method_name": "openml_no_transform",
+              "data__keyword":  "361111",#"361072",
+              #"transform__0__method_name": "no_transform",
+              "n_iter": 1,
+              "max_train_samples": 10000
+                }
+    #update config with default values
+    from configs.model_configs.tabr_config import config_classif_default as config_model
+    # transform "value": param to param
+    for key in config_model.keys():
+        if "value" in config_model[key].keys():
+            config[key] = config_model[key]["value"]
+        if "values" in config_model[key].keys():
+            assert len(config_model[key]["values"]) == 1
+            config[key] = config_model[key]["values"][0]
+    print(config)
+    config["use_gpu"] = False
+    config["model__device"] = "cpu"
+    config["model__max_epochs"] = 1
+    config["model__batch_size"] = 5096
 
     # config = {
     #     "model_type": "skorch",
@@ -283,4 +297,4 @@ if __name__ == """__main__""":
     #           #"max_test_samples": None,
     #           }
 
-    train_model_on_config()
+    train_model_on_config(config)

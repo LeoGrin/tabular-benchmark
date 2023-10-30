@@ -9,7 +9,7 @@ class AttrDict(dict):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
-def create_model(config, categorical_indicator, num_features=None, id=None, cat_dims=None):
+def create_model(config, categorical_indicator, cat_cardinalities=None, num_features=None, id=None, cat_dims=None):
     model_function = model_keyword_dic[config["model_name"]]
     model_config = {}
     for key in config.keys():
@@ -17,6 +17,7 @@ def create_model(config, categorical_indicator, num_features=None, id=None, cat_
             model_config[key[len("model__"):]] = config[key]
     if config["model_type"] == "skorch":
         model_config["categorical_indicator"] = categorical_indicator
+        model_config["categories"] = cat_cardinalities
         return model_function(**model_config, id=id)
     elif config["model_type"] == "sklearn":
         if config["model_name"].startswith("hgbt"):

@@ -4,8 +4,8 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, \
     GradientBoostingClassifier, GradientBoostingRegressor, \
     HistGradientBoostingRegressor, HistGradientBoostingClassifier
 from xgboost import XGBClassifier, XGBRegressor
-from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch
-from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch
+from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_tabr_skorch
+from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
 
 
@@ -136,5 +136,18 @@ total_config[keyword] = {
 
 model_keyword_dic[config_regression["model_name"]["value"]] = SAINT
 model_keyword_dic[config_classif["model_name"]["value"]] = SAINT
+
+# same for tabr
+from configs.model_configs.tabr_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "tabr"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = create_tabr_regressor_skorch
+model_keyword_dic[config_classif["model_name"]["value"]] = create_tabr_skorch
 
 

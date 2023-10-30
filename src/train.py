@@ -141,13 +141,13 @@ def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test,
     return train_score, val_score, test_score
 
 
-def train_model(iter, x_train, y_train, categorical_indicator, config, id):
+def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities, config, id):
     """
     Train the model
     """
     print("Training")
     if config["model_type"] == "skorch":
-        model_raw = create_model(config, categorical_indicator, id=id)  # TODO rng ??
+        model_raw = create_model(config, categorical_indicator, cat_cardinalities=cat_cardinalities, id=id)  # TODO rng ??
     elif config["model_type"] == "sklearn":
         model_raw = create_model(config, categorical_indicator)
     elif config["model_type"] == "tab_survey":
@@ -181,6 +181,10 @@ def train_model(iter, x_train, y_train, categorical_indicator, config, id):
         y_train = y_train[:int(len(y_train) * 0.8)]
         model.fit(x_train, y_train, eval_set=(x_val, y_val))
     else:
-        model.fit(x_train, y_train)
+        if config["model_name"].startswith("tabr"):
+            #TODO: handle this elsewhere?
+            model.fit({"X": x_train, "y": y_train}, y_train)
+        else:
+            model.fit(x_train, y_train)
 
     return model
