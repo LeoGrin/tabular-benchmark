@@ -317,7 +317,7 @@ class Model(nn.Module):
         # Select the desired indices
         selected_indices = candidate_idx[mask]
 
-        print(f"remove_train_batch_from_candidate took {time.time() - start_time} seconds")
+        #print(f"remove_train_batch_from_candidate took {time.time() - start_time} seconds")
 
         return selected_indices
 
