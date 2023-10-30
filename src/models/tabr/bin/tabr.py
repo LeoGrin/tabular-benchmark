@@ -296,9 +296,11 @@ class Model(nn.Module):
         start_time = time.time()
         candidate_idx = np.arange(self.X_train.shape[0])
         candidates_hashes = self.X_train_hashes
-        train_batch_hashes = hash_2d_tensor_by_rows(train_batch)
+        train_batch_hashes = hash_2d_tensor_by_rows(train_batch.cpu())
         # Create a dictionary where keys are hashes and values are counts of their occurrences in train_batch_hashes
         hash_counts = {hash: np.count_nonzero(train_batch_hashes == hash) for hash in np.unique(train_batch_hashes)}
+
+        assert np.isin(train_batch_hashes, candidates_hashes).all(), "train_batch_hashes should be a subset of candidates_hashes"
 
         # Iterate over candidate_hashes and create a mask. Decrement the count in hash_counts every time a hash is encountered.
         mask = []
