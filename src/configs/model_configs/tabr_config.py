@@ -125,8 +125,9 @@ config_default = {
         "value": "LayerNorm"
     },
     # num_embeddings
-    "model__module__num_embeddings": {
-        "value": None #TODO: check
+    "module__num_embeddings_temp": {
+        "value": "None" #"None" is replaced by None for _temp param #TODO: check
+        #model__ is added at the same time when as None replacement
     },
     "use_gpu": {
         "value": True
