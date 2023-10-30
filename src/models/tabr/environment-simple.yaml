@@ -6,7 +6,7 @@ channels:
 dependencies:
 - catboost=1.1.1
 - category_encoders=2.6.0
-#- faiss-gpu=1.7.2
+- faiss-gpu=1.7.2
 - gpytorch=1.9.1
 - joblib=1.2.0
 - jupyterlab=3.6.1
@@ -16,7 +16,7 @@ dependencies:
 - optuna=3.1.0
 - pandas=1.5.3
 - pytorch::pytorch=1.13.1
-#- pytorch::pytorch-cuda=11.7
+- pytorch::pytorch-cuda=11.7
 - pytorch::pytorch-mutex=1.0
 - scikit-learn=1.2.2
 - scipy=1.10.1
