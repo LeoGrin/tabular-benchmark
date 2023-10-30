@@ -10,7 +10,7 @@ import platform
 import time
 import torch
 
-os.environ["WANDB_MODE"] = "offline"
+#os.environ["WANDB_MODE"] = "offline"
 
 def modify_config(config):
     if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
