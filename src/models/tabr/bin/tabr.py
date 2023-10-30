@@ -107,6 +107,9 @@ class InputShapeSetterTabR(skorch.callbacks.Callback):
         y_train = y_train.reshape(-1)
         X_train = torch.from_numpy(X).float()
         X_train_hashes = hash_2d_tensor_by_rows(X_train)
+        # move to device
+        X_train = X_train.to(net.device)
+        y_train = y_train.to(net.device)
         print(f"Computed {len(np.unique(X_train_hashes))} unique hashes for X_train of shape {X_train.shape}")
         net.set_params(module__n_num_features=d_numerical,
             module__n_bin_features=bin_indicator.sum(),
