@@ -149,34 +149,34 @@ config_default = {
     }
 }
 
-config_regression = dict(config_random ,
-                                **skorch_config,
+config_regression = {**skorch_config,
+                         **config_random ,
                                 **{
                                     "model_name": {
                                         "value": "tabr_regressor"
                                     },
-                                })
+                                }}
 
-config_regression_default = dict(config_default,
-                                **skorch_config_default,
+config_regression_default = {**skorch_config_default,
+                                 **config_default,
                                 **{
                                     "model_name": {
                                         "value": "tabr_regressor"
                                     },
-                                })
+                                }}
 
-config_classif = dict(config_random ,
-                             **skorch_config,
+config_classif = {**skorch_config,
+                      **config_random ,
                              **{
                                  "model_name": {
                                      "value": "tabr"
                                  },
-                             })
+                             }}
 
-config_classif_default = dict(config_default,
-                             **skorch_config_default,
+config_classif_default = {**skorch_config_default,
+                              **config_default,
                              **{
                                  "model_name": {
                                      "value": "tabr"
                                  },
-                             })
+                             }}
