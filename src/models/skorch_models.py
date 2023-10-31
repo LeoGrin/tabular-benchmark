@@ -57,7 +57,8 @@ def create_tabr_skorch(id, wandb_run=None, use_checkpoints=True,
         categories = None
     else:
         categories = kwargs.pop('categories')
-    callbacks = [InputShapeSetterTabR(categorical_indicator=categorical_indicator, categories=categories),
+    callbacks = [InputShapeSetterTabR(categorical_indicator=categorical_indicator, categories=categories,
+                                      batch_size=batch_size),
                  EarlyStopping(monitor="valid_loss",
                                patience=es_patience)]  # TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='accuracy', name='train_accuracy', on_train=True))
@@ -80,7 +81,7 @@ def create_tabr_skorch(id, wandb_run=None, use_checkpoints=True,
         # Shuffle training data on each epoch
         criterion=torch.nn.CrossEntropyLoss,
         optimizer=optimizer,
-        batch_size=max(batch_size, 1),  # if batch size is float, it will be reset during fit
+        batch_size=max(batch_size, 1) if not type(batch_size) == str else 1,  # if batch size is float or str, it will be reset during fit
         iterator_train__shuffle=True,
         module__n_num_features=1,  # will be change when fitted
         module__n_bin_features=1,  # will be change when fitted

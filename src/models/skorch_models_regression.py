@@ -49,7 +49,8 @@ def create_tabr_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
         categories = kwargs.pop('categories')
     callbacks = [InputShapeSetterTabR(regression=True,
                                         categorical_indicator=categorical_indicator,
-                                        categories=categories),
+                                        categories=categories,
+                                        batch_size=batch_size),
                        EarlyStopping(monitor="valid_loss", patience=es_patience)] #TODO try with train_loss, and in this case use checkpoint
     callbacks.append(EpochScoring(scoring='neg_root_mean_squared_error', name='train_accuracy', on_train=True))
 
@@ -68,7 +69,7 @@ def create_tabr_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
         Model,
         # Shuffle training data on each epoch
         optimizer=optimizer,
-        batch_size=max(batch_size, 1), # if batch size is float, it will be reset during fit
+        batch_size=max(batch_size, 1) if not type(batch_size) == str else 1, # if batch size is float, it will be reset during fit
         iterator_train__shuffle=True,
         module__n_num_features=1,  # will be change when fitted
         module__n_bin_features=1,  # will be change when fitted
@@ -79,7 +80,6 @@ def create_tabr_regressor_skorch(id, wandb_run=None, use_checkpoints=True,
         module__binary_indicator=None, # will be change when fitted
         module__is_train=True,
         callbacks=callbacks,
-        verbose=0,
         **kwargs
     )
 

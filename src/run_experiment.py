@@ -98,7 +98,6 @@ def train_model_on_config(config=None):
                     np.float32)
 
                 start_time = time.time()
-                print(y_train.shape)
                 model = train_model(i, x_train, y_train, categorical_indicator, cat_cardinalities, config, model_id)
                 if config["regression"]:
                     try:
@@ -192,6 +191,13 @@ def train_model_on_config(config=None):
                            "mean_r2_test": r2_test,
                            "mean_time": end_time - start_time,
                            "processor": processor}, commit=False)
+            # check if model has attribute batch_size
+            if config["transformed_target"]:
+                if "batch_size" in model.regressor_.get_params().keys():
+                    wandb.log({"batch_size_used": model.regressor_.get_params()["batch_size"]}, commit=False)
+            else:
+                if "batch_size" in model.get_params().keys():
+                    wandb.log({"batch_size_used": model.get_params()["batch_size"]}, commit=False)
 
             wandb.log({"n_train": x_train.shape[0], "n_test": x_test.shape[0],
                        "n_features": x_train.shape[1],
@@ -235,12 +241,12 @@ if __name__ == """__main__""":
     #           "regression": True,
     #          # "model__verbose": 100,
     #           "data__regression": True,
-    #           "data__categorical": True,
+    #           "data__categorical": False,
     #           "data__method_name": "openml_no_transform",
-    #           "data__keyword":  "361097",#"361072",
+    #           "data__keyword":  "361293",#"361072",
     #           #"transform__0__method_name": "no_transform",
     #           "n_iter": 1,
-    #           "max_train_samples": 10000
+    #           "max_train_samples": 128,
     #             }
     # #update config with default values
     # from configs.model_configs.tabr_config import config_regression_default as config_model
@@ -255,7 +261,8 @@ if __name__ == """__main__""":
     # config["use_gpu"] = False
     # config["model__device"] = "cpu"
     # config["model__max_epochs"] = 1
-    # config["model__batch_size"] = 5096
+    # config["model__batch_size"] = "auto"
+    # config["model__verbose"] = 100
 
     # config = {
     #     "model_type": "skorch",

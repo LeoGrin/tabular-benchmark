@@ -1,6 +1,12 @@
 from configs.model_configs.skorch_config import skorch_config, skorch_config_default
 
 config_random  = {
+    "model__batch_size": {
+        "value": "auto"
+    },
+    "model__es_patience": {
+        "value": 16
+    },
     "model__lr_scheduler": {
         "values": [False]
     },
@@ -23,8 +29,8 @@ config_random  = {
     "model__optimizer__weight_decay": {
         #{0, LogUniform[1e-6, 1e-3]} #TODO: implement 0
         "distribution": "log_uniform_values",
-        "min": 1e-8, #TODO: changed from 1e-6 to mimic 0 choice
-        "max": 1e-3
+        "min": 1e-9, #TODO: changed from 1e-6 to mimic 0 choice
+        "max": 1e-4 #https://github.com/yandex-research/tabular-dl-tabr/blob/d628ec7e1c0a66011473021034e7dd4a77740112/exp/tabr/why/classif-cat-medium-0-compass/0-tuning/report.json
 
     },
     #encoder_n_blocks
@@ -44,7 +50,8 @@ config_random  = {
     },
     #dropout1
     "model__module__dropout1": {
-        "value": "dropout0", #TODO: not sure about this
+        #"value": "dropout0", #TODO: not sure about this
+        "value": 0.0 #https://github.com/yandex-research/tabular-dl-tabr/blob/d628ec7e1c0a66011473021034e7dd4a77740112/exp/tabr/why/classif-cat-medium-0-compass/0-tuning/report.json
     },
     #context_dropout
     #I think this correspond to attention dropout in the paper
@@ -76,6 +83,12 @@ config_random  = {
 }
 #Defaults for TabR-S
 config_default = {
+    "model__batch_size": {
+        "value": "auto"
+    },
+    "model__es_patience": {
+        "value": 16
+    },
     "model__lr_scheduler": {
         "values": [False]
     },
@@ -106,7 +119,8 @@ config_default = {
     },
     #dropout1
     "model__module__dropout1": {
-        "value": "dropout0", #TODO: not sure about this
+        #"value": "dropout0", #TODO: not sure about this
+        "value": 0.0 #
     },
     #context_dropout
     #I think this correspond to attention dropout in the paper

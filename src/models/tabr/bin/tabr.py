@@ -111,6 +111,21 @@ class InputShapeSetterTabR(skorch.callbacks.Callback):
         X_train = X_train.to(net.device)
         y_train = y_train.to(net.device)
         print(f"Computed {len(np.unique(X_train_hashes))} unique hashes for X_train of shape {X_train.shape}")
+        # compute batch size if "auto"
+        if self.batch_size == "auto":
+            train_size = X_train.shape[0]
+            if 7000 <= train_size <= 10_000:
+                self.batch_size = 256
+            elif 4000 <= train_size < 7000:
+                self.batch_size = 128
+            elif 2500 <= train_size < 4000:
+                self.batch_size = 64
+            elif train_size < 2500:
+                self.batch_size = 32
+            else:
+                raise ValueError(f"train_size {train_size} is too large") #TODO
+        print("batch_size", self.batch_size)
+
         net.set_params(module__n_num_features=d_numerical,
             module__n_bin_features=bin_indicator.sum(),
             module__cat_cardinalities=categories, #FIXME #lib.get_categories(X_cat),
@@ -122,6 +137,7 @@ class InputShapeSetterTabR(skorch.callbacks.Callback):
             module__y_train=y_train,
             module__X_train_hashes=X_train_hashes,
             module__is_train=True,
+            batch_size=self.batch_size,
         )
         print("Numerical features: {}".format(d_numerical))
         print("Categories {}".format(categories))
