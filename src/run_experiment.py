@@ -231,31 +231,31 @@ if __name__ == """__main__""":
     #  'transformed_target': False, 'train_prop': 0.7, 'val_test_prop': 0.3, 'max_val_samples': 50000,
     #  'max_test_samples': 50000}
 
-    config = {"model_name": "tabr",
-              "regression": False,
-             # "model__verbose": 100,
-              "data__regression": False,
-              "data__categorical": True,
-              "data__method_name": "openml_no_transform",
-              "data__keyword":  "361111",#"361072",
-              #"transform__0__method_name": "no_transform",
-              "n_iter": 1,
-              "max_train_samples": 10000
-                }
-    #update config with default values
-    from configs.model_configs.tabr_config import config_classif_default as config_model
-    # transform "value": param to param
-    for key in config_model.keys():
-        if "value" in config_model[key].keys():
-            config[key] = config_model[key]["value"]
-        if "values" in config_model[key].keys():
-            assert len(config_model[key]["values"]) == 1
-            config[key] = config_model[key]["values"][0]
-    print(config)
-    config["use_gpu"] = False
-    config["model__device"] = "cpu"
-    config["model__max_epochs"] = 1
-    config["model__batch_size"] = 5096
+    # config = {"model_name": "tabr_regressor",
+    #           "regression": True,
+    #          # "model__verbose": 100,
+    #           "data__regression": True,
+    #           "data__categorical": True,
+    #           "data__method_name": "openml_no_transform",
+    #           "data__keyword":  "361097",#"361072",
+    #           #"transform__0__method_name": "no_transform",
+    #           "n_iter": 1,
+    #           "max_train_samples": 10000
+    #             }
+    # #update config with default values
+    # from configs.model_configs.tabr_config import config_regression_default as config_model
+    # # transform "value": param to param
+    # for key in config_model.keys():
+    #     if "value" in config_model[key].keys():
+    #         config[key] = config_model[key]["value"]
+    #     if "values" in config_model[key].keys():
+    #         assert len(config_model[key]["values"]) == 1
+    #         config[key] = config_model[key]["values"][0]
+    # print(config)
+    # config["use_gpu"] = False
+    # config["model__device"] = "cpu"
+    # config["model__max_epochs"] = 1
+    # config["model__batch_size"] = 5096
 
     # config = {
     #     "model_type": "skorch",
@@ -297,4 +297,4 @@ if __name__ == """__main__""":
     #           #"max_test_samples": None,
     #           }
 
-    train_model_on_config(config)
+    train_model_on_config()
