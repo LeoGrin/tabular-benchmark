@@ -9,7 +9,7 @@ CACHE_DIR = PROJECT_DIR / 'cache'
 DATA_DIR = PROJECT_DIR / 'data'
 EXP_DIR = PROJECT_DIR / 'exp'
 
-assert PROJECT_DIR.exists()
+#assert PROJECT_DIR.exists()
 CACHE_DIR.mkdir(exist_ok=True)
 
 
