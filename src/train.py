@@ -141,7 +141,8 @@ def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test,
     return train_score, val_score, test_score
 
 
-def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities, config, id):
+def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities, config, id, x_val=None, y_val=None):
+    #TODO: choice of val set for es
     """
     Train the model
     """
@@ -168,17 +169,20 @@ def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities
         model = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
 
     if config["model_type"] == "tab_survey":
-        x_val = x_train[int(len(x_train) * 0.8):]
-        y_val = y_train[int(len(y_train) * 0.8):]
-        x_train = x_train[:int(len(x_train) * 0.8)]
-        y_train = y_train[:int(len(y_train) * 0.8)]
+        if x_val is None:
+            x_val = x_train[int(len(x_train) * 0.8):]
+            y_val = y_train[int(len(y_train) * 0.8):]
+            x_train = x_train[:int(len(x_train) * 0.8)]
+            y_train = y_train[:int(len(y_train) * 0.8)]
         model.fit(x_train, y_train, x_val, y_val)
     elif config["model_name"].startswith("xgb") and "model__early_stopping_rounds" in config.keys() \
             and config["model__early_stopping_rounds"]:
-        x_val = x_train[int(len(x_train) * 0.8):]
-        y_val = y_train[int(len(y_train) * 0.8):]
-        x_train = x_train[:int(len(x_train) * 0.8)]
-        y_train = y_train[:int(len(y_train) * 0.8)]
+        if x_val is None:
+            x_val = x_train[int(len(x_train) * 0.8):]
+            y_val = y_train[int(len(y_train) * 0.8):]
+            x_train = x_train[:int(len(x_train) * 0.8)]
+            y_train = y_train[:int(len(y_train) * 0.8)]
+        
         model.fit(x_train, y_train, eval_set=[(x_val, y_val)])
     else:
         if config["model_name"].startswith("tabr"):

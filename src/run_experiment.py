@@ -88,6 +88,7 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
                 if x_train_arg is None:
                     x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, rng)
                 else:
+                    #TODO: put this into its own generation function
                     x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = x_train_arg, x_val_arg, x_test_arg, y_train_arg, y_val_arg, y_test_arg, categorical_indicator_arg, cat_cardinalities_arg
                 data_generation_time = time.time() - t
                 print("Data generation time:", data_generation_time)
@@ -106,7 +107,11 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
                     np.float32)
 
                 start_time = time.time()
-                model = train_model(i, x_train, y_train, categorical_indicator, cat_cardinalities, config, model_id)
+                if config["es_on_val"]:
+                    #TODO skorch
+                    model = train_model(i, x_train, y_train, categorical_indicator, cat_cardinalities, config, model_id, x_val=x_val, y_val=y_val)
+                else:
+                    model = train_model(i, x_train, y_train, categorical_indicator, cat_cardinalities, config, model_id)
                 if config["regression"]:
                     try:
                         r2_train, r2_val, r2_test = evaluate_model(model, x_train, y_train, x_val, y_val, x_test,
