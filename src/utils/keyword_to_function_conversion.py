@@ -7,6 +7,7 @@ convert_keyword_to_function = {
     "uniform_data": generate_uniform_data,
     "periodic_triangle": periodic_triangle,
     "openml_no_transform": import_openml_data_no_transform,
+    "openml_no_transform_dataset": import_openml_data_no_transform_dataset,
     "gaussienize": gaussienize,
     "select_features_rf": select_features_rf,
     "remove_features_rf": remove_features_rf,
