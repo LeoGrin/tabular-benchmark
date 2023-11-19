@@ -10,7 +10,7 @@ import platform
 import time
 import torch
 
-#os.environ["WANDB_MODE"] = "offline"
+os.environ["WANDB_MODE"] = "offline"
 
 def modify_config(config):
     if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
@@ -27,7 +27,8 @@ def modify_config(config):
     return config
 
 
-def train_model_on_config(config=None):
+def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_arg=None, y_train_arg=None,
+                         y_val_arg=None, y_test_arg=None, categorical_indicator_arg=None, cat_cardinalities_arg=None):
     print("GPU?")
     print(torch.cuda.device_count())
     print(torch.cuda.is_available())
@@ -56,18 +57,22 @@ def train_model_on_config(config=None):
             r2_val_scores = []
             r2_test_scores = []
             times = []
-            if config["n_iter"] == "auto":
-                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, np.random.RandomState(0))
-                if x_test.shape[0] > 6000:
-                    n_iter = 1
-                elif x_test.shape[0] > 3000:
-                    n_iter = 2
-                elif x_test.shape[0] > 1000:
-                    n_iter = 3
-                else:
-                    n_iter = 5
+            if x_train_arg is not None:
+                assert config["n_iter"] == 1
+                n_iter = 1
             else:
-                n_iter = config["n_iter"]
+                if config["n_iter"] == "auto":
+                    x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, np.random.RandomState(0))
+                    if x_test.shape[0] > 6000:
+                        n_iter = 1
+                    elif x_test.shape[0] > 3000:
+                        n_iter = 2
+                    elif x_test.shape[0] > 1000:
+                        n_iter = 3
+                    else:
+                        n_iter = 5
+                else:
+                    n_iter = config["n_iter"]
                 
             for i in range(n_iter):
                 if config["model_type"] == "skorch" or config["model_type"] == "tab_survey":
@@ -80,7 +85,10 @@ def train_model_on_config(config=None):
                 rng = np.random.RandomState(i)
                 print(rng.randn(1))
                 t = time.time()
-                x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, rng)
+                if x_train_arg is None:
+                    x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = generate_dataset(config, rng)
+                else:
+                    x_train, x_val, x_test, y_train, y_val, y_test, categorical_indicator, cat_cardinalities = x_train_arg, x_val_arg, x_test_arg, y_train_arg, y_val_arg, y_test_arg, categorical_indicator_arg, cat_cardinalities_arg
                 data_generation_time = time.time() - t
                 print("Data generation time:", data_generation_time)
                 # print(y_train)
@@ -237,32 +245,34 @@ if __name__ == """__main__""":
     #  'transformed_target': False, 'train_prop': 0.7, 'val_test_prop': 0.3, 'max_val_samples': 50000,
     #  'max_test_samples': 50000}
 
-    # config = {"model_name": "tabr_regressor",
-    #           "regression": True,
-    #          # "model__verbose": 100,
-    #           "data__regression": True,
-    #           "data__categorical": False,
-    #           "data__method_name": "openml_no_transform",
-    #           "data__keyword":  "361293",#"361072",
-    #           #"transform__0__method_name": "no_transform",
-    #           "n_iter": 1,
-    #           "max_train_samples": 128,
-    #             }
-    # #update config with default values
-    # from configs.model_configs.tabr_config import config_regression_default as config_model
-    # # transform "value": param to param
-    # for key in config_model.keys():
-    #     if "value" in config_model[key].keys():
-    #         config[key] = config_model[key]["value"]
-    #     if "values" in config_model[key].keys():
-    #         assert len(config_model[key]["values"]) == 1
-    #         config[key] = config_model[key]["values"][0]
-    # print(config)
-    # config["use_gpu"] = False
-    # config["model__device"] = "cpu"
-    # config["model__max_epochs"] = 1
-    # config["model__batch_size"] = "auto"
-    # config["model__verbose"] = 100
+    config = {"model_name": "tabr",
+              "regression": True,
+             # "model__verbose": 100,
+              "data__regression": True,
+              "data__categorical": True,
+              "data__method_name": "openml_no_transform",
+              "data__keyword":  "361098",#"361072",
+              #"transform__0__method_name": "no_transform",
+              "n_iter": "auto",
+              "max_train_samples": 100_000,
+                }
+    #update config with default values
+    from configs.model_configs.tabr_config import config_regression_default as config_model
+    # transform "value": param to param
+    for key in config_model.keys():
+        if "value" in config_model[key].keys():
+            config[key] = config_model[key]["value"]
+        if "values" in config_model[key].keys():
+            assert len(config_model[key]["values"]) == 1
+            config[key] = config_model[key]["values"][0]
+    print(config)
+    config["use_gpu"] = False
+    config["model__device"] = "cpu"
+    #config["model__max_epochs"] = 2000
+    #config["model__es_patience"] = 50
+    #config["model__batch_size"] = "auto"
+    config["model__verbose"] = 100
+    config["transformed_target"] = False
 
     # config = {
     #     "model_type": "skorch",
@@ -304,4 +314,4 @@ if __name__ == """__main__""":
     #           #"max_test_samples": None,
     #           }
 
-    train_model_on_config()
+    train_model_on_config(config)
