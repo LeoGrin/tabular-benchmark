@@ -10,3 +10,6 @@
 [submodule "src/tabular-dl-tabr"]
 	path = src/tabular-dl-tabr
 	url = https://github.com/yandex-research/tabular-dl-tabr.git
+[submodule "src/models/tab_bench_dev"]
+	path = src/models/tab_bench_dev
+	url = git@github.com:dholzmueller/tab_bench_dev.git
