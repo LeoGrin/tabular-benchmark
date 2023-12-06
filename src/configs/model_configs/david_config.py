@@ -12,6 +12,9 @@ config_default = {
     "model__device": {
         "value": "cuda:0" #FIXME
     },
+    "transformed_target": {
+        "value": True,
+    }
 }
 
 config_regression = {#**skorch_config,
