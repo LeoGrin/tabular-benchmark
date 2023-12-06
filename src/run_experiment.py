@@ -10,7 +10,7 @@ import platform
 import time
 import torch
 
-os.environ["WANDB_MODE"] = "offline"
+#os.environ["WANDB_MODE"] = "offline"
 
 def modify_config(config):
     if config["model_name"] == "ft_transformer" or config["model_name"] == "ft_transformer_regressor":
@@ -206,7 +206,7 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
                            "mean_time": end_time - start_time,
                            "processor": processor}, commit=False)
             # check if model has attribute batch_size
-            if config["transformed_target"]:
+            if config["transformed_target"] and config["regression"]:
                 if "batch_size" in model.regressor_.get_params().keys():
                     wandb.log({"batch_size_used": model.regressor_.get_params()["batch_size"]}, commit=False)
             else:
