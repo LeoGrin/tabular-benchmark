@@ -143,6 +143,8 @@ if __name__ == "__main__":
                     datasets = [int(dataset) for dataset in args.datasets]
                     exclude = [int(dataset) for dataset in args.exclude]
                     task_ids = openml.study.get_suite(suite_id).tasks
+                    print("task_ids", task_ids)
+                    print("datasets", datasets)
                     if len(args.datasets) == 0:
                         datasets_to_use = [id for id in task_ids if id not in exclude]
                     else:

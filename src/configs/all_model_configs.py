@@ -7,6 +7,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_tabr_skorch
 from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
+from tab_models.sklearn_repo.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor
 
 
 
@@ -150,4 +151,16 @@ total_config[keyword] = {
 model_keyword_dic[config_regression["model_name"]["value"]] = create_tabr_regressor_skorch
 model_keyword_dic[config_classif["model_name"]["value"]] = create_tabr_skorch
 
+# same for david
+from configs.model_configs.david_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDSRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDSClassifier
 

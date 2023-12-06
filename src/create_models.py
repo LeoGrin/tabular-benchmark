@@ -19,7 +19,7 @@ def create_model(config, categorical_indicator, cat_cardinalities=None, num_feat
         model_config["categorical_indicator"] = categorical_indicator
         model_config["categories"] = cat_cardinalities
         return model_function(**model_config, id=id)
-    elif config["model_type"] == "sklearn":
+    elif config["model_type"] == "sklearn" or config["model_type"] == "david":
         if config["model_name"].startswith("hgbt"):
             # Use native support for categorical variables
             model_config["categorical_features"] = categorical_indicator

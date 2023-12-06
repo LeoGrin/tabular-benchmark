@@ -127,7 +127,7 @@ def evaluate_model(fitted_model, x_train, y_train, x_val, y_val, x_test, y_test,
     Evaluate the model
     """
 
-    if config["model_type"] == "sklearn":
+    if config["model_type"] == "sklearn" or config["model_type"] == "david":
         train_score, val_score, test_score = sklearn_evaluation(fitted_model, x_train, x_val, x_test, y_train, y_val,
                                                                 y_test, config, return_r2=return_r2)
     elif config["model_type"] == "skorch":
@@ -154,6 +154,14 @@ def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities
     elif config["model_type"] == "tab_survey":
         model_raw = create_model(config, categorical_indicator, num_features=x_train.shape[1], id=id,
                                  cat_dims=list((x_train[:, categorical_indicator].max(0) + 1).astype(int)))
+    elif config["model_type"] == "david":
+        #TODO check how to pass categories and validation set
+        #  val_idxs : np.ndarray, shape (n_val_samples,)
+        #     Indices of the validation data set within (X, y).
+        # cat_features : array-like, shape (n_features,)
+        #     Boolean array containing True for the features that should be interpreted as categorical.
+        #     If set to None, columns of data type string/object/category will be interpreted as categorical.
+        model_raw = create_model(config, categorical_indicator=None) # categorical_indicator is set in fit method
 
     if config["regression"] and config["transformed_target"]:
         model = TransformedTargetRegressor(model_raw, transformer=QuantileTransformer(output_distribution="normal"))
@@ -184,11 +192,13 @@ def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities
             y_train = y_train[:int(len(y_train) * 0.8)]
         
         model.fit(x_train, y_train, eval_set=[(x_val, y_val)])
+    elif config["model_name"].startswith("tabr"):
+        #TODO: handle this elsewhere?
+        model.fit({"X": x_train, "y": y_train}, y_train)
+    elif config["model_type"] == "david":
+        val_idxs = np.arange(int(len(x_train) * 0.8), len(x_train))
+        model.fit(x_train, y_train, cat_features=categorical_indicator, val_idxs=val_idxs)
     else:
-        if config["model_name"].startswith("tabr"):
-            #TODO: handle this elsewhere?
-            model.fit({"X": x_train, "y": y_train}, y_train)
-        else:
-            model.fit(x_train, y_train)
+        model.fit(x_train, y_train)
 
     return model

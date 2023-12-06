@@ -78,7 +78,7 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
                 if config["model_type"] == "skorch" or config["model_type"] == "tab_survey":
                     model_id = hash(
                         ".".join(list(config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
-                elif config["model_type"] == "sklearn":
+                else:#elif config["model_type"] == "sklearn":
                     model_id = 0 # not used
                 # if config["log_training"]: #FIXME
                 #    config["model__wandb_run"] = run
@@ -250,7 +250,7 @@ if __name__ == """__main__""":
     #  'transformed_target': False, 'train_prop': 0.7, 'val_test_prop': 0.3, 'max_val_samples': 50000,
     #  'max_test_samples': 50000}
 
-    config = {"model_name": "tabr",
+    config = {"model_name": "david",
               "regression": True,
              # "model__verbose": 100,
               "data__regression": True,
@@ -258,11 +258,12 @@ if __name__ == """__main__""":
               "data__method_name": "openml_no_transform",
               "data__keyword":  "361098",#"361072",
               #"transform__0__method_name": "no_transform",
+              "es_on_val": False,
               "n_iter": "auto",
-              "max_train_samples": 100_000,
+              "max_train_samples": 10_000,
                 }
     #update config with default values
-    from configs.model_configs.tabr_config import config_regression_default as config_model
+    from configs.model_configs.david_config import config_regression_default as config_model
     # transform "value": param to param
     for key in config_model.keys():
         if "value" in config_model[key].keys():
@@ -276,7 +277,7 @@ if __name__ == """__main__""":
     #config["model__max_epochs"] = 2000
     #config["model__es_patience"] = 50
     #config["model__batch_size"] = "auto"
-    config["model__verbose"] = 100
+    #config["model__verbose"] = 100
     config["transformed_target"] = False
 
     # config = {
