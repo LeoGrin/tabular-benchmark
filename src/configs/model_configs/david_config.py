@@ -8,7 +8,10 @@ config_default = {
     },
     "model_type": {
         "value": "david"
-    }
+    },
+    "model__device": {
+        "value": "cuda:0" #FIXME
+    },
 }
 
 config_regression = {#**skorch_config,
