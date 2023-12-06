@@ -7,7 +7,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_tabr_skorch
 from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
-from tab_models.sklearn_repo.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor
+from tab_models.sklearn.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor
 
 
 
