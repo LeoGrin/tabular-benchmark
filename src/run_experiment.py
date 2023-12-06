@@ -38,7 +38,8 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
     CONFIG_DEFAULT = {"train_prop": 0.70,
                       "val_test_prop": 0.3,
                       "max_val_samples": 50000,
-                      "max_test_samples": 50000}
+                      "max_test_samples": 50000,
+                      "es_on_val": False}
     # "model__use_checkpoints": True} #TODO
     # Initialize a new wandb run
     with wandb.init(config=config) as run:
