@@ -7,7 +7,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_tabr_skorch
 from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
-from tab_models.sklearn.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor
+from tab_models.sklearn.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor, MLPTDClassifier, MLPTDRegressor, CatBoostTDClassifier, CatBoostTDRegressor, LGBMTDClassifier, LGBMTDRegressor
 
 
 
@@ -164,3 +164,40 @@ total_config[keyword] = {
 model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDSRegressor
 model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDSClassifier
 
+
+from configs.model_configs.david_not_simple_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david_not_simple"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDClassifier
+
+from configs.model_configs.catboost_david_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david_catboost"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = CatBoostTDRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = CatBoostTDClassifier
+
+
+from configs.model_configs.lightgbm_david_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david_lightgbm"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = LGBMTDRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = LGBMTDClassifier
