@@ -14,7 +14,7 @@ config_default = {
     },
     "transformed_target": {
         "value": False,
-    }
+    },
 }
 
 config_regression = {#**skorch_config,
