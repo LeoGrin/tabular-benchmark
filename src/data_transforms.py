@@ -134,6 +134,14 @@ def cluster_1d(x, y, type="kmeans", rng=None, **kwargs):
 
     return x, y
 
+def normalize_y(x_train, x_val, x_test, y_train, y_val, y_test, rng=None):
+    # use standard scaler on y
+    scaler = StandardScaler()
+    y_train = scaler.fit_transform(y_train.reshape(-1, 1)).reshape(-1)
+    y_val = scaler.transform(y_val.reshape(-1, 1)).reshape(-1)
+    y_test = scaler.transform(y_test.reshape(-1, 1)).reshape(-1)
+    return x_train, x_val, x_test, y_train, y_val, y_test
+
 
 def remove_useless_features(x_train, x_val, x_test, y_train, y_val, y_test, max_rel_decrease=0.01, n_iter=3, rng=None):
     # TODO test
