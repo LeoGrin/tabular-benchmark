@@ -13,7 +13,7 @@ config_default = {
         "value": "cuda:0" #FIXME
     },
     "transformed_target": {
-        "value": True,
+        "value": False,
     }
 }
 
