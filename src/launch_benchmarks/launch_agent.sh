@@ -3,5 +3,5 @@
 #SBATCH --partition=parietal,normal
 #SBATCH --nodes=1
 #SBATCH --time=4000
-#SBATCH --exclude=margpu009
+#SBATCH --exclude=margpu009,marg003,marg004,marg005
 bash -l -c "conda activate test;wandb agent $wandb_id/$project/$sweep_id"
