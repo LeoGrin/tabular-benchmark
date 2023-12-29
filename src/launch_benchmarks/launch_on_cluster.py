@@ -5,12 +5,26 @@ import pandas as pd
 import wandb
 import argparse
 import time
+import subprocess
 import sys
 
 sys.path.append(".")
 from configs.wandb_config import wandb_id
 import time
 
+def get_gpu_usage():
+    # Define the command to be executed
+    username = "$USER"
+    command = 'squeue -O "username,gres:100" -u {} | awk -F: \'/gpu/ {{sum += $2}} END {{print sum}}\''.format(username)
+
+    # Run the command
+    result = subprocess.run(command, stdout=subprocess.PIPE, text=True, shell=True)
+
+    # Get the output and convert it to an integer
+    gpu_count_str = result.stdout.strip()
+    gpu_count = int(gpu_count_str) if gpu_count_str.isdigit() else 0
+
+    return gpu_count
 
 def download_sweep(sweep, output_filename, row, max_run_per_sweep=20000):
     MAX_RUNS_PER_SWEEP = max_run_per_sweep
@@ -71,6 +85,8 @@ parser.add_argument('--monitor', action='store_true')
 parser.add_argument('--oar', action='store_true')
 # Whether to use GPU
 parser.add_argument('--gpu', action='store_true')
+# Maximum number of gpu used by the user
+parser.add_argument('--max_gpus', type=int, default=10)
 # Whether to only launch the sweeps running on CPU
 parser.add_argument('--cpu_only', action='store_true')
 # Whether to only launch the sweeps running on GPU
@@ -105,6 +121,17 @@ for i, row in df.iterrows():
     use_gpu = args.gpu or row["use_gpu"]
     if use_gpu:
         print("Using GPU")
+        # check that we are not using more gpus than 
+        gpu_count = get_gpu_usage()
+        print("Total gpu usage", gpu_count)
+        while gpu_count + 1 > args.max_gpus:
+            print(f"Using currently {gpu_count} gpus")
+            print(f"Max gpu usage: {args.max_gpus}")
+            print("Waiting")
+            time.sleep(60)
+            gpu_count = get_gpu_usage()
+
+
     if args.cpu_only and use_gpu:
         print("Skipping sweep as it's GPU and we only want CPU")
         continue
