@@ -122,6 +122,8 @@ for i, row in df.iterrows():
     if use_gpu:
         print("Using GPU")
         # check that we are not using more gpus than 
+        # wait for the job to be launched
+        time.sleep(10)
         gpu_count = get_gpu_usage()
         print("Total gpu usage", gpu_count)
         while gpu_count + 1 > args.max_gpus:
