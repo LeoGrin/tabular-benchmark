@@ -36,6 +36,9 @@ skorch_config = {
     "transformed_target": {
         "values": [False, True]
     },
+    "transformed_target_type": {
+        "value": "standard"
+    },
     "use_gpu": {
         "value": True
     }
@@ -44,3 +47,4 @@ skorch_config = {
 skorch_config_default = skorch_config.copy()
 skorch_config_default["model__batch_size"] = {"value": 512}
 skorch_config_default["transformed_target"] = {"value": True}
+skorch_config_default["transformed_target_type"] = {"value": "standard"}

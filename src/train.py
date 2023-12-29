@@ -2,7 +2,7 @@ import numpy as np
 from create_models import create_model
 import os
 from sklearn.compose import TransformedTargetRegressor
-from sklearn.preprocessing import QuantileTransformer, OneHotEncoder
+from sklearn.preprocessing import QuantileTransformer, OneHotEncoder, StandardScaler
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -164,7 +164,17 @@ def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities
         model_raw = create_model(config, categorical_indicator=None) # categorical_indicator is set in fit method
 
     if config["regression"] and config["transformed_target"]:
-        model = TransformedTargetRegressor(model_raw, transformer=QuantileTransformer(output_distribution="normal"))
+        if "transformed_target_type" not in config.keys():
+            config["transformed_target_type"] = "quantile_normal"
+        if config["transformed_target_type"] == "quantile_normal":
+            model = TransformedTargetRegressor(model_raw, transformer=QuantileTransformer(output_distribution="normal"))
+        elif config["transformed_target_type"] == "quantile_uniform":
+            model = TransformedTargetRegressor(model_raw, transformer=QuantileTransformer(output_distribution="uniform"))
+        elif config["transformed_target_type"] == "standard":
+            model = TransformedTargetRegressor(model_raw, transformer=StandardScaler())
+        else:
+            raise ValueError("transformed_target_type not recognized")
+
     else:
         model = model_raw
 
@@ -196,6 +206,7 @@ def train_model(iter, x_train, y_train, categorical_indicator, cat_cardinalities
         #TODO: handle this elsewhere?
         model.fit({"X": x_train, "y": y_train}, y_train)
     elif config["model_type"] == "david":
+        #TODO: when we already have x_val and y_val, we should use them
         val_idxs = np.arange(int(len(x_train) * 0.8), len(x_train))
         model.fit(x_train, y_train, cat_features=categorical_indicator, val_idxs=val_idxs)
     else:
