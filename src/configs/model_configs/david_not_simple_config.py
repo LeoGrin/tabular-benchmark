@@ -62,7 +62,7 @@ config_regression = {#**skorch_config,
                                     "model_name": {
                                         "value": "david_not_simple_regressor"
                                     },
-                                    "wd": {
+                                    "model__wd": {
                                         "values": [0.0, 1e-3]
                                     }
                                 }}
@@ -81,10 +81,10 @@ config_classif = {#**skorch_config,
                                  "model_name": {
                                      "value": "david_not_simple"
                                  },
-                                "wd": {
+                                "model__wd": {
                                     "values": [0.0, 1e-3, 1e-2]
                                  },
-                                 "ls_eps": {
+                                 "model__ls_eps": {
                                     "values": [0.0, 0.1]
                                  }
                              }}
