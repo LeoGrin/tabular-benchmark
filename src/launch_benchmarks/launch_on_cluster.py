@@ -127,6 +127,127 @@ else:
 
 df = pd.read_csv(args.filename)
 
+
+def monitor_func(saved_sweeps, temp_filename_list):
+    print("Checking...")
+    api = wandb.Api()
+    for i, row in df.iterrows():
+        print(row["sweep_id"])
+        if not (row["sweep_id"] in saved_sweeps):
+            try:
+                sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
+            # except if the sweep doesn't exist
+            except:
+                print(f"Sweep {row['sweep_id']} doesn't exist")
+                saved_sweeps.append(row["sweep_id"])
+                continue
+            sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
+            if os.path.exists(sweep_output_filename):
+                print("file already exists")
+                try:
+                    # Check that the file contains the same number of runs as the sweep
+                    saved_runs = pd.read_csv(sweep_output_filename)
+                    if len(saved_runs) == len(sweep.runs):
+                        print("file already contains all runs")
+                        saved_sweeps.append(row["sweep_id"])
+                        temp_filename_list.append(sweep_output_filename)
+                        continue
+                    else:
+                        print("file doesn't contain all runs")
+                except:
+                    print("Error when reading file")
+                    pass
+            runs = sweep.runs
+            n = len(runs)
+            print(f"{n} runs for sweep {row['sweep_id']}")
+            print(sweep.state)
+            # Run command line
+            # Already stopped sweeps or sweeps with default hyperparameters
+            if sweep.state == "FINISHED" or sweep.state == "CANCELED":
+                # WandB says that a sweep is finished when there are no more runs to launch
+                # but doesn't wait for the runs to finish
+                print('Checking that all the runs are finished')
+                # Check that all runs are finished
+                all_finished = True
+                try:
+                    for run in runs:
+                        if run.state == "running":
+                            print(f"Run {run.name} is still running")
+                            all_finished = False
+                            break
+                except:
+                    print("Error when checking runs")
+                    all_finished = False
+                if all_finished:
+                    print("All runs are finished (or crashed)")
+                    print("Saving results")
+                    download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
+                    temp_filename_list.append(sweep_output_filename)
+                    saved_sweeps.append(row["sweep_id"])
+            if "n_run_per_dataset" in row.keys():
+                n_run_per_dataset = row["n_run_per_dataset"]
+            else:
+                n_run_per_dataset = 1
+            print(f"we want n_run_per_dataset = {n_run_per_dataset}")
+            if not ("default" in row[
+                "name"]) and not args.default and sweep.state == "RUNNING" and n > args.max_runs * row[
+                "n_datasets"] * n_run_per_dataset:
+                print("Sweep seems to be done, checking that there are enough runs for each dataset")
+                # Check that there are enough runs for each dataset
+                n_finished_runs_per_dataset = {}
+                try:
+                    for run in runs:
+                        if run.state == "finished":
+                            # Check that there is a mean_test_score value logged
+                            if "mean_test_score" in run.summary and not pd.isnull(run.summary["mean_test_score"]):
+                                if "data__keyword" in run.config.keys():
+                                    dataset = run.config["data__keyword"]
+                                    if dataset in n_finished_runs_per_dataset:
+                                        n_finished_runs_per_dataset[dataset] += 1
+                                    else:
+                                        n_finished_runs_per_dataset[dataset] = 1
+                except:
+                    print("Error when checking runs")
+                    continue
+                print(n_finished_runs_per_dataset)
+                if np.all([n_finished_runs_per_dataset[dataset] >= args.max_runs * n_run_per_dataset for dataset in
+                            n_finished_runs_per_dataset]):
+                    if len(n_finished_runs_per_dataset) != row["n_datasets"]:
+                        print("WARNING: some datasets are missing")
+                        print(f"Expected {row['n_datasets']} datasets, got {len(n_finished_runs_per_dataset)}")
+                        print("Stopping anyway")
+                    print("Stopping sweep")
+                    os.system("wandb sweep --stop {}/{}/{}".format(wandb_id, row['project'], row['sweep_id']))
+                    # Download the results
+                    print("Downloading results")
+                    download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
+                    temp_filename_list.append(sweep_output_filename)
+                    saved_sweeps.append(row["sweep_id"])
+                else:
+                    print("Not enough runs for each dataset")
+    return saved_sweeps, temp_filename_list
+
+def clean_and_save(temp_filename_list):
+    print("All sweeps are finished !")
+    # Concatenate the results
+    df = pd.concat([pd.read_csv(f) for f in temp_filename_list])
+    # Print number of runs without mean_test_score
+    print("Number of runs without mean_test_score (crashed): {}".format(len(df[df["mean_test_score"].isna()])))
+    # Print nan mean_test_score per model
+    print("Number of runs per model without mean_test_score (crashed):")
+    print(df[df["mean_test_score"].isna()].groupby("model_name").size())
+    df.to_csv(args.output_filename)
+    print("Results saved in {}".format(args.output_filename))
+    print("Cleaning temporary files...")
+    # Delete the temporary files
+    for f in temp_filename_list:
+        os.remove(f)
+
+
+
+temp_filename_list = []
+saved_sweeps = []
+
 # TODO YOU SHOULD ADAPT THIS COMMAND TO YOUR SITUATION
 print(f"Launching {len(df)} sweeps")
 for i, row in df.iterrows():
@@ -141,9 +262,13 @@ for i, row in df.iterrows():
         while gpu_count + 1 > args.max_gpus:
             print(f"Using currently {gpu_count} gpus")
             print(f"Max gpu usage: {args.max_gpus}")
+            if args.monitor:
+                print("Monitoring")
+                saved_sweeps, temp_filename_list = monitor_func(saved_sweeps, temp_filename_list)
             print("Waiting")
             time.sleep(60)
             gpu_count = get_gpu_usage()
+
 
 
     if args.cpu_only and use_gpu:
@@ -193,127 +318,14 @@ for i, row in df.iterrows():
         )
 
 if args.monitor:
-
-    saved_sweeps = []
     print("Launching monitoring")
-
-    temp_filename_list = []
-
     print("Waiting...")
     time.sleep(args.time)
     print("Starting monitoring...")
     while len(saved_sweeps) < len(df):
-        print("Checking...")
-        api = wandb.Api()
-        for i, row in df.iterrows():
-            print(row["sweep_id"])
-            if not (row["sweep_id"] in saved_sweeps):
-                try:
-                    sweep = api.sweep(f"{wandb_id}/{row['project']}/{row['sweep_id']}")
-                # except if the sweep doesn't exist
-                except:
-                    print(f"Sweep {row['sweep_id']} doesn't exist")
-                    saved_sweeps.append(row["sweep_id"])
-                    continue
-                sweep_output_filename = args.output_filename.replace(".csv", "_{}.csv".format(row["sweep_id"]))
-                if os.path.exists(sweep_output_filename):
-                    print("file already exists")
-                    try:
-                        # Check that the file contains the same number of runs as the sweep
-                        saved_runs = pd.read_csv(sweep_output_filename)
-                        if len(saved_runs) == len(sweep.runs):
-                            print("file already contains all runs")
-                            saved_sweeps.append(row["sweep_id"])
-                            temp_filename_list.append(sweep_output_filename)
-                            continue
-                        else:
-                            print("file doesn't contain all runs")
-                    except:
-                        print("Error when reading file")
-                        pass
-                runs = sweep.runs
-                n = len(runs)
-                print(f"{n} runs for sweep {row['sweep_id']}")
-                print(sweep.state)
-                # Run command line
-                # Already stopped sweeps or sweeps with default hyperparameters
-                if sweep.state == "FINISHED" or sweep.state == "CANCELED":
-                    # WandB says that a sweep is finished when there are no more runs to launch
-                    # but doesn't wait for the runs to finish
-                    print('Checking that all the runs are finished')
-                    # Check that all runs are finished
-                    all_finished = True
-                    try:
-                        for run in runs:
-                            if run.state == "running":
-                                print(f"Run {run.name} is still running")
-                                all_finished = False
-                                break
-                    except:
-                        print("Error when checking runs")
-                        all_finished = False
-                    if all_finished:
-                        print("All runs are finished (or crashed)")
-                        print("Saving results")
-                        download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
-                        temp_filename_list.append(sweep_output_filename)
-                        saved_sweeps.append(row["sweep_id"])
-                if "n_run_per_dataset" in row.keys():
-                    n_run_per_dataset = row["n_run_per_dataset"]
-                else:
-                    n_run_per_dataset = 1
-                print(f"we want n_run_per_dataset = {n_run_per_dataset}")
-                if not ("default" in row[
-                    "name"]) and not args.default and sweep.state == "RUNNING" and n > args.max_runs * row[
-                    "n_datasets"] * n_run_per_dataset:
-                    print("Sweep seems to be done, checking that there are enough runs for each dataset")
-                    # Check that there are enough runs for each dataset
-                    n_finished_runs_per_dataset = {}
-                    try:
-                        for run in runs:
-                            if run.state == "finished":
-                                # Check that there is a mean_test_score value logged
-                                if "mean_test_score" in run.summary and not pd.isnull(run.summary["mean_test_score"]):
-                                    if "data__keyword" in run.config.keys():
-                                        dataset = run.config["data__keyword"]
-                                        if dataset in n_finished_runs_per_dataset:
-                                            n_finished_runs_per_dataset[dataset] += 1
-                                        else:
-                                            n_finished_runs_per_dataset[dataset] = 1
-                    except:
-                        print("Error when checking runs")
-                        continue
-                    print(n_finished_runs_per_dataset)
-                    if np.all([n_finished_runs_per_dataset[dataset] >= args.max_runs * n_run_per_dataset for dataset in
-                               n_finished_runs_per_dataset]):
-                        if len(n_finished_runs_per_dataset) != row["n_datasets"]:
-                            print("WARNING: some datasets are missing")
-                            print(f"Expected {row['n_datasets']} datasets, got {len(n_finished_runs_per_dataset)}")
-                            print("Stopping anyway")
-                        print("Stopping sweep")
-                        os.system("wandb sweep --stop {}/{}/{}".format(wandb_id, row['project'], row['sweep_id']))
-                        # Download the results
-                        print("Downloading results")
-                        download_sweep(sweep, sweep_output_filename, row, max_run_per_sweep=args.max_run_per_sweep)
-                        temp_filename_list.append(sweep_output_filename)
-                        saved_sweeps.append(row["sweep_id"])
-                    else:
-                        print("Not enough runs for each dataset")
+        saved_sweeps, temp_filename_list = monitor_func(saved_sweeps, temp_filename_list)
         print("Check done")
         print("Waiting...")
         time.sleep(args.time)
-
-    print("All sweeps are finished !")
-    # Concatenate the results
-    df = pd.concat([pd.read_csv(f) for f in temp_filename_list])
-    # Print number of runs without mean_test_score
-    print("Number of runs without mean_test_score (crashed): {}".format(len(df[df["mean_test_score"].isna()])))
-    # Print nan mean_test_score per model
-    print("Number of runs per model without mean_test_score (crashed):")
-    print(df[df["mean_test_score"].isna()].groupby("model_name").size())
-    df.to_csv(args.output_filename)
-    print("Results saved in {}".format(args.output_filename))
-    print("Cleaning temporary files...")
-    # Delete the temporary files
-    for f in temp_filename_list:
-        os.remove(f)
+    print("Done!")
+    clean_and_save(temp_filename_list)
