@@ -69,7 +69,7 @@ def download_sweep(sweep, output_filename, row, max_run_per_sweep=20000):
         dic_to_add["sweep_name"] = row["name"]
         dic_to_add["sweep_id"] = row["sweep_id"]
         dic_to_add["hp"] = "default" if "default" in row["name"] else "random"
-        runs_df = runs_df.append(dic_to_add, ignore_index=True)
+        runs_df = pd.concat([runs_df, pd.DataFrame(dic_to_add, index=[0])])
 
     runs_df.to_csv(output_filename)
 
