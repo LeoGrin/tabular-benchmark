@@ -1,3 +1,4 @@
+
 config_random  = {
 }
 
@@ -21,7 +22,7 @@ config_regression = {#**skorch_config,
                          **config_random ,
                                 **{
                                     "model_name": {
-                                        "value": "david_regressor"
+                                        "value": "resnet_david_regressor"
                                     },
                                 }}
 
@@ -29,7 +30,7 @@ config_regression_default = {#**skorch_config_default,
                                  **config_default,
                                 **{
                                     "model_name": {
-                                        "value": "david_regressor"
+                                        "value": "resnet_david_regressor"
                                     },
                                 }}
 
@@ -37,7 +38,7 @@ config_classif = {#**skorch_config,
                       **config_random ,
                              **{
                                  "model_name": {
-                                     "value": "david"
+                                     "value": "resnet_david"
                                  },
                              }}
 
@@ -45,6 +46,6 @@ config_classif_default = {#**skorch_config_default,
                               **config_default,
                              **{
                                  "model_name": {
-                                     "value": "david"
+                                     "value": "resnet_david"
                                  },
                              }}
