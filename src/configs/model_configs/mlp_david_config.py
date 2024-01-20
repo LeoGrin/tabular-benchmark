@@ -16,6 +16,15 @@ config_default = {
     "transformed_target": {
         "value": False,
     },
+    "transform__0__method_name": {
+        "value": "gaussienize"
+    },
+    "transform__0__type": {
+        "value": "quantile",
+    },
+    "transform__0__apply_on": {
+        "value": "numerical",
+    },
 }
 
 config_regression = {#**skorch_config,
