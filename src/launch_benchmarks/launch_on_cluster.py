@@ -266,7 +266,7 @@ for i, row in df.iterrows():
                 print("Monitoring")
                 saved_sweeps, temp_filename_list = monitor_func(saved_sweeps, temp_filename_list)
             print("Waiting")
-            time.sleep(60)
+            time.sleep(20)
             gpu_count = get_gpu_usage()
 
 
