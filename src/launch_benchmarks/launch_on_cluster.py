@@ -69,7 +69,8 @@ def download_sweep(sweep, output_filename, row, max_run_per_sweep=20000):
         dic_to_add["sweep_name"] = row["name"]
         dic_to_add["sweep_id"] = row["sweep_id"]
         dic_to_add["hp"] = "default" if "default" in row["name"] else "random"
-        runs_df = pd.concat([runs_df, pd.DataFrame(dic_to_add, index=[0])], ignore_index=True)
+        to_add = pd.DataFrame([dic_to_add])
+        runs_df = pd.concat([runs_df, to_add], ignore_index=True)
 
     runs_df.to_csv(output_filename)
 
@@ -248,7 +249,6 @@ def clean_and_save(temp_filename_list):
 temp_filename_list = []
 saved_sweeps = []
 
-# TODO YOU SHOULD ADAPT THIS COMMAND TO YOUR SITUATION
 print(f"Launching {len(df)} sweeps")
 for i, row in df.iterrows():
     use_gpu = args.gpu or row["use_gpu"]
@@ -285,6 +285,7 @@ for i, row in df.iterrows():
     except:
         # If the sweep doesn't exist, we launch it
         pass
+    # TODO YOU SHOULD ADAPT THIS COMMAND TO YOUR SITUATION
     if use_gpu:
         OAR_COMMAND = """oarsub "module load miniconda3;source activate toy_tabular;wandb agent {}/{}/{}"  -l gpu=1,walltime=23:00:30 -p "not cluster='graphite' AND not cluster='grimani' AND not cluster='gruss'" -q {}"""
         # TODO modify launch_agent_gpu.sh

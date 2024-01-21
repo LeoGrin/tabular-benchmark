@@ -8,8 +8,8 @@ from models.skorch_models import create_resnet_skorch, create_ft_transformer_sko
 from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch, create_excelformer_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
 from tab_models.sklearn.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor, MLPTDClassifier, MLPTDRegressor,\
-          CatBoostTDClassifier, CatBoostTDRegressor, LGBMTDClassifier, LGBMTDRegressor, ResnetTDClassifier, ResnetTDRegressor,\
-          RTDL_MLPTDClassifier, RTDL_MLPTDRegressor
+          CatBoostTDClassifier, CatBoostTDRegressor, LGBMTDClassifier, LGBMTDRegressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
+          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor
 
 
 
@@ -251,8 +251,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = ResnetTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = ResnetTDRegressor
+model_keyword_dic[config_regression["model_name"]["value"]] = Resnet_RTDL_D_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = Resnet_RTDL_D_Classifier
 
 from configs.model_configs.mlp_david_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "mlp_david"
@@ -263,5 +263,5 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = RTDL_MLPTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = RTDL_MLPTDClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = MLP_RTDL_D_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = MLP_RTDL_D_Classifier
