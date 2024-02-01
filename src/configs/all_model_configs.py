@@ -9,7 +9,7 @@ from models.skorch_models_regression import create_resnet_regressor_skorch, crea
 from models.TabSurvey.models.saint import SAINT
 from tab_models.sklearn.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor, MLPTDClassifier, MLPTDRegressor,\
           CatBoostTDClassifier, CatBoostTDRegressor, LGBMTDClassifier, LGBMTDRegressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
-          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor
+          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGBTDClassifier, XGBTDRegressor
 
 
 
@@ -228,6 +228,18 @@ total_config[keyword] = {
 
 model_keyword_dic[config_regression["model_name"]["value"]] = CatBoostTDRegressor
 model_keyword_dic[config_classif["model_name"]["value"]] = CatBoostTDClassifier
+
+from configs.model_configs.xgboost_david_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david_xgboost"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = XGBTDRegressor
+model_keyword_dic[config_classif["model_name"]["value"]] = XGBTDClassifier
 
 
 from configs.model_configs.lightgbm_david_config import config_classif, config_regression, config_classif_default, config_regression_default
