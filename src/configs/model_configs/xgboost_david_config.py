@@ -14,6 +14,9 @@ config_default = {
     },
     "transformed_target": {
         "value": False,
+    },
+    "model__n_threads": {
+        "value": 1,
     }
 }
 
