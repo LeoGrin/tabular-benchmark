@@ -51,7 +51,8 @@ def create_model(config, categorical_indicator, cat_cardinalities=None, num_feat
             model_config["categorical_features"] = categorical_indicator
         return model_function(**model_config)
     elif config["model_type"] == "david":
-        if config["model_name"].startswith("david"):
+        if not("lightgbm" in config["model_name"] or "xgboost" in config["model_name"] \
+                or "catboost" in config["model_name"]):
             model_config = convert_raw_mlp_params(model_config, is_classification = not "regressor" in config["model_name"])
         return model_function(**model_config)
     elif config["model_type"] == "tab_survey":
