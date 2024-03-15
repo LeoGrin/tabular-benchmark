@@ -79,7 +79,7 @@ config_classif = dict(config_random ,
                                   "value": "rtdl_mlp"
                               },
                               "model__early_stop_on": {
-                                  "valid_acc",
+                                  "value": "valid_acc",
                               }
                           })
 
@@ -90,6 +90,6 @@ config_classif_default = dict(config_default,
                                   "value": "rtdl_mlp"
                               },
                                 "model__early_stop_on": {
-                                  "valid_acc",
+                                  "value": "valid_acc",
                               }
                           })
