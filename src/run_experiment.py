@@ -76,6 +76,8 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
                     n_iter = config["n_iter"]
                 
             for i in range(n_iter):
+                np.random.seed(i)
+                torch.manual_seed(i)
                 if config["model_type"] == "skorch" or config["model_type"] == "tab_survey":
                     model_id = hash(
                         ".".join(list(config.keys())) + "." + str(iter))  # uniquely identify the run (useful for checkpointing)
@@ -251,7 +253,7 @@ if __name__ == """__main__""":
     #  'transformed_target': False, 'train_prop': 0.7, 'val_test_prop': 0.3, 'max_val_samples': 50000,
     #  'max_test_samples': 50000}
 
-    # config = {"model_name": "david",
+    # config = {"model_name": "david_catboost",
     #           "regression": True,
     #          # "model__verbose": 100,
     #           "data__regression": True,
@@ -264,7 +266,7 @@ if __name__ == """__main__""":
     #           "max_train_samples": 10_000,
     #             }
     # #update config with default values
-    # from configs.model_configs.david_config import config_regression_default as config_model
+    # from configs.model_configs.lightgbm_david_config import config_regression_default as config_model
     # # transform "value": param to param
     # for key in config_model.keys():
     #     if "value" in config_model[key].keys():
@@ -282,15 +284,31 @@ if __name__ == """__main__""":
     # config["transformed_target"] = False
 
     # config = {
-    #     "model_type": "skorch",
-    #     "model_name": "npt",
+    #     "model_type": "david",
+    #     "model_name": "david_catboost",
     #     "n_iter": 1,
-    #     "model__optimizer": "adamw",
-    #     "model__lr": 0.001,
-    #     "model__batch_size": 64,
-    #     "data__method_name": "real_data",
-    #     "data__keyword": "electricity",
-    #     "regression": False
+    #     "use_gpu": False,
+    #     "device": "cpu",
+    #     "model__verbosity": 0,
+    #     "model__n_threads": 1,
+    #     #"model__max_epochs": 10,
+    #     #"model__optimizer": "adamw",
+    #     #"model__lr": 0.001,
+    #     #"model__batch_size": 64,
+    #     #"data__method_name": "real_data",
+    #     #"data__keyword": "electricity",
+    #     "regression": True,
+    #     "data__method_name": "openml_no_transform",
+    #     "data__keyword":  "361081",#"361072",
+    #     "data__categorical": False,
+    #     "max_train_samples": 10_000,
+    #     "n_iter": "auto",
+    #     "es_on_val": False,
+    #     "transformed_target": False,
+    # #           #"transform__0__method_name": "no_transform",
+    # #           "es_on_val": False,
+    # #           "n_iter": "auto",
+    # #           "max_train_samples": 10_000,
     # }
 
     # config = {"model_type": "skorch",
@@ -298,7 +316,7 @@ if __name__ == """__main__""":
     #           "regression": False,
     #           "data__regression": False,
     #           "data__categorical": False,
-    #           "n_iter": 1,
+    #           "n_iter": 2,
     #           "max_train_samples": 1000,
     #           "model__device": "cpu",
     #           "model__optimizer": "adam",
@@ -315,8 +333,11 @@ if __name__ == """__main__""":
     #           "model__module__d_embedding": 64,
     #           "model__module__normalization": "batchnorm",
     #           "model__module__activation": "reglu",
-    #           "data__method_name": "real_data",
-    #           "data__keyword": "electricity",
+    #           "model__early_stop_on": "valid_acc",
+    #           "data__method_name": "openml_no_transform",
+    #           "data__keyword": "361062",
+    #           "transformed_target": False,
+    #           "verbose": 100,
     #           #"max_train_samples": None,
     #           #"max_test_samples": None,
     #           }

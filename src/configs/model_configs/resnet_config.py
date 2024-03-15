@@ -112,6 +112,9 @@ config_classif = dict(config_random ,
                                  "model_name": {
                                      "value": "rtdl_resnet"
                                  },
+                                "model__early_stop_on": {
+                                  "valid_acc",
+                              }
                              })
 
 config_classif_default = dict(config_default,
@@ -120,4 +123,7 @@ config_classif_default = dict(config_default,
                                  "model_name": {
                                      "value": "rtdl_resnet"
                                  },
+                                "model__early_stop_on": {
+                                  "valid_acc",
+                              }
                              })
