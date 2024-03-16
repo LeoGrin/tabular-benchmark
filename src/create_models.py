@@ -5,29 +5,7 @@ import numpy as np
 from tab_models.sklearn.default_params import DefaultParams
 from tab_models import utils
 
-# for david's model
-def convert_raw_mlp_params(params, is_classification):
-    special_param_names = ['num_emb_type', 'use_front_scale']
-    not_special_params = {key: value for key, value in params.items() if key not in special_param_names}
-    default_params = DefaultParams.MLP_TD_CLASS if is_classification else DefaultParams.MLP_TD_REG
-    config = utils.update_dict(default_params, not_special_params)
-    num_emb_type = params.get('num_emb_type', None)
-    if num_emb_type == 'none':
-        config['use_plr_embeddings'] = False
-    elif num_emb_type == 'pl-densenet':
-        pass  # this is already the default
-    elif num_emb_type == 'plr':
-        config['plr_act_name'] = 'relu'
-        config['plr_use_densenet'] = False
-    elif num_emb_type is None:
-        pass  # also use the default
-    else:
-        raise ValueError(f'Unknown num_emb_type "{num_emb_type}"')
-
-    if not config.get('use_front_scale', True):
-        config['first_layer_config'] = dict(block_str='w-b-a-d')
-
-    return config
+from tab_models.alg_interfaces.nn_interface import convert_raw_mlp_params
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):

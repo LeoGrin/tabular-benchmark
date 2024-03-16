@@ -1,26 +1,34 @@
 
 config_random  = {
     "model__num_emb_type": {
-        "values": ['none', 'pl-densenet', 'plr']
+        "values": ['none', 'pbld', 'pl', 'plr']
     },
-    "model__use_front_scale": {
+    "model__add_front_scale": {
         "values": [True, False],
         "probabilities": [0.6, 0.4]
     },
     'model__lr': {
         "distribution": "log_uniform_values",
         "min": 2e-2,
-        "max": 1.5e-1,
+        "max": 3e-1,
     },
     'model__p_drop': {
-            'values': [0.0, 0.15, 0.3, 0.45],
-            'probabilities': [0.2, 0.4, 0.2, 0.2]
+            'values': [0.0, 0.15, 0.3],
+            'probabilities': [0.3, 0.5, 0.2]
+    },
+    'model__wd': {
+        "values": [0.0, 2e-2]
+    },
+    "model__plr_sigma": {
+        "distribution": "log_uniform_values",
+        "min": 0.05,
+        "max": 0.5
     },
     'model__act': {
             'values': ['relu', 'selu', 'mish']
     },
     'model__hidden_sizes': {
-            'values': [[256] * 3, [64] * 3, [512]],
+            'values': [[256] * 3, [64] * 5, [512]],
             'probabilities': [0.6, 0.2, 0.2]
     },
     "use_gpu": {
@@ -62,9 +70,6 @@ config_regression = {#**skorch_config,
                                     "model_name": {
                                         "value": "david_not_simple_regressor"
                                     },
-                                    "model__wd": {
-                                        "values": [0.0, 1e-3]
-                                    }
                                 }}
 
 config_regression_default = {#**skorch_config_default,
@@ -81,11 +86,9 @@ config_classif = {#**skorch_config,
                                  "model_name": {
                                      "value": "david_not_simple"
                                  },
-                                "model__wd": {
-                                    "values": [0.0, 1e-3, 1e-2]
-                                 },
                                  "model__ls_eps": {
-                                    "values": [0.0, 0.1]
+                                    "values": [0.0, 0.1],
+                                    "probabilities": [0.3, 0.7]
                                  }
                              }}
 
