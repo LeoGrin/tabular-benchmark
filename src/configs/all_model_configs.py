@@ -7,9 +7,9 @@ from xgboost import XGBClassifier, XGBRegressor
 from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_tabr_skorch, create_excelformer_skorch
 from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch, create_excelformer_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
-from tab_models.sklearn.sklearn_interfaces import MLPTDSClassifier, MLPTDSRegressor, MLPTDClassifier, MLPTDRegressor,\
-          CatBoostTDClassifier, CatBoostTDRegressor, LGBMTDClassifier, LGBMTDRegressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
-          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGBTDClassifier, XGBTDRegressor
+from tab_models.sklearn.sklearn_interfaces import RealMLP_TD_S_Classifier, RealMLP_TD_S_Regressor, RealMLP_TD_Classifier, RealMLP_TD_Regressor,\
+          CatBoost_TD_Classifier, CatBoost_TD_Regressor, LGBM_TD_Classifier, LGBM_TD_Regressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
+          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGB_TD_Classifier, XGB_TD_Regressor
 
 
 
@@ -174,8 +174,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDSRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDSClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = RealMLP_TD_S_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = RealMLP_TD_S_Classifier
 
 
 from configs.model_configs.david_not_simple_config import config_classif, config_regression, config_classif_default, config_regression_default
@@ -187,8 +187,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = RealMLP_TD_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = RealMLP_TD_Classifier
 
 from configs.model_configs.david_config_normalized_y import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "david_normalized_y"
@@ -199,8 +199,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDSRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDSClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = RealMLP_TD_S_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = RealMLP_TD_S_Classifier
 
 
 from configs.model_configs.david_not_simple_config_normalized_y import config_classif, config_regression, config_classif_default, config_regression_default
@@ -212,8 +212,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = MLPTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = MLPTDClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = RealMLP_TD_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = RealMLP_TD_Classifier
 
 
 
@@ -226,8 +226,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = CatBoostTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = CatBoostTDClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = CatBoost_TD_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = CatBoost_TD_Classifier
 
 from configs.model_configs.xgboost_david_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "david_xgboost"
@@ -238,8 +238,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = XGBTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = XGBTDClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = XGB_TD_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = XGB_TD_Classifier
 
 
 from configs.model_configs.lightgbm_david_config import config_classif, config_regression, config_classif_default, config_regression_default
@@ -251,8 +251,8 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = LGBMTDRegressor
-model_keyword_dic[config_classif["model_name"]["value"]] = LGBMTDClassifier
+model_keyword_dic[config_regression["model_name"]["value"]] = LGBM_TD_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = LGBM_TD_Classifier
 
 from configs.model_configs.resnet_david_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "resnet_david"
