@@ -5,7 +5,7 @@ import numpy as np
 from tab_models.sklearn.default_params import DefaultParams
 from tab_models import utils
 
-from tab_models.alg_interfaces.nn_interface import convert_raw_mlp_params
+from tab_models.alg_interfaces.nn_interfaces import convert_raw_mlp_params
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
