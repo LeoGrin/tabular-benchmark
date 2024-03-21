@@ -2,10 +2,6 @@ import sys
 sys.path.append(".")
 from configs.all_model_configs import model_keyword_dic
 import numpy as np
-from tab_models.sklearn.default_params import DefaultParams
-from tab_models import utils
-
-from tab_models.alg_interfaces.nn_interfaces import convert_raw_mlp_params
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
@@ -29,9 +25,6 @@ def create_model(config, categorical_indicator, cat_cardinalities=None, num_feat
             model_config["categorical_features"] = categorical_indicator
         return model_function(**model_config)
     elif config["model_type"] == "david":
-        if not("lightgbm" in config["model_name"] or "xgboost" in config["model_name"] \
-                or "catboost" in config["model_name"]):
-            model_config = convert_raw_mlp_params(model_config, is_classification = not "regressor" in config["model_name"])
         return model_function(**model_config)
     elif config["model_type"] == "tab_survey":
         args_dic = {}
