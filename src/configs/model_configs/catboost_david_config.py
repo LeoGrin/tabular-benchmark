@@ -6,8 +6,8 @@ import numpy as np
 config_random = {
     "model__learning_rate": {
         'distribution': "log_uniform",
-        'min': np.exp(-5),
-        'max': np.exp(0),
+        'min': -5,
+        'max': 0,
     },
     "model__random_strength": {
         'distribution': "q_uniform",
@@ -22,9 +22,9 @@ config_random = {
         'q': 1
     },
     "model__l2_leaf_reg": {
-        'distribution': "log_uniform",
-        'min': np.exp(0),
-        'max': np.exp(np.log(10)),
+        'distribution': "log_uniform_values",
+        'min': 1,
+        'max': 10,
     },
     "model__bagging_temperature": {
         'distribution': "uniform",
