@@ -1,7 +1,65 @@
+import numpy as np
 
-config_random  = {
+# from Shwartz-Ziv and Armon, Tabular data: Deep learning is not all you need
+# same as NODE except higher upper bound for leaf estimation iterations
+# the parameter names in the space are for the alg interface, not directly for the GBDT interface!
+config_random = {
+    "model__learning_rate": {
+        'distribution': "log_uniform",
+        'min': np.exp(-5),
+        'max': np.exp(0),
+    },
+    "model__random_strength": {
+        'distribution': "q_uniform",
+        'min': 1,
+        'max': 20,
+        'q': 1
+    },
+    "model__one_hot_max_size": {
+        'distribution': "q_uniform",
+        'min': 0,
+        'max': 25,
+        'q': 1
+    },
+    "model__l2_leaf_reg": {
+        'distribution': "log_uniform",
+        'min': np.exp(0),
+        'max': np.exp(np.log(10)),
+    },
+    "model__bagging_temperature": {
+        'distribution': "uniform",
+        'min': 0,
+        'max': 1,
+    },
+    "model__leaf_estimation_iterations": {
+        'distribution': "q_uniform",
+        'min': 1,
+        'max': 20,
+        'q': 1
+    },
+    "model__n_estimators": {
+        "value": 2048
+    },
+    "model__max_depth": {
+        "value": 6
+    },
+     "use_gpu": {
+        "value": False
+    },
+    "model_type": {
+        "value": "david"
+    },
+    "model__device": {
+        "value": "cpu" #FIXME
+    },
+    "transformed_target": {
+        "value": False,
+    },
+    "model__n_threads": {
+        "value": 1,
+    }
 }
-#Defaults for TabR-S
+
 config_default = {
     "use_gpu": {
         "value": False
