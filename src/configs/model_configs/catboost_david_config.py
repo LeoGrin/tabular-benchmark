@@ -31,6 +31,9 @@ config_random = {
         'min': 0,
         'max': 1,
     },
+    "model__bootstrap_type": {
+        "value": "Bayesian",
+    },
     "model__leaf_estimation_iterations": {
         'distribution': "q_uniform",
         'min': 1,
