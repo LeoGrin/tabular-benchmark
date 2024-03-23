@@ -148,7 +148,7 @@ config_classif = dict(config_random ,
                                 "model__args__objective": {
                                     "value": "binary",
                                 },
-                                "model__early_stop_on": {
+                                "model__args__early_stop_on": {
                                   "value": "valid_acc",
                               },
                             })
@@ -158,7 +158,7 @@ config_classif_default = dict(config_default,
                                 "model__args__objective": {
                                     "value": "binary",
                                 },
-                                "model__early_stop_on": {
+                                "model__args__early_stop_on": {
                                   "value": "valid_acc",
                               },
                             })
