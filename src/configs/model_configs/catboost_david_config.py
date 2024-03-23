@@ -41,7 +41,7 @@ config_random = {
         'q': 1
     },
     "model__n_estimators": {
-        "value": 2048
+        "value": 1000
     },
     "model__max_depth": {
         "value": 6
