@@ -4,7 +4,7 @@ import numpy as np
 # same as NODE except higher upper bound for leaf estimation iterations
 # the parameter names in the space are for the alg interface, not directly for the GBDT interface!
 config_random = {
-    "model__learning_rate": {
+    "model__lr": {
         'distribution': "log_uniform",
         'min': -5,
         'max': 0,
