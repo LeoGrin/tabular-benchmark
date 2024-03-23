@@ -96,6 +96,10 @@ class SAINT(BaseModelTorch):
 
         loss_history = []
         val_loss_history = []
+        if self.args.objective in ["binary", "classification"] and self.args.early_stop_on == "valid_acc":
+            val_acc_history = []
+            max_val_acc = 0
+            max_val_acc_idx = 0
 
         for epoch in range(self.args.epochs):
             self.model.train()
@@ -165,23 +169,45 @@ class SAINT(BaseModelTorch):
 
                     val_loss += criterion(y_outs, y_gts)
                     val_dim += 1
+                    if self.args.objective in ["binary", "classification"] and self.args.early_stop_on == "valid_acc":
+                        n_correct = torch.sum(torch.argmax(y_outs, dim=1) == y_gts)
             val_loss /= val_dim
+            if self.args.objective in ["binary", "classification"] and self.args.early_stop_on == "valid_acc":
+                val_acc = n_correct / len(y_val)
+                val_acc_history.append(val_acc.item())
 
             val_loss_history.append(val_loss.item())
 
             print("Epoch", epoch, "loss", val_loss.item())
 
-            if val_loss < min_val_loss:
-                min_val_loss = val_loss
-                min_val_loss_idx = epoch
+            #TODO: simplify
 
-                # Save the currently best model
-                self.save_model(filename_extension="{}_best".format(self.model_id), directory="tmp")
+            if self.args.objective in ["binary", "classification"] and self.args.early_stop_on == "valid_acc":
+                if val_acc > max_val_acc:
+                    max_val_acc = val_acc
+                    max_val_acc_idx = epoch
 
-            if min_val_loss_idx + self.args.early_stopping_rounds < epoch:
-                print("Validation loss has not improved for %d steps!" % self.args.early_stopping_rounds)
-                print("Early stopping applies.")
-                break
+                    # Save the currently best model
+                    self.save_model(filename_extension="{}_best".format(self.model_id), directory="tmp")
+
+                if max_val_acc_idx + self.args.early_stopping_rounds < epoch:
+                    print("Validation loss has not improved for %d steps!" % self.args.early_stopping_rounds)
+                    print("Early stopping applies.")
+                    break
+                    
+
+            else:
+                if val_loss < min_val_loss:
+                    min_val_loss = val_loss
+                    min_val_loss_idx = epoch
+
+                    # Save the currently best model
+                    self.save_model(filename_extension="{}_best".format(self.model_id), directory="tmp")
+
+                if min_val_loss_idx + self.args.early_stopping_rounds < epoch:
+                    print("Validation loss has not improved for %d steps!" % self.args.early_stopping_rounds)
+                    print("Early stopping applies.")
+                    break
 
         self.load_model(filename_extension="{}_best".format(self.model_id), directory="tmp")
         return loss_history, val_loss_history
