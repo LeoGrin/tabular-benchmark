@@ -32,13 +32,16 @@ config_random = {
         'min': -16,
         'max': 5,
     },
+    #slightly different
     "model__lambda_l1": {
-        'distribution': "categorical",
-        'values': [0, {'distribution': "log_uniform", 'min': -16, 'max': 2}],
+        'distribution': "log_uniform", 
+        'min': -16, 
+        'max': 2,
     },
     "model__lambda_l2": {
-        'distribution': "categorical",
-        'values': [0, {'distribution': "log_uniform", 'min': -16, 'max': 2}],
+        'distribution': "log_uniform", 
+        'min': -16, 
+        'max': 2
     },
     "model__n_estimators": {
         "value": 1000
