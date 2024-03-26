@@ -316,6 +316,49 @@ def create_rtdl_mlp_skorch(id, wandb_run=None, use_checkpoints=True,
     return mlp_skorch
 
 
+
+
+class NeuralNetClassifierCustomOptim(NeuralNetClassifier):
+    def initialize_optimizer(self, triggered_directly=None):
+        """Initialize the model optimizer. If ``self.optimizer__lr``
+        is not set, use ``self.lr`` instead.
+
+        Parameters
+        ----------
+        triggered_directly
+          Deprecated, don't use it anymore.
+
+        """
+        # handle deprecated paramter
+        # if triggered_directly is not None:
+        #     warnings.warn(
+        #         "The 'triggered_directly' argument to 'initialize_optimizer' is "
+        #         "deprecated, please don't use it anymore.", DeprecationWarning)
+
+        named_parameters = list(self.get_all_learnable_params())
+        # print
+        no_wd_names = ['tokenizer', '.norm', '.bias']
+        for x in ['tokenizer', '.norm', '.bias']:
+            assert any(x in a for a in (b[0] for b in named_parameters)) #TODO
+
+        def needs_wd(name):
+            return all(x not in name for x in no_wd_names)
+
+        named_parameters_grouped = [
+            {'params': [v for k, v in named_parameters if needs_wd(k)]},
+            {
+                'params': [v for k, v in named_parameters if not needs_wd(k)],
+                'weight_decay': 0.0,
+            }]
+        
+        args, kwargs = self.get_params_for_optimizer(
+            'optimizer', named_parameters)
+
+        # pylint: disable=attribute-defined-outside-init
+        self.optimizer_ = self.optimizer(named_parameters_grouped, **kwargs)
+        return self
+
+
 def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True,
                                  categorical_indicator=None, **kwargs):
     if "lr_scheduler" not in kwargs:
@@ -366,7 +409,7 @@ def create_ft_transformer_skorch(id, wandb_run=None, use_checkpoints=True,
         categorical_indicator = torch.BoolTensor(categorical_indicator)
 
 
-    model_skorch = NeuralNetClassifier(
+    model_skorch = NeuralNetClassifierCustomOptim(
         Transformer,
         # Shuffle training data on each epoch
         criterion=torch.nn.CrossEntropyLoss,
