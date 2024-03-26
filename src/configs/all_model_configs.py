@@ -9,7 +9,7 @@ from models.skorch_models_regression import create_resnet_regressor_skorch, crea
 from models.TabSurvey.models.saint import SAINT
 from tab_models.sklearn.sklearn_interfaces import RealMLP_TD_S_Classifier, RealMLP_TD_S_Regressor, RealMLP_TD_Classifier, RealMLP_TD_Regressor,\
           CatBoost_TD_Classifier, CatBoost_TD_Regressor, LGBM_TD_Classifier, LGBM_TD_Regressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
-          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGB_TD_Classifier, XGB_TD_Regressor
+          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGB_TD_Classifier, XGB_TD_Regressor, TabR_S_D_Classifier, Tabr_S_D_Regressor
 
 
 
@@ -253,6 +253,20 @@ total_config[keyword] = {
 
 model_keyword_dic[config_regression["model_name"]["value"]] = LGBM_TD_Regressor
 model_keyword_dic[config_classif["model_name"]["value"]] = LGBM_TD_Classifier
+
+
+from configs.model_configs.david_tabrs_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david_tabrs"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = Tabr_S_D_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = TabR_S_D_Classifier
+
 
 from configs.model_configs.resnet_david_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "resnet_david"
