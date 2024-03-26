@@ -212,8 +212,11 @@ def train_model_on_config(config=None, x_train_arg=None, x_val_arg=None, x_test_
                 if "batch_size" in model.regressor_.get_params().keys():
                     wandb.log({"batch_size_used": model.regressor_.get_params()["batch_size"]}, commit=False)
             else:
-                if "batch_size" in model.get_params().keys():
-                    wandb.log({"batch_size_used": model.get_params()["batch_size"]}, commit=False)
+                try:
+                    if "batch_size" in model.get_params().keys():
+                        wandb.log({"batch_size_used": model.get_params()["batch_size"]}, commit=False)
+                except:
+                    pass
 
             wandb.log({"n_train": x_train.shape[0], "n_test": x_test.shape[0],
                        "n_features": x_train.shape[1],
@@ -282,34 +285,38 @@ if __name__ == """__main__""":
     # #config["model__batch_size"] = "auto"
     # #config["model__verbose"] = 100
     # config["transformed_target"] = False
-
-    # config = {
-    #     "model_type": "david",
-    #     "model_name": "david_catboost",
-    #     "n_iter": 1,
+    # from configs.model_configs.ft_transformer_config import config_classif_default
+    # config = {k: v["value"] for k,v in config_classif_default.items()}
+    # config.update({
+    #     "model_type": "skorch",
+    #     "model_name": "ft_transformer",
+    #     #"n_iter": 1,
     #     "use_gpu": False,
     #     "device": "cpu",
-    #     "model__verbosity": 0,
-    #     "model__n_threads": 1,
+    #     "model__device": "cpu",
+    #     #"model__verbosity": 1,
+    #     #"model__n_threads": 1,
     #     #"model__max_epochs": 10,
     #     #"model__optimizer": "adamw",
     #     #"model__lr": 0.001,
     #     #"model__batch_size": 64,
     #     #"data__method_name": "real_data",
     #     #"data__keyword": "electricity",
-    #     "regression": True,
+    #     "regression": False,
     #     "data__method_name": "openml_no_transform",
-    #     "data__keyword":  "361081",#"361072",
+    #     "data__keyword":  "361066",#"361072",
     #     "data__categorical": False,
     #     "max_train_samples": 10_000,
     #     "n_iter": "auto",
     #     "es_on_val": False,
     #     "transformed_target": False,
+    #     "use_gpu": False,
     # #           #"transform__0__method_name": "no_transform",
     # #           "es_on_val": False,
     # #           "n_iter": "auto",
     # #           "max_train_samples": 10_000,
-    # }
+    # })
+    # print(config)
 
     # config = {"model_type": "skorch",
     #           "model_name": "rtdl_resnet",
