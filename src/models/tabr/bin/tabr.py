@@ -311,7 +311,7 @@ class Model(nn.Module):
     #MODIF
     def remove_train_batch_from_candidate(self, train_batch):
         # having access to the batch indices is a pain in skorch, so we hack around it
-        # by remove rows with the same hash as the train batch
+        # by removing rows with the same hash as the train batch
         start_time = time.time()
         candidate_idx = np.arange(self.X_train.shape[0])
         candidates_hashes = self.X_train_hashes
