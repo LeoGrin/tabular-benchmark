@@ -168,14 +168,14 @@ plot_aggregated_results_time <- function(df, score="accuracy", quantile=0.1, tru
                              filter(!is.na(mean_test_score)) %>% 
                              group_by(model_name) %>% 
                              filter(cum_time_factor == min(cum_time_factor, na.rm=T))),
-                    bg.color='white', size = 6.5, bg.r=0.15,
+                    bg.color='white', size = 7.5, bg.r=0.15,
                     nudge_y = 0., nudge_x = 0.3, min.segment.length=100)+
     coord_cartesian(ylim=c(y_inf, y_sup)) + 
     #scale_x_log10(limits=c(1, Inf)) +
     scale_x_log10() +
     xlab("Random search time (seconds)") +
     ylab(glue("Normalized test {score} of best  \n model (on valid set) up to this iteration")) +
-    theme_minimal(base_size=22) +
+    theme_minimal(base_size=25) +
     theme(legend.position="none") +
     colScale
 }

@@ -7,7 +7,8 @@ gg_color_hue <- function(n) {
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
 myColors <- gg_color_hue(8)
-names(myColors) <- c("GradientBoostingTree", "RandomForest", "HistGradientBoostingTree", "XGBoost", "FT Transformer", "Resnet", "MLP", "SAINT")
+myColors <- c(myColors, "black")
+names(myColors) <- c("GradientBoostingTree", "RandomForest", "HistGradientBoostingTree", "XGBoost", "FT Transformer", "Resnet", "MLP", "SAINT", "TabR")
 colScale <- list(scale_colour_manual(name = "grp",values = myColors, limits=force),
                  scale_fill_manual(name = "grp",values = myColors, limits=force))
 
@@ -29,6 +30,8 @@ rename <- function(df) {
              model_name == "rtdl_mlp" ~ "MLP",
              model_name == "rtdl_mlp_regressor" ~ "MLP",
              model_name == "saint" ~ "SAINT",
+             model_name == "tabr" ~ "TabR",
+             model_name == "tabr_regressor" ~ "TabR",
              TRUE ~ model_name)))
 }
 
