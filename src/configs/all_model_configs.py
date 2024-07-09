@@ -7,7 +7,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from models.skorch_models import create_resnet_skorch, create_ft_transformer_skorch, create_rtdl_mlp_skorch, create_tabr_skorch, create_excelformer_skorch
 from models.skorch_models_regression import create_resnet_regressor_skorch, create_ft_transformer_regressor_skorch, create_rtdl_mlp_regressor_skorch, create_tabr_regressor_skorch, create_excelformer_regressor_skorch
 from models.TabSurvey.models.saint import SAINT
-from tab_models.sklearn.sklearn_interfaces import RealMLP_TD_S_Classifier, RealMLP_TD_S_Regressor, RealMLP_TD_Classifier, RealMLP_TD_Regressor,\
+from pytabkit.models.sklearn.sklearn_interfaces import RealMLP_TD_S_Classifier, RealMLP_TD_S_Regressor, RealMLP_TD_Classifier, RealMLP_TD_Regressor,\
           CatBoost_TD_Classifier, CatBoost_TD_Regressor, LGBM_TD_Classifier, LGBM_TD_Regressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
           MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGB_TD_Classifier, XGB_TD_Regressor, TabR_S_D_Classifier, Tabr_S_D_Regressor, \
           CatBoost_D_Classifier, CatBoost_D_Regressor, LGBM_D_Classifier, LGBM_D_Regressor, XGB_D_Classifier, XGB_D_Regressor
