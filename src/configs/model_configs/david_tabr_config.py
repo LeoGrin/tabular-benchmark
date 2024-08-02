@@ -46,7 +46,7 @@ config_random  = {
     },
     #context_dropout
     #I think this correspond to attention dropout in the paper
-    "model__module__context_dropout": {
+    "model__context_dropout": {
         "distribution": "uniform",
         "min": 0.0,
         "max": 0.6
