@@ -9,7 +9,7 @@ from models.skorch_models_regression import create_resnet_regressor_skorch, crea
 from models.TabSurvey.models.saint import SAINT
 from pytabkit.models.sklearn.sklearn_interfaces import RealMLP_TD_S_Classifier, RealMLP_TD_S_Regressor, RealMLP_TD_Classifier, RealMLP_TD_Regressor,\
           CatBoost_TD_Classifier, CatBoost_TD_Regressor, LGBM_TD_Classifier, LGBM_TD_Regressor, Resnet_RTDL_D_Classifier, Resnet_RTDL_D_Regressor, \
-          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGB_TD_Classifier, XGB_TD_Regressor, TabR_S_D_Classifier, Tabr_S_D_Regressor, \
+          MLP_RTDL_D_Classifier, MLP_RTDL_D_Regressor, XGB_TD_Classifier, XGB_TD_Regressor, TabR_S_D_Classifier, TabR_S_D_Regressor, \
           CatBoost_D_Classifier, CatBoost_D_Regressor, LGBM_D_Classifier, LGBM_D_Regressor, XGB_D_Classifier, XGB_D_Regressor
 
 
@@ -301,7 +301,7 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = Tabr_S_D_Regressor
+model_keyword_dic[config_regression["model_name"]["value"]] = TabR_S_D_Regressor
 model_keyword_dic[config_classif["model_name"]["value"]] = TabR_S_D_Classifier
 
 from configs.model_configs.david_tabr_config import config_classif, config_regression, config_classif_default, config_regression_default
@@ -313,7 +313,7 @@ total_config[keyword] = {
                        "default": config_regression_default},
 }
 
-model_keyword_dic[config_regression["model_name"]["value"]] = Tabr_S_D_Regressor
+model_keyword_dic[config_regression["model_name"]["value"]] = TabR_S_D_Regressor
 model_keyword_dic[config_classif["model_name"]["value"]] = TabR_S_D_Classifier
 
 
