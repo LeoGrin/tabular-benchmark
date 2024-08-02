@@ -304,6 +304,18 @@ total_config[keyword] = {
 model_keyword_dic[config_regression["model_name"]["value"]] = Tabr_S_D_Regressor
 model_keyword_dic[config_classif["model_name"]["value"]] = TabR_S_D_Classifier
 
+from configs.model_configs.david_tabr_config import config_classif, config_regression, config_classif_default, config_regression_default
+keyword = "david_tabr"
+total_config[keyword] = {
+        "classif": {"random": config_classif,
+                    "default": config_classif_default},
+        "regression": {"random": config_regression,
+                       "default": config_regression_default},
+}
+
+model_keyword_dic[config_regression["model_name"]["value"]] = Tabr_S_D_Regressor
+model_keyword_dic[config_classif["model_name"]["value"]] = TabR_S_D_Classifier
+
 
 from configs.model_configs.resnet_david_config import config_classif, config_regression, config_classif_default, config_regression_default
 keyword = "resnet_david"
