@@ -8,6 +8,9 @@ config_random  = {
     },
     "model__optimizer": {
         "parameters": {
+            "type": {
+                "value": "AdamW"
+            },
             "lr": {
                 "distribution": "log_uniform_values",
                 "min": 3e-5,
