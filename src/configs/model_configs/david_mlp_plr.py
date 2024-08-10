@@ -3,10 +3,10 @@ config_random  = {
         "values": [8],#list(range(1, 9))
     },
     "model__module__d_layers": {
-        "values": [256]#list(range(1, 513))
+        "values": [256],#list(range(1, 513))
     },
     "model__module__d_first_layer": {
-        "values": [128],list(range(1, 513))
+        "values": [128],#list(range(1, 513))
     },
     "model__module__d_last_layer": {
         "values": [128],#list(range(1, 513))
