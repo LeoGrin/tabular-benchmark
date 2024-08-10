@@ -1,50 +1,47 @@
 config_random  = {
     "model__module__n_layers": {
-        "values": [8],#list(range(1, 9))
+        "values": list(range(1, 9))
     },
     "model__module__d_layers": {
-        "values": [256],#list(range(1, 513))
+        "values": list(range(1, 513))
     },
     "model__module__d_first_layer": {
-        "values": [128],#list(range(1, 513))
+        "values": list(range(1, 513))
     },
     "model__module__d_last_layer": {
-        "values": [128],#list(range(1, 513))
+        "values": list(range(1, 513))
     },
     "model__module__dropout": {
-        #"distribution": "uniform",
-        #"min": 0.0,
-        #"max": 0.5
-        "values": [0.2],
+        "distribution": "uniform",
+        "min": 0.0,
+        "max": 0.5
     },
     "model__lr": {
-        #"distribution": "log_uniform_values",
-        #"min": 1e-5,
-        #"max": 1e-2
-        "values": [1e-3],
+        "distribution": "log_uniform_values",
+        "min": 1e-5,
+        "max": 1e-2
     },
-    #"model__optimizer__weight_decay": {
-    #    "distribution": "log_uniform_values",
-    #    "min": 1e-6,
-    #    "max": 1e-3
-    #},
+    "model__optimizer__weight_decay": {
+        "distribution": "log_uniform_values",
+        "min": 1e-9,
+        "max": 1e-3
+    },
     "model__module__d_embedding": {
-        "values": [128],#list(range(8, 32))
+        "values": list(range(8, 32))
     },
     "model__module__num_emb_type": {
         "values": ['plr']
     },
     "model__module__num_emb_dim": {
-        "values": [24],#list(range(1, 65))
+        "values": list(range(1, 65))
     },
     "model__module__num_emb_hidden_dim": {
-        "values": [48],#list(range(1, 65))
+        "values": list(range(1, 65))
     },
     "model__module__num_emb_sigma": {
-        #"distribution": "log_uniform_values",
-        #"min": 1e-3,
-        #"max": 1e2
-        "values": [0.01],
+        "distribution": "log_uniform_values",
+        "min": 1e-3,
+        "max": 1e2
     },
     "model__batch_size": {
         "value": 256,
@@ -62,10 +59,7 @@ config_random  = {
         "value": 16
     },
     "model__verbose": {
-        "value": 100
-    },
-    "model__tfms": {
-        "values": ['quantile'],
+        "value": 0
     },
     "use_gpu": {
         "value": True
@@ -76,12 +70,12 @@ config_random  = {
     "model__device": {
         "value": "cuda:0" #FIXME
     },
-    # "transformed_target": {
-    #     "values": [False, True],
-    # },
-    # "transformed_target_type": {
-    #     "value": "standard"
-    # },
+    "transformed_target": {
+        "values": [False, True],
+    },
+    "transformed_target_type": {
+        "value": "standard"
+    },
 }
 
 config_default = {
