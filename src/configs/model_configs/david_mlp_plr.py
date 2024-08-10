@@ -62,10 +62,10 @@ config_random  = {
         "value": 16
     },
     "model__verbose": {
-        "value": 0
+        "value": 100
     },
     "model__tfms": {
-        "values": ['quantile_tabr'],
+        "values": ['quantile'],
     },
     "use_gpu": {
         "value": True
@@ -76,12 +76,12 @@ config_random  = {
     "model__device": {
         "value": "cuda:0" #FIXME
     },
-    "transformed_target": {
-        "values": [False, True],
-    },
-    "transformed_target_type": {
-        "value": "standard"
-    },
+    # "transformed_target": {
+    #     "values": [False, True],
+    # },
+    # "transformed_target_type": {
+    #     "value": "standard"
+    # },
 }
 
 config_default = {
