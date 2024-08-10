@@ -32,6 +32,9 @@ config_random  = {
     "model__module__num_emb_type": {
         "values": ['plr']
     },
+    "model__tfms": {
+        "value": ["quantile_tabr"]
+    },
     "model__module__num_emb_dim": {
         "values": list(range(1, 65))
     },
@@ -79,6 +82,9 @@ config_random  = {
 }
 
 config_default = {
+    "model__tfms": {
+        "value": ["quantile_tabr"]
+    },
     "use_gpu": {
         "value": True
     },
