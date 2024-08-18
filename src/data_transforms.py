@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from scipy.stats import multivariate_normal
 from sklearn.covariance import EmpiricalCovariance, MinCovDet
 from configs.all_model_configs import model_keyword_dic
+from sklearn.preprocessing import OrdinalEncoder
 
 
 def marginal_transformations(x, y, function, vectorized=False, rng=None):
@@ -348,3 +349,22 @@ def remove_high_frequency_from_train(x_train, x_val, x_test, y_train, y_val, y_t
         y_train_new = (y_train_new > 0.5).astype(int)
         print(np.unique(y_train_new, return_counts=True))
     return x_train, x_val, x_test, y_train_new, y_val, y_test
+
+
+def ordinal_transform(x_train, x_val, x_test, y_train, y_val, y_test, rng=None):
+    """
+    Apply ordinal encoding to categorical features in the dataset. Expects x_train, x_val, x_test to only
+    contain categorical features.
+    :param x_train: training data
+    :param x_val: validation data
+    :param x_test: test data
+    :param y_train: training labels
+    :param y_val: validation labels
+    :param y_test: test labels
+    :return: transformed data
+    """
+    enc = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
+    x_train = enc.fit_transform(x_train)
+    x_val = enc.transform(x_val)
+    x_test = enc.transform(x_test)
+    return x_train, x_val, x_test, y_train, y_val, y_test

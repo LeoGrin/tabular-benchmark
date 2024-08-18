@@ -16,5 +16,6 @@ convert_keyword_to_function = {
     "random_rotation": apply_random_rotation,
     "remove_high_frequency_from_train": remove_high_frequency_from_train,
     "normalize_y": normalize_y,
+    "ordinal": ordinal_transform,
     "no_transform": None
 }
